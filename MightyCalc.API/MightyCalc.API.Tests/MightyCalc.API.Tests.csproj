@@ -7,9 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="3.0.0-preview-19075-0444" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0-preview3-19153-02" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.0.0-preview3.19153.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.0-preview-20181205-02" />
         <PackageReference Include="xunit" Version="2.4.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MightyCalc.API\MightyCalc.API.csproj" />
+      <ProjectReference Include="..\MightyCalc.Client\MightyCalc.Client.csproj" />
     </ItemGroup>
 
 </Project>

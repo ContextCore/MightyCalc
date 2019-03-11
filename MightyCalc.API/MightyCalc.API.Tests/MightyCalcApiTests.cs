@@ -1,4 +1,8 @@
 using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using MightyCalc.Client;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -7,10 +11,19 @@ namespace MightyCalc.API.Tests
     public class MightyCalcApiTests
     {
         private readonly ITestOutputHelper _output;
+        private IMightyCalcClient _client;
 
         public MightyCalcApiTests(ITestOutputHelper output)
         {
             _output = output;
+            var builder = new WebHostBuilder()
+                .UseEnvironment("Development")
+                .UseStartup<Startup>(); 
+            
+            var server = new TestServer(builder);
+            var httpClient = server.CreateClient();
+
+            _client = new MightyCalcClient("", httpClient);
         }
         
         
@@ -23,11 +36,24 @@ namespace MightyCalc.API.Tests
         [InlineData("sqrt(2.25)",1.5D)] //square root
         [InlineData("cuberoot(3.375)",1.5D)] //cube root
         [InlineData("5!",120D)] //factorial
-        public void Given_expression_with_build_in_functions_When_calculating_Then_answer_is_provided(string expression, double answer)
+        public async Task Given_term_expression_with_build_in_functions_When_calculating_Then_answer_is_provided(string expression, double answer)
         {
-            throw new NotImplementedException();
+            Assert.Equal(answer, await _client.CalculateAsync(new Client.Expression(){Representation = expression}));
         }
         
+        [Theory]
+        [InlineData(2.5D, "a+b","a",1,"b",1.5D)] //add
+        [InlineData(-0.5D,"a-b","a",1,"b",-1.5D)] //substract
+        [InlineData(1.5D,"a*b",1*1.5,"a",1D,"b",1.5)] //multiple
+        //#[InlineData("3/1.5",2D)] //divide
+        //#[InlineData("sqrt(2.25)",1.5D)] //square root
+        //[InlineData("cuberoot(3.375)",1.5D)] //cube root
+        //[InlineData("5!",120D)] //factorial
+        public async Task Given_parametrized_expression_with_build_in_functions_When_calculating_Then_answer_is_provided(double answer,string expression, params object[] parameters)
+        {
+            Assert.Equal(answer, await _client.CalculateAsync(new Client.Expression(){Representation = expression}));
+        }
+
         
         [Fact]
         public void Given_expression_with_non_existing_function_When_calculating_Then_error_is_raised()
