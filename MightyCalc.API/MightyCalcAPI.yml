@@ -30,14 +30,23 @@ paths:
         - calculate
       summary: Calculate an expression
       operationId: calculate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Expression'
       responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+          description: Calculation succeeded
         '400':
           description: Invalid expression provided
         '422':
           description: Expression contains unknown functions 
-      requestBody:
-        $ref: '#/components/requestBodies/Expression'
-  
   /func:
     get:
       tags:
@@ -68,11 +77,11 @@ paths:
       operationId: createFunction
       summary: Creates a new user-defined function
       description: Creates a new user-defined function under given name 
-      parameters:
-        - name: expression
-          in: header
-          schema:
-            $ref: '#/components/schemas/NamedExpression'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamedExpression'
       responses:
         '200':
           description: successful operation
@@ -88,11 +97,11 @@ paths:
       operationId: replaceFunction
       summary: Replaces a user-defined function
       description: Replaces a new user-defined function under given name 
-      parameters:
-        - name: expression
-          in: header
-          schema:
-            $ref: '#/components/schemas/NamedExpression'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamedExpression'
       responses:
         '200':
           description: successful operation
@@ -149,23 +158,26 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    name: 
-                      type: string 
-                    usageCount:
-                      type: integer
-            application/xml:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Expression'
+                $ref: '#/components/schemas/Report'
         '400':
           description: Invalid datetime period specified
 components:
   schemas:
+    FunctionUsage:
+      type: object
+      properties:
+        name: 
+          type: string 
+        usageCount:
+          type: integer
+    Report: 
+      type: object
+      properties: 
+        UsageStatistics:   
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionUsage'
+                  
     Parameter:
       type: object
       required: 
