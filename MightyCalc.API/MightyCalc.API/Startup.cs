@@ -20,7 +20,7 @@ namespace MightyCalc.API
         {
             services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new Info {Title = "My API", Version = "v1"});
+                    c.SwaggerDoc("v1", new Info {Title = "Mighty Calc API", Version = "v1"});
                 })
                 .AddMvc()
                 .AddNewtonsoftJson();
@@ -51,8 +51,8 @@ namespace MightyCalc.API
 
             app.UseRouting(routes => { routes.MapApplication(); });
 
-             app.UseAuthentication();
-             app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
         }
     }
 }
