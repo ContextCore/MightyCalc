@@ -4,7 +4,7 @@ namespace MightyCalc.Calculations
 {
     public class Parameter
     {
-        public Parameter(string name, double value)
+        public Parameter(string name, double value=0)
         {
             Name = name;
             Value = value;

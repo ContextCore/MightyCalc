@@ -7,16 +7,19 @@ namespace MightyCalc.Calculations
 {
     public class SpracheCalculator : ICalculator
     {
-        XtensibleCalculator _calculator = new XtensibleCalculator();
-
+        readonly XtensibleCalculator _calculator = new XtensibleCalculator();
+        private readonly List<FunctionSignature> _knownFunctions = new List<FunctionSignature>();
         public SpracheCalculator()
-        {
-            _calculator.RegisterFunction("fact",
-                d => Enumerable.Range(1, (int) d).Aggregate(1, (elem, fact) => fact * elem));
-            _calculator.RegisterFunction("sqrt",
-                d => Math.Sqrt(d));
-            _calculator.RegisterFunction("cuberoot",
-                d => Math.Pow(d, 1 / 3.0));
+        { 
+            AddFunction("add","Addition","a+b", "a", "b");
+            AddFunction("sub","Substraction","a-b", "a", "b");
+            AddFunction("mul","Multiply","a*b", "a", "b");
+            AddFunction("div","Divide","a/b", "a", "b");
+            
+            AddFunction("sqrt","Square Root",d => Math.Sqrt(d));
+            AddFunction("cuberoot","Cube Root",d => Math.Pow(d, 1 / 3.0));
+            AddFunction("fact","Factorial",d => Enumerable.Range(1, (int) d).Aggregate(1, (elem, fact) => fact * elem));
+
         }
 
         public double Calculate(string expression, params Parameter[] parameters)
@@ -30,9 +33,26 @@ namespace MightyCalc.Calculations
             return _calculator.ParseExpression(expression, dict).Compile().Invoke();
         }
 
-        public void AddFunction(string name, string expression, params Parameter[] parameters)
+        public void AddFunction(string name, string description, string expression, params string[] parameterNames)
         {
-            throw new NotImplementedException();
+            _knownFunctions.Add(new FunctionSignature(name,parameterNames.Count(),description));
+            _calculator.RegisterFunction(name, expression, parameterNames.ToArray());
+        }
+        private void AddFunction(string name, string description, Func<double,double> expression)
+        {
+            _knownFunctions.Add(new FunctionSignature(name,1,description));
+            _calculator.RegisterFunction(name, expression);
+        }
+        private void AddFunction(string name, string description, Func<double,double,double> expression)
+        {
+            _knownFunctions.Add(new FunctionSignature(name,2,description));
+            _calculator.RegisterFunction(name, expression);
+        }
+
+
+        public IReadOnlyList<FunctionSignature> GetKnownFunctions()
+        {
+            return _knownFunctions;
         }
     }
 }
