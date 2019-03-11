@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.API", "MightyCal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.Client", "MightyCalc.Client\MightyCalc.Client.csproj", "{EDA87E26-9E88-4D04-BB95-80019150BF14}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.API.Tests", "MightyCalc.API.Tests\MightyCalc.API.Tests.csproj", "{74AF0FCD-03F0-44C8-A3F5-A42948A09D6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{EDA87E26-9E88-4D04-BB95-80019150BF14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDA87E26-9E88-4D04-BB95-80019150BF14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDA87E26-9E88-4D04-BB95-80019150BF14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74AF0FCD-03F0-44C8-A3F5-A42948A09D6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74AF0FCD-03F0-44C8-A3F5-A42948A09D6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74AF0FCD-03F0-44C8-A3F5-A42948A09D6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74AF0FCD-03F0-44C8-A3F5-A42948A09D6B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
