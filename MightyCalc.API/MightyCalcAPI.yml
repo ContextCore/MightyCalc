@@ -187,9 +187,10 @@ components:
           type: string
           example: 'a'
         value:
-          type: integer
-          example: '10'
-      example: '{name: a, value: 10}'
+          type: number
+          format: double
+          example: '10.1'
+      example: '{name: a, value: 10.1}'
     Expression:
       type: object
       required:

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MightyCalc.Calculations;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace MightyCalc.API
@@ -25,7 +26,8 @@ namespace MightyCalc.API
                 .AddMvc()
                 .AddNewtonsoftJson();
 
-            services.AddTransient<IApiController, DummyApi>();
+            services.AddTransient<IApiController, LocalApi>();
+            services.AddTransient<ICalculator,SpracheCalculator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

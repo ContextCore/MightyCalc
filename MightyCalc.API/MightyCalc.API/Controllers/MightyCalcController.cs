@@ -152,7 +152,7 @@ namespace MightyCalc.API
         public string Name { get; set; }
     
         [Newtonsoft.Json.JsonProperty("value", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int Value { get; set; }
+        public double Value { get; set; }
     
         public string ToJson() 
         {

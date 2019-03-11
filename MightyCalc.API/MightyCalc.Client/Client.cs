@@ -22,7 +22,7 @@ namespace MightyCalc.Client
         /// <returns>successful operation</returns>
         /// <exception cref="MightyCalcException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<NamedExpression>> FindFunctionsAsync(string name = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<NamedExpression>> FindFunctionsAsync(string name = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
     
         /// <summary>Creates a new user-defined function</summary>
         /// <returns>successful operation</returns>
@@ -174,7 +174,7 @@ namespace MightyCalc.Client
         /// <returns>successful operation</returns>
         /// <exception cref="MightyCalcException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<NamedExpression>> FindFunctionsAsync(string name = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<NamedExpression>> FindFunctionsAsync(string name = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/func?");
@@ -213,10 +213,10 @@ namespace MightyCalc.Client
                         if (status_ == "200") 
                         {
                             var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
-                            var result_ = default(System.Collections.Generic.ICollection<NamedExpression>); 
+                            var result_ = default(System.Collections.Generic.IReadOnlyCollection<NamedExpression>); 
                             try
                             {
-                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<System.Collections.Generic.ICollection<NamedExpression>>(responseData_, _settings.Value);
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<System.Collections.Generic.IReadOnlyCollection<NamedExpression>>(responseData_, _settings.Value);
                                 return result_; 
                             } 
                             catch (System.Exception exception_) 
@@ -231,7 +231,7 @@ namespace MightyCalc.Client
                             throw new MightyCalcException("The HTTP status code of the response was not expected (" + (int)response_.StatusCode + ").", (int)response_.StatusCode, responseData_, headers_, null);
                         }
             
-                        return default(System.Collections.Generic.ICollection<NamedExpression>);
+                        return default(System.Collections.Generic.IReadOnlyCollection<NamedExpression>);
                     }
                     finally
                     {
@@ -619,7 +619,7 @@ namespace MightyCalc.Client
     public partial class Report 
     {
         [Newtonsoft.Json.JsonProperty("UsageStatistics", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<FunctionUsage> UsageStatistics { get; set; }
+        public System.Collections.Generic.IReadOnlyCollection<FunctionUsage> UsageStatistics { get; set; }
     
         public string ToJson() 
         {
@@ -640,7 +640,7 @@ namespace MightyCalc.Client
         public string Name { get; set; }
     
         [Newtonsoft.Json.JsonProperty("value", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int Value { get; set; }
+        public double Value { get; set; }
     
         public string ToJson() 
         {
@@ -661,7 +661,7 @@ namespace MightyCalc.Client
         public string Representation { get; set; }
     
         [Newtonsoft.Json.JsonProperty("parameters", Required = Newtonsoft.Json.Required.Always)]
-        public System.Collections.Generic.ICollection<Parameter> Parameters { get; set; } = new System.Collections.ObjectModel.Collection<Parameter>();
+        public System.Collections.Generic.IReadOnlyCollection<Parameter> Parameters { get; set; } = new System.Collections.Generic.List<Parameter>();
     
         public string ToJson() 
         {
