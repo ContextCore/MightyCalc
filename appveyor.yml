@@ -18,7 +18,7 @@ install:
     echo "exported file version is $FILE_VERSION"
     echo "exported info version is $INFORMATIONAL_VERSION"
 
-- ps: Update-AppveyorBuild -Version $env:APP_VERSION
+- ps: Update-AppveyorBuild -Version "$env:APP_VERSION.$env:APPVEYOR_BUILD_NUMBER"
 build_script:
 - sh: |
     cd MightyCalc.API
