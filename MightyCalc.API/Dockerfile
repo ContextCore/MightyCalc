@@ -26,14 +26,12 @@ COPY --from=api-gen-env ./MightyCalc.API ./MightyCalc.API
 WORKDIR MightyCalc.API
 
 RUN dotnet publish -c Release -o publish
-RUN ls
 
 #create production-ready container
+#want to use different image, but swagger UI has compatibility issues with .net core preview3 version
 FROM microsoft/dotnet:3.0-sdk as runtime
-RUN ls
 COPY --from=build-env /MightyCalc.API/publish /MightyCalc.API   
 WORKDIR /MightyCalc.API
-RUN ls
 EXPOSE 80
 ENTRYPOINT ["dotnet", "MightyCalc.API.dll"]
 

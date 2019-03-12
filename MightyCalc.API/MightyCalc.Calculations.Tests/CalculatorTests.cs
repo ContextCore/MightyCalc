@@ -26,7 +26,7 @@ namespace MightyCalc.Calculations.Tests
         [InlineData("sqrt(2.25)", 1.5D)] //square root
         [InlineData("cuberoot(8)", 2D)] //cube root
         [InlineData("fact(5)", 120D)] //factorial
-        public async Task Given_term_expression_with_build_in_functions_When_calculating_Then_answer_is_provided(
+        public void Given_term_expression_with_build_in_functions_When_calculating_Then_answer_is_provided(
             string expression, double answer)
         {
             Assert.Equal(answer, _calculator.Calculate(expression));
