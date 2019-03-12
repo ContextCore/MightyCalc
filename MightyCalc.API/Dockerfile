@@ -7,8 +7,8 @@ RUN apt-get install zip -y
 
 #download latest Swag toolchain
 RUN curl -L http://rsuter.com/Projects/NSwagStudio/archive.php --output ./NSwag.zip
-RUN unzip ../NSwag.zip -d NSwag
-RUN rm ../NSwag.zip
+RUN unzip ../NSwag.zip -d NSwag > /dev/null
+RUN rm ../NSwag.zip > /dev/null
 
 COPY . ./MightyCalc.API
 WORKDIR MightyCalc.API

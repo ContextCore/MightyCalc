@@ -32,4 +32,5 @@ artifacts:
 deploy_script:
 - sh: |
     docker login --user $dockerUser --password $dockerPassword
+    docker images
     docker push aleskov/mightycalc
