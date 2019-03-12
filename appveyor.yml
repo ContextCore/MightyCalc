@@ -22,9 +22,8 @@ install:
 build_script:
 - sh: |
     cd MightyCalc.API
-    ls
-    docker build . -t mightycalc.api
-    docker export mightycalc.api > mightycalc.api.tar 
+    docker build . -t aleskov/mightycalc
+    docker export aleskov/mightycalc > mightycalc.api.tar 
 - sh: |
     dotnet test
 artifacts:
@@ -33,4 +32,4 @@ artifacts:
 deploy_script:
 - sh: |
     docker login --user $dockerUser --password $dockerPassword
-    docker push mightycalc.api
+    docker push aleskov/mightycalc
