@@ -31,5 +31,5 @@ artifacts:
   name: Containers
 deploy_script:
 - sh: |
-    docker login --username $dockerUser --password $dockerPassword
+    docker login -u $dockerUser -p $dockerPassword
     docker push aleskov/mightycalc
