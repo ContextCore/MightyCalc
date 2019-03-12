@@ -23,7 +23,7 @@ build_script:
 - sh: |
     cd MightyCalc.API
     docker build . -t aleskov/mightycalc
-    docker save aleskov/mightycalc > mightycalc.api.tar 
+    docker save aleskov/mightycalc > mightycalc.tar 
 - sh: |
     #dotnet test
 artifacts:
