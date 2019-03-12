@@ -81,10 +81,10 @@ namespace MightyCalc.API.Tests
 
         
         [Fact]
-        public async Task Given_expression_with_non_existing_function_When_calculating_Then_error_is_raised_AND_code_is_400()
+        public async Task Given_expression_with_non_existing_function_When_calculating_Then_error_is_raised_AND_code_is_500()
         {
             var ex = await Assert.ThrowsAsync<MightyCalcException>( () => _client.CalculateAsync(new Client.Expression(){Representation = "test(2,1)"}));
-            Assert.Equal(400, ex.StatusCode);
+            Assert.Equal(500, ex.StatusCode);
         }
     }
 }

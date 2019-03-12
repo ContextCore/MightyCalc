@@ -18,18 +18,19 @@ RUN dotnet ../NSwag/NetCore22/dotnet-nswag.dll swagger2cscontroller /input:"./Mi
 
 #Generating API client in C#
 RUN dotnet ../NSwag/NetCore22/dotnet-nswag.dll swagger2csclient /input:"./MightyCalcAPI.yml" /classname:MightyCalcClient /namespace:MightyCalc.Client /UseLiquidTemplates:true /output:"/MightyCalc.API/MightyCalc.Client/Client.cs" /GenerateClientInterfaces:true /InjectHttpClient:true /generateDataAnnotations:false /exceptionClass:MightyCalcException /generateOptionalParameters:true /ArrayBaseType:"System.Collections.Generic.IReadonlyCollection" /responseArrayType:"System.Collections.Generic.IReadOnlyCollection" /arrayType:"System.Collections.Generic.IReadOnlyCollection"
-
 #build the project and get binaries for production 
 FROM microsoft/dotnet:3.0-sdk as build-env
 
 COPY --from=api-gen-env ./MightyCalc.API ./MightyCalc.API
 WORKDIR MightyCalc.API
 
+RUN dotnet test -c Release
 RUN dotnet publish -c Release -o publish
+
 
 #create production-ready container
 #want to use different image, but swagger UI has compatibility issues with .net core preview3 version
-FROM microsoft/dotnet:3.0-sdk as runtime
+FROM microsoft/dotnet:3.0-aspnetcore-runtime as runtime
 COPY --from=build-env /MightyCalc.API/publish /MightyCalc.API   
 WORKDIR /MightyCalc.API
 EXPOSE 80
