@@ -27,7 +27,7 @@ build_script:
 - sh: |
     #dotnet test
 artifacts:
-- path: '**\mighty.*.tar'
+- path: '**\mighty*.tar'
   name: Containers
 deploy_script:
 - sh: |
