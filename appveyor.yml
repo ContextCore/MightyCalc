@@ -21,7 +21,8 @@ install:
 - ps: Update-AppveyorBuild -Version $env:APP_VERSION
 build_script:
 - sh: |
-    Cd MightyCalc.API
+    cd MightyCalc.API
+    ls
     docker build . -t mightycalc.api
     docker export mightycalc.api > mightycalc.api.tar 
 - sh: |
