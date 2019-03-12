@@ -1,0 +1,35 @@
+version: 0.0.{build}
+branches:
+  only:
+  - master
+image: Ubuntu
+Services:
+ - docker
+install:
+- sh: |
+    
+    . ./git_versioning.sh
+
+    export APP_VERSION=${version}
+    export FILE_VERSION=${fileVersion}
+    export INFORMATIONAL_VERSION=${informationVersion}
+
+    echo "exported app version is $APP_VERSION"
+    echo "exported file version is $FILE_VERSION"
+    echo "exported info version is $INFORMATIONAL_VERSION"
+
+- ps: Update-AppveyorBuild -Version $env:APP_VERSION
+build_script:
+- sh: |
+      Cd MightyCalc.API
+      Docker build . -t mightycalc.api
+      Docker export mightycalc.api > mightycalc.api.tar 
+- sh: |
+    dotnet test
+artifacts:
+- path: '**\mighty.*.tar'
+  name: Containers
+deploy_script:
+- sh: |
+  Docker login --user $dockerUser --password $dockerPassword
+  Docker push mightycalc.api

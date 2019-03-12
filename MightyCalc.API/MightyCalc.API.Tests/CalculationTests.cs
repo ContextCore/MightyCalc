@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -9,14 +8,12 @@ using Xunit.Abstractions;
 
 namespace MightyCalc.API.Tests
 {
-    public class MightyCalcApiTests
+    public class CalculationTests
     {
-        private readonly ITestOutputHelper _output;
-        private IMightyCalcClient _client;
+        private readonly IMightyCalcClient _client;
 
-        public MightyCalcApiTests(ITestOutputHelper output)
+        public CalculationTests()
         {
-            _output = output;
             var builder = new WebHostBuilder()
                 .UseEnvironment("Development")
                 .UseStartup<Startup>(); 
@@ -64,71 +61,30 @@ namespace MightyCalc.API.Tests
         [Fact]
         public async Task Given_parametrized_expression_And_defining_not_existing_parameters_calculating_When_calculating_Then_not_existing_parameters_are_ignored()
         {
-            throw new NotImplementedException();
+            Assert.Equal(2, await _client.CalculateAsync(new Client.Expression(){Representation = "a+1", Parameters = new []
+            {
+                new Client.Parameter(){Name ="a", Value=1},
+                new Client.Parameter(){Name = "b", Value=2}, 
+            }}));
         }
         
         [Fact]
         public async Task Given_parametrized_expression_And_redefining_parameters_calculating_When_calculating_Then_error_is_thrown()
         {
-            throw new NotImplementedException();
+            Assert.Equal(3, await _client.CalculateAsync(new Client.Expression(){Representation = "add(a,1)", Parameters = new []
+            {
+                new Client.Parameter(){Name = "a", Value=1},
+                new Client.Parameter(){Name = "a", Value=2}, 
+            }}));
         }
 
 
         
         [Fact]
-        public void Given_expression_with_non_existing_function_When_calculating_Then_error_is_raised()
+        public async Task Given_expression_with_non_existing_function_When_calculating_Then_error_is_raised_AND_code_is_400()
         {
-            throw new NotImplementedException();
-        }
-        
-        [Fact]
-        public void Given_only_builtin_functions_When_getting_function_list_Then_it_contains_all_functions()
-        {
-            throw new NotImplementedException();
-        }
-        
-
-        [Fact]
-        public void When_create_new_function_Then_it_shows_in_list()
-        {
-            throw new NotImplementedException();
-        }
-        
-        [Fact]
-        public void Given_created_function_When_create_new_function_with_same_name_Then_error_is_raised()
-        {
-            throw new NotImplementedException();
-        }
-        
-        [Fact]
-        public void Given_created_function_When_calculating_expression_with_it_Then_function_is_calculated()
-        {
-            throw new NotImplementedException();
-        }
-
-        
-        [Fact]
-        public void When_delete_not_existing_function_Then_receive_an_error()
-        {
-            throw new NotImplementedException();
-        }
-        
-        [Fact]
-        public void When_delete_existing_function_Then_it_cannot_be_called()
-        {
-            throw new NotImplementedException();
-        }
-        
-        [Fact]
-        public void When_delete_existing_function_Then_it_is_not_shown_in_list()
-        {
-            throw new NotImplementedException();
-        }
-        
-        [Fact]
-        public void When_replace_existing_function_Then_it_is_used_instead_of_old_one()
-        {
-            throw new NotImplementedException();
+            var ex = await Assert.ThrowsAsync<MightyCalcException>( () => _client.CalculateAsync(new Client.Expression(){Representation = "test(2,1)"}));
+            Assert.Equal(400, ex.StatusCode);
         }
     }
 }
