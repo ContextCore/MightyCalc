@@ -8,7 +8,7 @@ namespace MightyCalc.Calculations
     public class SpracheCalculator : ICalculator
     {
         readonly XtensibleCalculator _calculator = new XtensibleCalculator();
-        private readonly List<FunctionSignature> _knownFunctions = new List<FunctionSignature>();
+        private readonly List<FunctionDefinition> _knownFunctions = new List<FunctionDefinition>();
         public SpracheCalculator()
         { 
             AddFunction("add","Addition","a+b", "a", "b");
@@ -35,22 +35,22 @@ namespace MightyCalc.Calculations
 
         public void AddFunction(string name, string description, string expression, params string[] parameterNames)
         {
-            _knownFunctions.Add(new FunctionSignature(name,parameterNames.Count(),description));
+            _knownFunctions.Add(new FunctionDefinition(name,parameterNames.Count(),description, expression));
             _calculator.RegisterFunction(name, expression, parameterNames.ToArray());
         }
         private void AddFunction(string name, string description, Func<double,double> expression)
         {
-            _knownFunctions.Add(new FunctionSignature(name,1,description));
+            _knownFunctions.Add(new FunctionDefinition(name,1,description,""));
             _calculator.RegisterFunction(name, expression);
         }
         private void AddFunction(string name, string description, Func<double,double,double> expression)
         {
-            _knownFunctions.Add(new FunctionSignature(name,2,description));
+            _knownFunctions.Add(new FunctionDefinition(name,2,description,""));
             _calculator.RegisterFunction(name, expression);
         }
 
 
-        public IReadOnlyList<FunctionSignature> GetKnownFunctions()
+        public IReadOnlyList<FunctionDefinition> GetKnownFunctions()
         {
             return _knownFunctions;
         }

@@ -36,12 +36,6 @@ namespace MightyCalc.Client
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         System.Threading.Tasks.Task ReplaceFunctionAsync(NamedExpression body = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
     
-        /// <summary>Removes a user-defined function</summary>
-        /// <returns>successful operation</returns>
-        /// <exception cref="MightyCalcException">A server side error occurred.</exception>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task DeleteFunctionAsync(string name, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-    
         /// <summary>Get usage statistics</summary>
         /// <param name="from">start of the report period</param>
         /// <param name="to">end of the report period</param>
@@ -401,74 +395,6 @@ namespace MightyCalc.Client
             }
         }
     
-        /// <summary>Removes a user-defined function</summary>
-        /// <returns>successful operation</returns>
-        /// <exception cref="MightyCalcException">A server side error occurred.</exception>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task DeleteFunctionAsync(string name, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            if (name == null)
-                throw new System.ArgumentNullException("name");
-    
-            var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/func?");
-            urlBuilder_.Append("name=").Append(System.Uri.EscapeDataString(ConvertToString(name, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
-            urlBuilder_.Length--;
-    
-            var client_ = _httpClient;
-            try
-            {
-                using (var request_ = new System.Net.Http.HttpRequestMessage())
-                {
-                    request_.Method = new System.Net.Http.HttpMethod("DELETE");
-    
-                    PrepareRequest(client_, request_, urlBuilder_);
-                    var url_ = urlBuilder_.ToString();
-                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
-                    PrepareRequest(client_, request_, url_);
-    
-                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-                    try
-                    {
-                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
-                        if (response_.Content != null && response_.Content.Headers != null)
-                        {
-                            foreach (var item_ in response_.Content.Headers)
-                                headers_[item_.Key] = item_.Value;
-                        }
-    
-                        ProcessResponse(client_, response_);
-    
-                        var status_ = ((int)response_.StatusCode).ToString();
-                        if (status_ == "200") 
-                        {
-                            return;
-                        }
-                        else
-                        if (status_ == "400") 
-                        {
-                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
-                            throw new MightyCalcException("Invalid function name provided", (int)response_.StatusCode, responseData_, headers_, null);
-                        }
-                        else
-                        if (status_ != "200" && status_ != "204")
-                        {
-                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
-                            throw new MightyCalcException("The HTTP status code of the response was not expected (" + (int)response_.StatusCode + ").", (int)response_.StatusCode, responseData_, headers_, null);
-                        }
-                    }
-                    finally
-                    {
-                        if (response_ != null)
-                            response_.Dispose();
-                    }
-                }
-            }
-            finally
-            {
-            }
-        }
-    
         /// <summary>Get usage statistics</summary>
         /// <param name="from">start of the report period</param>
         /// <param name="to">end of the report period</param>
@@ -661,7 +587,7 @@ namespace MightyCalc.Client
         public string Representation { get; set; }
     
         [Newtonsoft.Json.JsonProperty("parameters", Required = Newtonsoft.Json.Required.Always)]
-        public System.Collections.Generic.IReadOnlyCollection<Parameter> Parameters { get; set; } = new System.Collections.Generic.List<Parameter>();
+        public System.Collections.Generic.IReadOnlyCollection<Parameter> Parameters { get; set; } = new System.Collections.ObjectModel.Collection<Parameter>();
     
         public string ToJson() 
         {
@@ -683,6 +609,9 @@ namespace MightyCalc.Client
     
         [Newtonsoft.Json.JsonProperty("expression", Required = Newtonsoft.Json.Required.Always)]
         public Expression Expression { get; set; } = new Expression();
+    
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Description { get; set; }
     
         public string ToJson() 
         {

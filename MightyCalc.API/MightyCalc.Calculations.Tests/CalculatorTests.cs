@@ -130,5 +130,13 @@ namespace MightyCalc.Calculations.Tests
             _calculator.AddFunction("test","Test function","sub(add(a,b),c)","a","b","c");
             Assert.Equal(-7, _calculator.Calculate("test(1 ,2 ,10)"));
         }
+        
+        [Fact]
+        public  void When_add_custom_function_several_times_Then_the_last_instance_is_used()
+        {
+            _calculator.AddFunction("test","Test function","sub(add(a,b),c)","a","b","c");
+            _calculator.AddFunction("test","Test function","sub(add(a,b),c)+1","a","b","c");
+            Assert.Equal(-6, _calculator.Calculate("test(1 ,2 ,10)"));
+        }
     }
 }

@@ -28,10 +28,6 @@ namespace MightyCalc.API
         /// <returns>successful operation</returns>
         System.Threading.Tasks.Task ReplaceFunctionAsync(NamedExpression body);
     
-        /// <summary>Removes a user-defined function</summary>
-        /// <returns>successful operation</returns>
-        System.Threading.Tasks.Task DeleteFunctionAsync(string name);
-    
         /// <summary>Get usage statistics</summary>
         /// <param name="from">start of the report period</param>
         /// <param name="to">end of the report period</param>
@@ -81,14 +77,6 @@ namespace MightyCalc.API
         public System.Threading.Tasks.Task ReplaceFunction([Microsoft.AspNetCore.Mvc.FromBody] NamedExpression body)
         {
             return _implementation.ReplaceFunctionAsync(body);
-        }
-    
-        /// <summary>Removes a user-defined function</summary>
-        /// <returns>successful operation</returns>
-        [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("func")]
-        public System.Threading.Tasks.Task DeleteFunction(string name)
-        {
-            return _implementation.DeleteFunctionAsync(name);
         }
     
         /// <summary>Get usage statistics</summary>
@@ -199,6 +187,9 @@ namespace MightyCalc.API
         [Newtonsoft.Json.JsonProperty("expression", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public Expression Expression { get; set; } = new Expression();
+    
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Description { get; set; }
     
         public string ToJson() 
         {

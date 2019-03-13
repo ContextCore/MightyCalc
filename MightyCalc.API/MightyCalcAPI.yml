@@ -111,25 +111,7 @@ paths:
           description: Expression contains unknown functions 
         '409':
           description: Function with such name already exists
-    delete:
-      tags: 
-        - functions
-      summary: Removes a user-defined function
-      operationId: deleteFunction
-      description: Removes a user-defined function with given name 
-      parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid function name provided
-        
-    
+       
   /stats:
     get:
       tags:
@@ -215,6 +197,8 @@ components:
           type: string 
         expression:
           $ref: '#/components/schemas/Expression'
+        description:
+          type: string
   requestBodies:
     Expression:
       content:

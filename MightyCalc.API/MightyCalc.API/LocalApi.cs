@@ -24,26 +24,25 @@ namespace MightyCalc.API
 
         public Task<IReadOnlyCollection<NamedExpression>> FindFunctionsAsync(string name)
         {
-            return Task.FromResult((IReadOnlyCollection<NamedExpression>) new[]
+            IReadOnlyCollection<NamedExpression> expressions = 
+                _calculator.GetKnownFunctions().Select(f => new NamedExpression()
             {
-                new NamedExpression()
+                Description = f.Description,
+                Name = f.Name,
+                Expression = new Expression()
                 {
-                    Expression = new Expression
-                    {
-                        Representation = "Test(a,b)",
-                        Parameters = new List<Parameter>
-                        {
-                            new Parameter() {Name = "a"},
-                            new Parameter() {Name = "b"}
-                        }
-                    },
-                    Name = "Test"
+                    Representation = f.Expression,
+                    Parameters = f.Parameters.Select(p => new Parameter() {Name = p})
+                        .ToList()
                 }
-            });
+            }).ToArray();
+            
+            return Task.FromResult(expressions);
         }
 
         public Task CreateFunctionAsync(NamedExpression body)
         {
+            _calculator.AddFunction(body.Name, body.Description,body.Expression.Representation,body.Expression.Parameters.Select(p => p.Name).ToArray());
             return Task.CompletedTask;
         }
 

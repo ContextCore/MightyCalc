@@ -27,7 +27,7 @@ namespace MightyCalc.API
                 .AddNewtonsoftJson();
 
             services.AddTransient<IApiController, LocalApi>();
-            services.AddTransient<ICalculator,SpracheCalculator>();
+            services.AddSingleton<ICalculator,SpracheCalculator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

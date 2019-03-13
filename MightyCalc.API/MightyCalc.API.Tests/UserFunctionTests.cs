@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using MightyCalc.Client;
@@ -14,64 +16,85 @@ namespace MightyCalc.API.Tests
         {
             var builder = new WebHostBuilder()
                 .UseEnvironment("Development")
-                .UseStartup<Startup>(); 
-            
+                .UseStartup<Startup>();
+
             var server = new TestServer(builder);
             var httpClient = server.CreateClient();
 
             _client = new MightyCalcClient("", httpClient);
         }
-        
-          
-        [Fact(Skip = "not implemented")]
-        public void Given_only_builtin_functions_When_getting_function_list_Then_it_contains_all_functions()
-        {
-            //  var functions = await _client.CalculateAsync(new Client.Expression(){Representation = "test(2,1)"}));
-            //  Assert.Equal(400, ex.StatusCode);
-        }
-        
 
-        [Fact(Skip = "not implemented")]
-        public void When_create_new_function_Then_it_shows_in_list()
+
+        [Fact]
+        public async Task Given_only_builtin_functions_When_getting_function_list_Then_it_contains_all_functions()
         {
-            throw new NotImplementedException();
-        }
-        
-        [Fact(Skip = "not implemented")]
-        public void Given_created_function_When_create_new_function_with_same_name_Then_error_is_raised()
-        {
-            throw new NotImplementedException();
-        }
-        
-        [Fact(Skip = "not implemented")]
-        public void Given_created_function_When_calculating_expression_with_it_Then_function_is_calculated()
-        {
-            throw new NotImplementedException();
+            var functions = await _client.FindFunctionsAsync();
+            var expectedNames =
+                new[]
+                {
+                    "Addition",
+                    "Substraction",
+                    "Multiply",
+                    "Divide",
+                    "Square Root",
+                    "Cube Root",
+                    "Factorial"
+                };
+
+            Assert.Equal(expectedNames, functions.Select(ne => ne.Name));
         }
 
-        
-        [Fact(Skip = "not implemented")]
-        public void When_delete_not_existing_function_Then_receive_an_error()
+
+        [Fact]
+        public async Task When_create_new_function_Then_it_shows_in_list()
         {
-            throw new NotImplementedException();
+            var namedExpression = new Client.NamedExpression()
+            {
+                Expression = new Client.Expression
+                {
+                    Representation = "cuberoot(a)*b", 
+                    Parameters =
+                        new[] {new Client.Parameter {Name = "a"}, new Client.Parameter {Name = "b"}}
+                },
+                Name = "test function",
+                Description = "cuberoot description"
+            };
+            
+            await _client.CreateFunctionAsync(namedExpression);
+
+            var functionNames = await _client.FindFunctionsAsync();
+            Assert.Contains(namedExpression.Name, functionNames.Select(f => f.Name));
+            Assert.Contains(namedExpression.Expression.Representation, functionNames.Select(f => f.Expression.Representation));
+            Assert.Contains(namedExpression.Description, functionNames.Select(f => f.Description));
         }
-        
-        [Fact(Skip = "not implemented")]
-        public void When_delete_existing_function_Then_it_cannot_be_called()
+
+ 
+        [Fact]
+        public async Task Given_created_function_When_calculating_expression_with_it_Then_function_is_calculated()
         {
-            throw new NotImplementedException();
-        }
-        
-        [Fact(Skip = "not implemented")]
-        public void When_delete_existing_function_Then_it_is_not_shown_in_list()
-        {
-            throw new NotImplementedException();
-        }
-        
-        [Fact(Skip = "not implemented")]
-        public void When_replace_existing_function_Then_it_is_used_instead_of_old_one()
-        {
-            throw new NotImplementedException();
+            var namedExpression = new Client.NamedExpression()
+            {
+                Expression = new Client.Expression
+                {
+                    Representation = "cuberoot(a)*b", 
+                    Parameters =
+                        new[] {new Client.Parameter {Name = "a"}, new Client.Parameter {Name = "b"}}
+                },
+                Name = "testFunction",
+                Description = "cuberoot description"
+            };
+            
+            await _client.CreateFunctionAsync(namedExpression);
+            var result = await _client.CalculateAsync(new Client.Expression()
+            {
+                Representation = "testFunction(a,b) + 1", Parameters = new[]
+                {
+                    new Client.Parameter() {Name = "a", Value = 8},
+                    new Client.Parameter() {Name = "b", Value = 2},
+                }
+            });
+            
+            Assert.Equal(5,result);
         }
     }
 }
