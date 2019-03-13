@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: api
+  name: api
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: api
+    spec:
+      containers:
+      - args:
+        image: aleskov/mightycalc
+        name: api
+        ports:
+        - containerPort: 80
+        resources: {}
+      restartPolicy: Always
+      imagePullSecrets:
+        - name: "dockerhub"
+status: {}
