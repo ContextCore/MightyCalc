@@ -22,7 +22,7 @@ install:
 build_script:
 - sh: |
     cd MightyCalc.API
-    docker build . -t aleskov/mightycalc
+    docker build . -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
     docker save aleskov/mightycalc > mightycalc.tar 
 - sh: |
     #dotnet test
