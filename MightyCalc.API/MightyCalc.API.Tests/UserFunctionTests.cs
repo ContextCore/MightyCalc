@@ -41,7 +41,7 @@ namespace MightyCalc.API.Tests
                     "Factorial"
                 };
 
-            Assert.Equal(expectedNames, functions.Select(ne => ne.Name));
+            Assert.Equal(expectedNames, functions.Select(ne => ne.Description));
         }
 
 
