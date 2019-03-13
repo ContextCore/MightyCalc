@@ -42,19 +42,24 @@ namespace MightyCalc.API
 
         public Task CreateFunctionAsync(NamedExpression body)
         {
+            //API-specific restriction, not coming from business logic! 
+            if(_calculator.GetKnownFunctions().Any(f => f.Name == body.Name))
+                     throw new FunctionAlreadyExistsException();
+                
             _calculator.AddFunction(body.Name, body.Description,body.Expression.Representation,body.Expression.Parameters.Select(p => p.Name).ToArray());
             return Task.CompletedTask;
         }
 
+        internal class FunctionAlreadyExistsException : Exception
+        {
+        }
+
         public Task ReplaceFunctionAsync(NamedExpression body)
         {
+            _calculator.AddFunction(body.Name, body.Description,body.Expression.Representation,body.Expression.Parameters.Select(p => p.Name).ToArray());
             return Task.CompletedTask;
         }
 
-        public Task DeleteFunctionAsync(string name)
-        {
-            return Task.CompletedTask;
-        }
 
         public Task<Report> UsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
         {

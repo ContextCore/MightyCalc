@@ -67,6 +67,7 @@ namespace MightyCalc.API.Tests
             Assert.Contains(namedExpression.Expression.Representation, functionNames.Select(f => f.Expression.Representation));
             Assert.Contains(namedExpression.Description, functionNames.Select(f => f.Description));
         }
+       
 
  
         [Fact]
@@ -95,6 +96,69 @@ namespace MightyCalc.API.Tests
             });
             
             Assert.Equal(5,result);
+        }
+        
+        [Fact]
+        public async Task Given_created_function_When_replacing_it_Then_new_function_is_taken_for_calculations()
+        {
+            var initialFunc = new Client.NamedExpression()
+            {
+                Expression = new Client.Expression
+                {
+                    Representation = "cuberoot(a)*b", 
+                    Parameters =
+                        new[] {new Client.Parameter {Name = "a"}, new Client.Parameter {Name = "b"}}
+                },
+                Name = "testFunction",
+                Description = "cuberoot description"
+            };
+            
+            var replacedFunc = new Client.NamedExpression()
+            {
+                Expression = new Client.Expression
+                {
+                    Representation = "cuberoot(a)*b + 1", 
+                    Parameters =
+                        new[] {new Client.Parameter {Name = "a"}, new Client.Parameter {Name = "b"}}
+                },
+                Name = "testFunction",
+                Description = "cuberoot description"
+            };
+            
+            
+            await _client.CreateFunctionAsync(initialFunc);
+            await _client.ReplaceFunctionAsync(replacedFunc);
+            
+            var result = await _client.CalculateAsync(new Client.Expression()
+            {
+                Representation = "testFunction(a,b) + 1", Parameters = new[]
+                {
+                    new Client.Parameter() {Name = "a", Value = 8},
+                    new Client.Parameter() {Name = "b", Value = 2},
+                }
+            });
+            
+            Assert.Equal(6,result);
+        }
+        
+        [Fact]
+        public async Task Given_created_function_When_creating_it_again_Then_error_occures()
+        {
+            var initialFunc = new Client.NamedExpression()
+            {
+                Expression = new Client.Expression
+                {
+                    Representation = "cuberoot(a)*b", 
+                    Parameters =
+                        new[] {new Client.Parameter {Name = "a"}, new Client.Parameter {Name = "b"}}
+                },
+                Name = "testFunction",
+                Description = "cuberoot description"
+            };
+            
+            
+            await _client.CreateFunctionAsync(initialFunc);
+            await Assert.ThrowsAsync<MightyCalcException>(() => _client.CreateFunctionAsync(initialFunc));
         }
     }
 }
