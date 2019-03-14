@@ -27,7 +27,7 @@ namespace MightyCalc.Node.Tests
             var actor = Sys.ActorOf(Props.Create<CalculatorActor>());
             actor.Tell(new CalculatorActorProtocol.AddFunction(new FunctionDefinition("myFunc",2,"test description",
                 "a+b-Pow(a,2)","a","b")));
-            
+            ExpectMsg<CalculatorActorProtocol.FunctionAdded>();
             actor.Tell(new CalculatorActorProtocol.CalculateExpression("1+myFunc(2,3)"));
             var msg = ExpectMsg<CalculatorActorProtocol.CalculationResult>();
             Assert.Equal(2D,msg.Value);

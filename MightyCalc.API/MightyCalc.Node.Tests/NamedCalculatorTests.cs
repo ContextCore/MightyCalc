@@ -1,17 +1,29 @@
 using System;
+using System.Security;
 using System.Threading.Tasks;
+using Akka.Actor;
+using Akka.Cluster;
+using Akka.Configuration;
+using Akka.TestKit.Xunit2;
 using MightyCalc.Calculations;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace MightyCalc.Node.Tests
 {
-    public class NamedCalculatorTests
+    public class NamedCalculatorTests:TestKit
     {
         private readonly INamedCalculatorPool _pool;
 
-        public NamedCalculatorTests()
+        public NamedCalculatorTests(ITestOutputHelper output):base(
+            ((Config)("akka.actor.provider = \"Akka.Cluster.ClusterActorRefProvider, Akka.Cluster\""))
+                .WithFallback(FullDebugConfig),
+            "Test",output)
         {
-            _pool = null;
+            var clusterType = typeof(Akka.Cluster.ClusterActorRefProvider);
+            var cluster = Cluster.Get(Sys);
+            cluster.Join((Sys as ExtendedActorSystem).Provider.DefaultAddress);
+            _pool = new AkkaCalculatorPool(Sys);
         }
         
         [Fact]

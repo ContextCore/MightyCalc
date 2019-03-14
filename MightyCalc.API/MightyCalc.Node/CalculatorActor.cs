@@ -17,14 +17,16 @@ namespace MightyCalc.Node
                 try
                 {
                     AddFunction(calculator, a.Definition);
-                    Persist(new FunctionAdded(PersistenceId, a.Definition),e => {} );
+                    Persist(new FunctionAdded(PersistenceId, a.Definition), e =>
+                    {
+                        Sender.Tell(CalculatorActorProtocol.FunctionAdded.Instance);
+                    });
                 }
                 catch (Exception ex)
                 {
                     Sender.Tell(new CalculatorActorProtocol.FunctionAddError(ex));
                     throw new FunctionAddException(ex);
                 }
-                
             });
             Command<CalculatorActorProtocol.CalculateExpression>(c =>
             {
@@ -32,7 +34,7 @@ namespace MightyCalc.Node
                 {
                     var result = calculator.Calculate(c.Representation, c.Parameters);
                     PersistAsync(new CalculationPerformed(PersistenceId, c.Representation,
-                        c.Parameters, result.FunctionUsages.ToArray()), e =>{});
+                        c.Parameters, result.FunctionUsages.ToArray()), e => { });
                     Sender.Tell(new CalculatorActorProtocol.CalculationResult(result.Value));
                 }
                 catch (Exception ex)
@@ -46,7 +48,7 @@ namespace MightyCalc.Node
 
         public class FunctionAddException : Exception
         {
-            public FunctionAddException(Exception exception):base("failed to add new function",exception)
+            public FunctionAddException(Exception exception) : base("failed to add new function", exception)
             {
             }
         }
@@ -68,7 +70,8 @@ namespace MightyCalc.Node
             public Parameter[] Parameters { get; }
             public string[] FunctionsUsed { get; }
 
-            public CalculationPerformed(string calculatorId, string expression, Parameter[] parameters, string[] functionsUsed)
+            public CalculationPerformed(string calculatorId, string expression, Parameter[] parameters,
+                string[] functionsUsed)
             {
                 CalculatorId = calculatorId;
                 Expression = expression;
