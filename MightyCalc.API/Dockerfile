@@ -34,6 +34,9 @@ FROM microsoft/dotnet:3.0-aspnetcore-runtime as runtime
 COPY --from=build-env /MightyCalc.API/publish /MightyCalc.API   
 WORKDIR /MightyCalc.API
 EXPOSE 80
+EXPOSE 443
+EXPOSE 5000
+EXPOSE 5001
 ENTRYPOINT ["dotnet", "MightyCalc.API.dll"]
 
 
