@@ -51,7 +51,10 @@ namespace MightyCalc.API
 
         public Task ReplaceFunctionAsync(NamedExpression body)
         {
-            return CreateFunctionAsync(body);
+            return _pool.For("anonymous").AddFunction(body.Name,
+                body.Description,
+                body.Expression.Representation,
+                body.Expression.Parameters.Select(p => p.Name).ToArray());
         }
 
         public Task<Report> UsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
