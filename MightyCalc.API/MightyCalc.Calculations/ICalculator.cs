@@ -4,12 +4,26 @@ namespace MightyCalc.Calculations
 {
     public interface ICalculator
     {
-        double Calculate(string expression, params Parameter[] parameters);
+        CalculationResult Calculate(string expression, params Parameter[] parameters);
         void AddFunction(string name, string description, string expression, params string[] parameterNames);
 
         IReadOnlyList<FunctionDefinition> GetKnownFunctions();
     }
 
+    public class CalculationResult
+    {
+        public CalculationResult(double value, IReadOnlyCollection<string> functionUsages)
+        {
+            Value = value;
+            FunctionUsages = functionUsages;
+        }
+
+        public IReadOnlyCollection<string> FunctionUsages { get; }
+        public double Value { get; }
+    }
+
+
+   
     public class FunctionDefinition
     {
         public FunctionDefinition(string name, int arity, string description, string expression, params string [] parameters)

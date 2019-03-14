@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Sprache;
 using Xunit;
 
@@ -17,19 +18,43 @@ namespace MightyCalc.Calculations.Tests
         }
 
         [Theory]
-        [InlineData("1+1.5", 2.5D)] //add basic
-        [InlineData("add(1,1.5)", 2.5D)] //add custom
-        [InlineData("1-1.5", -0.5D)] //substract basic 
-        [InlineData("sub(1,1.5)", -0.5D)] //substract custom 
-        [InlineData("1*1.5", 1.5D)] //multiple basic 
-        [InlineData("3/1.5", 2D)] //divide basic 
-        [InlineData("sqrt(2.25)", 1.5D)] //square root
-        [InlineData("cuberoot(8)", 2D)] //cube root
-        [InlineData("fact(5)", 120D)] //factorial
+        [InlineData("1+1.5", 2.5D,"AddChecked")] //add basic
+        [InlineData("add(1,1.5)", 2.5D,"add")] //add custom
+        [InlineData("1-1.5", -0.5D,"SubtractChecked")] //substract basic 
+        [InlineData("sub(1,1.5)", -0.5D,"sub")] //substract custom 
+        [InlineData("1*1.5", 1.5,"MultiplyChecked")] //multiple basic 
+        [InlineData("3/1.5", 2D,"Divide")] //divide basic 
+        [InlineData("sqrt(2.25)", 1.5D, "sqrt")] //square root
+        [InlineData("cuberoot(8)", 2D,"cuberoot")] //cube root
+        [InlineData("fact(5)", 120D,"fact")] //factorial
         public void Given_term_expression_with_build_in_functions_When_calculating_Then_answer_is_provided(
-            string expression, double answer)
+            string expression, double answer, params string[] functionUsed)
         {
-            Assert.Equal(answer, _calculator.Calculate(expression));
+            var result = _calculator.Calculate(expression);
+            
+            Assert.Equal(answer, result.Value);
+            result.FunctionUsages.Should().BeEquivalentTo(functionUsed);
+        }
+        
+        [Fact]
+        public void Given_term_expression_Then_answer_is_provided()
+        {
+            var result = _calculator.Calculate("a+b-1*sqrt(sub(c,2)+3)",new Parameter("a",1), new Parameter("b",2), new Parameter("c",3));
+            
+            result.FunctionUsages.Should().BeEquivalentTo(new []{"AddChecked", "SubtractChecked", "MultiplyChecked", "sqrt", "sub", "AddChecked"});
+        }
+
+        [Theory]
+        [InlineData("cuberoot(10)", "cuberoot")] //cube root with long-named parameter
+        [InlineData("fact(12)", "fact")]
+        [InlineData("1+2-1*sqrt(sub(4,2)+6)", "AddChecked", "SubtractChecked", "MultiplyChecked", "sqrt", "sub", "AddChecked")]
+        public void
+            Given_term_expression_with_build_in_functions_When_calculating_Then_used_functions_are_extracted(
+               string expression, params string[] functions)
+        {
+            var result = _calculator.Calculate(expression);
+            
+            result.FunctionUsages.Should().BeEquivalentTo(functions);
         }
 
         [Theory]
@@ -57,7 +82,7 @@ namespace MightyCalc.Calculations.Tests
                 parametersList.Add(new Parameter(name, value));
             }
 
-            Assert.Equal(answer, _calculator.Calculate(expression, parametersList.ToArray()));
+            Assert.Equal(answer, _calculator.Calculate(expression, parametersList.ToArray()).Value);
         }
 
         [Fact]
@@ -128,7 +153,7 @@ namespace MightyCalc.Calculations.Tests
         public void When_add_custom_function_Then_can_use_it()
         {
             _calculator.AddFunction("test","Test function","sub(add(a,b),c)","a","b","c");
-            Assert.Equal(-7, _calculator.Calculate("test(1 ,2 ,10)"));
+            Assert.Equal(-7, _calculator.Calculate("test(1 ,2 ,10)").Value);
         }
         
         [Fact]
@@ -136,7 +161,7 @@ namespace MightyCalc.Calculations.Tests
         {
             _calculator.AddFunction("test","Test function","sub(add(a,b),c)","a","b","c");
             _calculator.AddFunction("test","Test function","sub(add(a,b),c)+1","a","b","c");
-            Assert.Equal(-6, _calculator.Calculate("test(1 ,2 ,10)"));
+            Assert.Equal(-6, _calculator.Calculate("test(1 ,2 ,10)").Value);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Sprache.Calc;
 
 namespace MightyCalc.Calculations
@@ -22,7 +23,7 @@ namespace MightyCalc.Calculations
 
         }
 
-        public double Calculate(string expression, params Parameter[] parameters)
+        public CalculationResult Calculate(string expression, params Parameter[] parameters)
         {
             var dict = new Dictionary<string, double>();
             foreach (var parameter in parameters)
@@ -30,7 +31,60 @@ namespace MightyCalc.Calculations
                 dict[parameter.Name] = parameter.Value;
             }
 
-            return _calculator.ParseExpression(expression, dict).Compile().Invoke();
+            var exp = _calculator.ParseExpression(expression, dict);
+            var value = exp.Compile().Invoke();
+            return new CalculationResult(value, ExtractCalledFunctions(exp).ToArray());
+        }
+
+        public class FunctionCallVisitor : ExpressionVisitor
+        {
+            public FunctionCallVisitor(string[] knownFunctions)
+            {
+                _knownFunctions = knownFunctions;
+            }
+
+            public List<string> FunctionNames { get; } = new List<string>();
+            private readonly string[] _knownFunctions;
+
+            public override Expression Visit(Expression expr)
+            {
+                switch (expr)
+                {
+                    //case InvocationExpression e: break;
+                   // case MethodCallExpression e: break;
+                    case BinaryExpression e:
+                    {
+                        FunctionNames.Add(e.NodeType.ToString());
+                        break;
+                    }
+                    //case LambdaExpression e: break;
+                    case UnaryExpression e:
+                    {
+                        FunctionNames.Add(e.Method.Name);
+                        break;
+                    }
+                    case ConstantExpression e:
+                        if(e.Value is string value)
+                        {
+                            var customFunction = value.Split(':')[0];
+                            if(_knownFunctions.Contains(customFunction))
+                                FunctionNames.Add(customFunction);
+                        }
+
+                        break;
+                }
+                
+                return base.Visit(expr);
+            }
+        }
+        
+        private IEnumerable<string> ExtractCalledFunctions(Expression expression)
+        {
+            var visitor = new FunctionCallVisitor(_knownFunctions.Select(f => f.Name).ToArray());
+
+            visitor.Visit(expression);
+            
+            return visitor.FunctionNames;
         }
 
         public void AddFunction(string name, string description, string expression, params string[] parameterNames)

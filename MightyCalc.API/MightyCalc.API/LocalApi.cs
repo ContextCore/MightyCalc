@@ -18,7 +18,7 @@ namespace MightyCalc.API
         public Task<double> CalculateAsync(Expression body)
         {
             var parameters = body.Parameters.Select(p => new Calculations.Parameter(p.Name, p.Value)).ToArray();
-            var result = _calculator.Calculate(body.Representation, parameters);
+            var result = _calculator.Calculate(body.Representation, parameters).Value;
             return Task.FromResult(result);
         }
 
