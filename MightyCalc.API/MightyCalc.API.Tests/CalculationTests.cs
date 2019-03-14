@@ -77,6 +77,25 @@ namespace MightyCalc.API.Tests
                 new Client.Parameter(){Name = "a", Value=2}, 
             }}));
         }
+        
+        [Fact]
+        public async Task Given_divide_by_zero_expression_When_calculating_Then_error_is_not_thrown()
+        {
+            Assert.Equal(double.PositiveInfinity, await _client.CalculateAsync(new Client.Expression(){Representation = "a/b", Parameters = new []
+            {
+                new Client.Parameter(){Name = "a", Value=1},
+                new Client.Parameter(){Name = "b", Value=0}, 
+            }}));
+        }
+        [Fact]
+        public async Task Given_sqrt_from_negative_expression_When_calculating_Then_error_is_not_thrown()
+        {
+            Assert.Equal(double.NaN, await _client.CalculateAsync(new Client.Expression(){Representation = "sqrt(a/b)", Parameters = new []
+            {
+                new Client.Parameter(){Name = "a", Value=-1},
+                new Client.Parameter(){Name = "b", Value=1}, 
+            }}));
+        }
 
 
         

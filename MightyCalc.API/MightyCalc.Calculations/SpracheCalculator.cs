@@ -60,7 +60,7 @@ namespace MightyCalc.Calculations
                     //case LambdaExpression e: break;
                     case UnaryExpression e:
                     {
-                        FunctionNames.Add(e.Method.Name);
+                        FunctionNames.Add(e.NodeType.ToString());
                         break;
                     }
                     case ConstantExpression e:
