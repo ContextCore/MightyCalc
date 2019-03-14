@@ -91,7 +91,24 @@ namespace MightyCalc.Calculations
         {
             _knownFunctions.Add(new FunctionDefinition(name,parameterNames.Count(),description, expression));
             _calculator.RegisterFunction(name, expression, parameterNames.ToArray());
+            try
+            {
+                Calculate(expression, parameterNames.Select(p => new Parameter(p, 0)).ToArray());
+            }
+            catch (Exception ex)
+            {
+                throw new AddFunctionException(ex);
+            }
         }
+
+        public class AddFunctionException : Exception
+        {
+            public AddFunctionException(Exception exception):base("Error during add a new function",exception)
+            {
+                
+            }
+        }
+
         private void AddFunction(string name, string description, Func<double,double> expression)
         {
             _knownFunctions.Add(new FunctionDefinition(name,1,description,""));
