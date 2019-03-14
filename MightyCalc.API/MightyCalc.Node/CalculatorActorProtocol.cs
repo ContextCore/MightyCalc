@@ -38,6 +38,26 @@ namespace MightyCalc.Node
             public static FunctionAdded Instance { get; } = new FunctionAdded();
         }
 
+        public class GetKnownFunctions
+        {
+            private GetKnownFunctions()
+            {
+               
+            }
+            public static GetKnownFunctions Instance { get; } = new GetKnownFunctions();
+            
+        }
+        
+        public class KnownFunctions
+        {
+            public KnownFunctions(params FunctionDefinition [] definitions )
+            {
+                Definitions = definitions;
+            }
+            public FunctionDefinition[] Definitions { get; }
+        }
+        
+        
         public class FunctionAddError:FunctionAdded
         {
             public Exception Reason { get; }

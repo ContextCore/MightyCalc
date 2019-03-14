@@ -42,5 +42,15 @@ namespace MightyCalc.Node
             if (res is CalculatorActorProtocol.FunctionAddError e)
                 throw e.Reason;
         }
+
+        public async Task<FunctionDefinition[]> GetKnownFunction(string functionName)
+        {
+            var res = await _calculatorActorRegion.Ask<CalculatorActorProtocol.KnownFunctions>(new ShardEnvelop(
+                    _calculatorId,
+                    ShardIdGenerator.Instance.GetShardId(_calculatorId),
+                    CalculatorActorProtocol.GetKnownFunctions.Instance)
+                ,TimeSpan.FromSeconds(5));
+            return res.Definitions;
+        }
     }
 }

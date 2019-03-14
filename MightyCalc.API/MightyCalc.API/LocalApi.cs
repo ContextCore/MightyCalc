@@ -50,10 +50,7 @@ namespace MightyCalc.API
             return Task.CompletedTask;
         }
 
-        internal class FunctionAlreadyExistsException : Exception
-        {
-        }
-
+   
         public Task ReplaceFunctionAsync(NamedExpression body)
         {
             _calculator.AddFunction(body.Name, body.Description,body.Expression.Representation,body.Expression.Parameters.Select(p => p.Name).ToArray());
@@ -67,4 +64,8 @@ namespace MightyCalc.API
                 {UsageStatistics = new List<FunctionUsage>() {new FunctionUsage {Name = "Test", UsageCount = 1}}});
         }
     }
+    internal class FunctionAlreadyExistsException : Exception
+    {
+    }
+
 }

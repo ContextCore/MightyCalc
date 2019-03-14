@@ -12,6 +12,7 @@ namespace MightyCalc.Node
         {
             PersistenceId = Self.Path.Name;
             var calculator = new SpracheCalculator();
+            
             Command<CalculatorActorProtocol.AddFunction>(a =>
             {
                 try
@@ -28,6 +29,10 @@ namespace MightyCalc.Node
                     throw new FunctionAddException(ex);
                 }
             });
+            
+            Command<CalculatorActorProtocol.GetKnownFunctions>(g =>
+                Sender.Tell(new CalculatorActorProtocol.KnownFunctions(calculator.GetKnownFunctions().ToArray())));
+            
             Command<CalculatorActorProtocol.CalculateExpression>(c =>
             {
                 try

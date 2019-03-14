@@ -13,5 +13,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MightyCalc.Calculations\MightyCalc.Calculations.csproj" />
+      <ProjectReference Include="..\MightyCalc.Node\MightyCalc.Node.csproj" />
     </ItemGroup>
 </Project>

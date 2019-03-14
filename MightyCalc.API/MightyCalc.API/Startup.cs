@@ -1,8 +1,12 @@
+using Akka.Actor;
+using Akka.Cluster;
+using Akka.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MightyCalc.Calculations;
+using MightyCalc.Node;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace MightyCalc.API
@@ -26,7 +30,17 @@ namespace MightyCalc.API
                 .AddMvc()
                 .AddNewtonsoftJson();
 
-            services.AddTransient<IApiController, LocalApi>();
+            services.AddTransient<IApiController, AkkaApi>();
+            services.AddSingleton<ActorSystem>(p =>
+            {
+                var config = Configuration.GetValue<string>("AkkaConfig");
+                config = config ?? "akka.actor.provider = \"Akka.Cluster.ClusterActorRefProvider, Akka.Cluster\"";  
+                var system= ActorSystem.Create("Calc", config) as ExtendedActorSystem;
+                var cluster = Cluster.Get(system);
+                cluster.Join(system.Provider.DefaultAddress);
+                return system;
+            });
+            services.AddSingleton<INamedCalculatorPool, AkkaCalculatorPool>();
             services.AddSingleton<ICalculator,SpracheCalculator>();
         }
 
