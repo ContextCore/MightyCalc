@@ -1,0 +1,10 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mightycalc-ingress
+spec:
+  tls:
+  - secretName: tls-certificate
+  backend:
+    serviceName: mightycalc-svc
+    servicePort: mightycalc-http
