@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Akka.Actor;
 using Akka.Cluster;
 using Akka.Configuration;
@@ -5,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using MightyCalc.Calculations;
 using MightyCalc.Node;
 using Swashbuckle.AspNetCore.Swagger;
@@ -23,10 +26,10 @@ namespace MightyCalc.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSwaggerGen(c =>
-                {
+           services.AddSwaggerGen(c =>
+              {
                     c.SwaggerDoc("v1", new Info {Title = "Mighty Calc API", Version = "v1"});
-                })
+               })
                 .AddMvc()
                 .AddNewtonsoftJson();
 
@@ -57,10 +60,25 @@ namespace MightyCalc.API
                 app.UseHsts();
             }
 
+            var provider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(),"swagger"));
+            
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            {
+                FileProvider = provider,
+                RequestPath = "/swagger"
+            });
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = provider,
+                RequestPath = "/swagger",
+                ServeUnknownFileTypes = true
+            });
+            
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MightyCalc API V1");
+                c.SwaggerEndpoint("/swagger/MightyCalcAPI.yaml", "MightyCalc API V1");
                 c.RoutePrefix = string.Empty;
             });
             app.UseHttpsRedirection();

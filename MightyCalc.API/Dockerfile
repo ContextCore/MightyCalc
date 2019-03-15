@@ -14,19 +14,21 @@ COPY . ./MightyCalc.API
 WORKDIR MightyCalc.API
 
 #Generating API controller
-RUN dotnet ../NSwag/NetCore22/dotnet-nswag.dll swagger2cscontroller /input:"./MightyCalcAPI.yml" /classname:Api /namespace:MightyCalc.API /UseLiquidTemplates:true /ControllerBaseClass:Microsoft.AspNetCore.Mvc.ControllerBase /AspNetNamespace:"Microsoft.AspNetCore.Mvc" /output:"/MightyCalc.API/MightyCalc.API/Controllers/MightyCalcController.cs" /ResponseArrayType:"System.Collections.Generic.IReadOnlyCollection"  /ArrayBaseType:"System.Collections.Generic.IReadonlyCollection" /ArrayInstanceType:"System.Collections.Generic.List"
+RUN dotnet ../NSwag/NetCore22/dotnet-nswag.dll swagger2cscontroller /input:"./MightyCalcAPI.yaml" /classname:Api /namespace:MightyCalc.API /UseLiquidTemplates:true /ControllerBaseClass:Microsoft.AspNetCore.Mvc.ControllerBase /AspNetNamespace:"Microsoft.AspNetCore.Mvc" /output:"/MightyCalc.API/MightyCalc.API/Controllers/MightyCalcController.cs" /ResponseArrayType:"System.Collections.Generic.IReadOnlyCollection"  /ArrayBaseType:"System.Collections.Generic.IReadonlyCollection" /ArrayInstanceType:"System.Collections.Generic.List"
 
 #Generating API client in C#
-RUN dotnet ../NSwag/NetCore22/dotnet-nswag.dll swagger2csclient /input:"./MightyCalcAPI.yml" /classname:MightyCalcClient /namespace:MightyCalc.Client /UseLiquidTemplates:true /output:"/MightyCalc.API/MightyCalc.Client/Client.cs" /GenerateClientInterfaces:true /InjectHttpClient:true /generateDataAnnotations:false /exceptionClass:MightyCalcException /generateOptionalParameters:true /ArrayBaseType:"System.Collections.Generic.IReadonlyCollection" /responseArrayType:"System.Collections.Generic.IReadOnlyCollection" /arrayType:"System.Collections.Generic.IReadOnlyCollection"
+RUN dotnet ../NSwag/NetCore22/dotnet-nswag.dll swagger2csclient /input:"./MightyCalcAPI.yaml" /classname:MightyCalcClient /namespace:MightyCalc.Client /UseLiquidTemplates:true /output:"/MightyCalc.API/MightyCalc.Client/Client.cs" /GenerateClientInterfaces:true /InjectHttpClient:true /generateDataAnnotations:false /exceptionClass:MightyCalcException /generateOptionalParameters:true /ArrayBaseType:"System.Collections.Generic.IReadonlyCollection" /responseArrayType:"System.Collections.Generic.IReadOnlyCollection" /arrayType:"System.Collections.Generic.IReadOnlyCollection"
 #build the project and get binaries for production 
 FROM microsoft/dotnet:3.0-sdk as build-env
 
 COPY --from=api-gen-env ./MightyCalc.API ./MightyCalc.API
 WORKDIR MightyCalc.API
 
-RUN dotnet test -c Release
-RUN dotnet publish -c Release -o publish
-
+RUN dotnet build -c Release
+RUN mkdir -p /swagger
+RUN cp ./MightyCalcAPI.yaml /swagger/MightyCalcAPI.yaml #for tests
+RUN dotnet test -c Release --no-build
+RUN dotnet publish -c Release -o publish --no-build
 
 #create production-ready container
 #want to use different image, but swagger UI has compatibility issues with .net core preview3 version
@@ -34,9 +36,6 @@ FROM microsoft/dotnet:3.0-aspnetcore-runtime as runtime
 COPY --from=build-env /MightyCalc.API/publish /MightyCalc.API   
 WORKDIR /MightyCalc.API
 EXPOSE 80
-EXPOSE 443
-EXPOSE 5000
-EXPOSE 5001
 ENTRYPOINT ["dotnet", "MightyCalc.API.dll"]
 
 
