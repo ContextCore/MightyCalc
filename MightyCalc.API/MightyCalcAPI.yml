@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: |
-    This is API iterface for MightyCalc project.  You can find
+    This is API interface for MightyCalc project.  You can find
     out more about the project at
     [github](https://github.com/andreyleskov/MightyCalc).
   version: "1.0.0"
@@ -81,9 +81,7 @@ paths:
       summary: Creates a new user-defined function
       description: |
         Creates a new user-defined function under given name and parameters. Function should be in an infix form and can carry all other existing function, numbers, and, optionally, parameters. If function is using a parameter, it should be defined in parameters section. Parameter value field will be ignored and can be empty or not presented.  
-        After creation, funtion cannot be recreated. To replace function, use PUT /func endpoint. 
-        Functions with different arity are treated as separate functions, 
-        like 'MyFunc(a)' and 'MyFunc(a,b)''
+        After creation, function cannot be recreated. To replace function, use PUT /func endpoint. 
       requestBody:
         content:
           application/json:
