@@ -1,16 +1,11 @@
 openapi: 3.0.0
-# Added by API Auto Mocking Plugin
-#servers:
-  #- description: SwaggerHub API Auto Mocking
-   # url: https://virtserver.swaggerhub.com/andreyleskov/MightyCalc/1.0.0
 info:
   description: |
     This is API iterface for MightyCalc project.  You can find
     out more about the project at
     [github](https://github.com/andreyleskov/MightyCalc).
   version: "1.0.0"
-  title: Swagger Petstore
-  termsOfService: 'http://swagger.io/terms/'
+  title: MightyCalc 
   contact:
     email: andrey.leskov@gmail.com
   license:
@@ -30,6 +25,12 @@ paths:
         - calculate
       summary: Calculate an expression
       operationId: calculate
+      description: |
+        Evaluates an expression and returns calculation result. 
+        The expression is an infix expression consists of numbers, functions and 
+        function parameters. Parameters are optional, but expression should not content undeclared parameters or parameters without value provided. Functions available could be found by GET /func
+        In addition all function from [System.Math](https://docs.microsoft.com/en-us/dotnet/api/system.math?view=netcore-3.) are available as well
+        
       requestBody:
         content:
           application/json:
@@ -51,8 +52,10 @@ paths:
     get:
       tags:
         - functions
-      summary: Finds user-defined functions
-      description: Search for function names by provided wildcard. Will list top 100 functions
+      summary: Returns user-defined functions. This list can be changed by POST /func  
+      description: |
+        Returns available function names for calculation
+        .Net functions from System.Math
       operationId: findFunctions
       parameters:
         - name: name
@@ -76,7 +79,11 @@ paths:
         - functions
       operationId: createFunction
       summary: Creates a new user-defined function
-      description: Creates a new user-defined function under given name 
+      description: |
+        Creates a new user-defined function under given name and parameters. Function should be in an infix form and can carry all other existing function, numbers, and, optionally, parameters. If function is using a parameter, it should be defined in parameters section. Parameter value field will be ignored and can be empty or not presented.  
+        After creation, funtion cannot be recreated. To replace function, use PUT /func endpoint. 
+        Functions with different arity are treated as separate functions, 
+        like 'MyFunc(a)' and 'MyFunc(a,b)''
       requestBody:
         content:
           application/json:
@@ -96,7 +103,9 @@ paths:
         - functions
       operationId: replaceFunction
       summary: Replaces a user-defined function
-      description: Replaces a new user-defined function under given name 
+      description: |
+        Replaces a user-defined function under given name. 
+        See the details of /POST func endpoint
       requestBody:
         content:
           application/json:
@@ -109,8 +118,6 @@ paths:
           description: Invalid expression provided
         '422':
           description: Expression contains unknown functions 
-        '409':
-          description: Function with such name already exists
        
   /stats:
     get:
@@ -186,7 +193,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Parameter'
-          example: '{{name: a, value: 10}}'
+          example: '{{name: a, value: 10}, {name: b, value:1}}'
     NamedExpression:
       type: object
       required:
@@ -195,10 +202,12 @@ components:
       properties:
         name: 
           type: string 
+          example: myFunc
         expression:
           $ref: '#/components/schemas/Expression'
         description:
           type: string
+          example: my own function crafted with love
   requestBodies:
     Expression:
       content:
