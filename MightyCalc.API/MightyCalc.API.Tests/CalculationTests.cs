@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Akka.DistributedData;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using MightyCalc.Client;
@@ -22,6 +24,35 @@ namespace MightyCalc.API.Tests
             var httpClient = server.CreateClient();
 
             _client = new MightyCalcClient("", httpClient);
+        }
+        
+        [Theory(Skip = "statistics not implemented yet")]
+        [InlineData(new[]{"1+1.5"},"AdditionSigned",1)] //add
+        [InlineData(new[]{"1+1.5+1","0+0+0+1"},"AdditionSigned",5)] //add
+        [InlineData(new[]{"Pow(2,1) - 23","23 - 4 - 1"},"Pow",1,"SubtractSigned",3)] //add
+        public async Task Given_expressions_calculated_When_getting_stats_Then_it_should_be_presented(string[] expressions, params object[] expectedStats)
+        {
+            var expectedUsage = new Dictionary<string,int>();
+            var enumerator = expectedStats.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                var name = (string) enumerator.Current;
+                enumerator.MoveNext();
+                var count = (int) enumerator.Current;
+                expectedUsage.Add(name,count);
+            }
+
+            foreach (var expression in expressions)
+            {
+                await _client.CalculateAsync(new Client.Expression{Representation = expression});
+            }
+
+            await Task.Delay(2000); // for projection
+            
+            var report = await _client.UsageStatsAsync();
+            
+            foreach(var expected in expectedUsage)
+                Assert.Equal(expected.Value,report.UsageStatistics.First(u => u.Name == expected.Key).UsageCount);
         }
         
         

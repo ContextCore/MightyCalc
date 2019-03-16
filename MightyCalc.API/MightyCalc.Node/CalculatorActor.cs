@@ -68,7 +68,9 @@ namespace MightyCalc.Node
 
         public override string PersistenceId { get; }
 
-        class CalculationPerformed
+        
+        
+        public class CalculationPerformed
         {
             public string CalculatorId { get; }
             public string Expression { get; }
@@ -85,7 +87,7 @@ namespace MightyCalc.Node
             }
         }
 
-        class FunctionAdded
+        public class FunctionAdded
         {
             public string CalculatorId { get; }
             public FunctionDefinition Definition { get; }
