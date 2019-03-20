@@ -1,0 +1,216 @@
+openapi: 3.0.0
+info:
+  description: |
+    This is API interface for MightyCalc project.  You can find
+    out more about the project at
+    [github](https://github.com/andreyleskov/MightyCalc).
+  version: "1.0.0"
+  title: MightyCalc 
+  contact:
+    email: andrey.leskov@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: calculate
+    description: Do the calculation you prefer
+  - name: statistics
+    description: MightyCalc usage statistics 
+  - name: functions
+    description: User-defined functions access
+paths:
+  /calc:
+    post:
+      tags:
+        - calculate
+      summary: Calculate an expression
+      operationId: calculate
+      description: |
+        Evaluates an expression and returns calculation result. 
+        The expression is an infix expression consists of numbers, functions and 
+        function parameters. Parameters are optional, but expression should not content undeclared parameters or parameters without value provided. Functions available could be found by GET /func
+        In addition all function from [System.Math](https://docs.microsoft.com/en-us/dotnet/api/system.math?view=netcore-3.) are available as well
+        
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Expression'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+          description: Calculation succeeded
+        '400':
+          description: Invalid expression provided
+        '422':
+          description: Expression contains unknown functions 
+  /func:
+    get:
+      tags:
+        - functions
+      summary: Returns user-defined functions. This list can be changed by POST /func  
+      description: |
+        Returns available function names for calculation
+        .Net functions from System.Math
+      operationId: findFunctions
+      parameters:
+        - name: name
+          in: query
+          description: Function name pattern to seach for 
+          required: false
+          schema:
+            type: string
+            
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NamedExpression'
+    post: 
+      tags: 
+        - functions
+      operationId: createFunction
+      summary: Creates a new user-defined function
+      description: |
+        Creates a new user-defined function under given name and parameters. Function should be in an infix form and can carry all other existing function, numbers, and, optionally, parameters. If function is using a parameter, it should be defined in parameters section. Parameter value field will be ignored and can be empty or not presented.  
+        After creation, function cannot be recreated. To replace function, use PUT /func endpoint. 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamedExpression'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid expression provided
+        '422':
+          description: Expression contains unknown functions 
+        '409':
+          description: Function with such name already exists
+    put:
+      tags: 
+        - functions
+      operationId: replaceFunction
+      summary: Replaces a user-defined function
+      description: |
+        Replaces a user-defined function under given name. 
+        See the details of /POST func endpoint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamedExpression'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid expression provided
+        '422':
+          description: Expression contains unknown functions 
+       
+  /stats:
+    get:
+      tags:
+        - statistics
+      summary: Get usage statistics
+      description: Provides information about function usage frequency
+      operationId: usageStats
+      parameters:
+        - name: from
+          in: query
+          description: start of the report period
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: end of the report period
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        '400':
+          description: Invalid datetime period specified
+components:
+  schemas:
+    FunctionUsage:
+      type: object
+      properties:
+        name: 
+          type: string 
+        usageCount:
+          type: integer
+    Report: 
+      type: object
+      properties: 
+        UsageStatistics:   
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionUsage'
+                  
+    Parameter:
+      type: object
+      required: 
+        - name
+      properties:
+        name:
+          type: string
+          example: 'a'
+        value:
+          type: number
+          format: double
+          example: '10.1'
+      example: '{name: a, value: 10.1}'
+    Expression:
+      type: object
+      required:
+        - representation
+        - parameters
+      properties:
+        representation:
+          type: string
+          example: 'Min(a, b) + 1'
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Parameter'
+          example: '{{name: a, value: 10}, {name: b, value:1}}'
+    NamedExpression:
+      type: object
+      required:
+       - name 
+       - expression
+      properties:
+        name: 
+          type: string 
+          example: myFunc
+        expression:
+          $ref: '#/components/schemas/Expression'
+        description:
+          type: string
+          example: my own function crafted with love
+  requestBodies:
+    Expression:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Expression'
+      description: Expression object that needs to be calculated
+      required: true

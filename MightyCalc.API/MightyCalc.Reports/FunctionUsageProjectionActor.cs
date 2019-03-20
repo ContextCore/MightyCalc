@@ -1,10 +1,27 @@
 using System.Linq;
+using Akka.Actor;
 using Akka.Persistence;
 using Microsoft.EntityFrameworkCore;
 using MightyCalc.Node;
+using MightyCalc.Reports.ReportingExtension;
 
 namespace MightyCalc.Reports
 {
+
+
+
+//    public class Reporting
+//    {
+//        public Reporting(ActorSystem)
+//        {
+//            
+//        }
+//
+//        public void Start()
+//        {
+//            
+//        }
+//    }
     public class FunctionUsageProjectionActor : ReceivePersistentActor
     {
         public override string PersistenceId { get; }
@@ -12,14 +29,14 @@ namespace MightyCalc.Reports
         public FunctionUsageProjectionActor()
         {
             PersistenceId = Self.Path.Name;
-
+            var dependencies = Context.System.GetReportingExtension().GetDependencies();
 
             var optionsBuilder = new DbContextOptionsBuilder<FunctionUsageContext>();
             optionsBuilder.UseNpgsql("Host=localhost:32773;Database=postgres;Username=postgres;");
 
             Command<Project<CalculatorActor.CalculationPerformed>>(p =>
             {
-                using (var context = new FunctionUsageContext(optionsBuilder.Options))
+                using (var context = dependencies.CreateFunctionUsageContext())
                 {
                     foreach (var singleIdGroup in p.Events.GroupBy(e => e.CalculatorId))
                     {

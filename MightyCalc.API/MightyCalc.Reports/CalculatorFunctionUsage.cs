@@ -8,4 +8,10 @@ namespace MightyCalc.Reports
         public string FunctionName { get; set; }
         public int InvocationsCount { get; set; }
     }
+    
+    public class TotalFunctionUsage
+    {
+        public string FunctionName { get; set; }
+        public int InvocationsCount { get; set; }
+    }
 }
