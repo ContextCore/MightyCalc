@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MightyCalc.Reports;
+using MightyCalc.Reports.DatabaseProjections;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MightyCalc.Reports.Migrations

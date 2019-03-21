@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using MightyCalc.Reports.DatabaseProjections;
 using Xunit;
 
 namespace MightyCalc.Reports.Tests

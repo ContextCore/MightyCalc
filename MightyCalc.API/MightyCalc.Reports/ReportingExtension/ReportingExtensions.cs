@@ -5,7 +5,6 @@ using Autofac;
 namespace MightyCalc.Reports.ReportingExtension {
     public static class ReportingExtensions
     {
-
         public static ReportingExtension GetReportingExtension(this ActorSystem sys)
         {
             return sys.GetExtension<ReportingExtension>();
