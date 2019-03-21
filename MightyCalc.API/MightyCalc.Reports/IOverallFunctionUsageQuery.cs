@@ -6,6 +6,6 @@ namespace MightyCalc.Reports
 {
     public interface IOverallFunctionUsageQuery
     {
-        Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionNameWildCard);
+        Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionName = null);
     }
 }

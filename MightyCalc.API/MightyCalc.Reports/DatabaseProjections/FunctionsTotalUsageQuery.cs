@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,10 +14,13 @@ namespace MightyCalc.Reports.DatabaseProjections
         {
             _context = context;
         }
-        public async Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionNameWildCard)
+        public async Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionName = null)
         {
+            if (String.IsNullOrEmpty(functionName))
+                return await _context.FunctionsTotalUsage.ToArrayAsync();
+            
             return await _context.FunctionsTotalUsage
-                .Where(f => f.FunctionName.Contains(functionNameWildCard))
+                .Where(f => f.FunctionName.Contains(functionName))
                 .ToArrayAsync();
         }
     }

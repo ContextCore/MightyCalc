@@ -46,7 +46,7 @@ namespace MightyCalc.Reports.Tests
             
             actor.Tell(FunctionsTotalUsageProjector.Start.Instance);
 
-            var usage = new SequencedUsage
+            var usage = new SequencedFunctionUsage
             {
                 FunctionName = "testFunction",
                 InvocationsCount = 10,
@@ -93,7 +93,7 @@ namespace MightyCalc.Reports.Tests
             
             actor.Tell(FunctionsTotalUsageProjector.Start.Instance);
 
-            var usage = new SequencedUsage
+            var usage = new SequencedFunctionUsage
             {
                 FunctionName = "testFunction",
                 InvocationsCount = 10,
@@ -124,7 +124,7 @@ namespace MightyCalc.Reports.Tests
             Init(nameof(Given_actor_When_sending_function_usages_to_it_And_they_are_projected_Then_next_message_is_received));
             var actor = Sys.ActorOf(Props.Create<FunctionsTotalUsageProjector>("testEvent"));
             actor.Tell(FunctionsTotalUsageProjector.Start.Instance);
-            actor.Tell(new SequencedUsage());
+            actor.Tell(new SequencedFunctionUsage());
             ExpectMsg<FunctionsTotalUsageProjector.Next>();
         }
     }

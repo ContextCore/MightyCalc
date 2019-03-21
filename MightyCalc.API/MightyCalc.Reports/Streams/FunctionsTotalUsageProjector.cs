@@ -16,27 +16,35 @@ namespace MightyCalc.Reports.Streams
             var dependencies = Context.System.GetReportingExtension().GetDependencies();
             Func<FunctionUsageContext> contextFactory = () => dependencies.CreateFunctionUsageContext();
 
-            Receive<Start>(s => { });
-            Receive<ProjectionDone>(s => { });
+            Receive<Start>(s =>
+            {
+                Sender.Tell(Next.Instance);
+            });
+            Receive<ProjectionDone>(s =>
+            {
+            });
             //Event processing intentionally made slow for simplicity
-            Receive<SequencedUsage>(e =>
+            Receive<SequencedFunctionUsage>(e =>
             {
                 using (var context = contextFactory.Invoke())
                 {
                     var existingUsage =
                         context.FunctionsTotalUsage.SingleOrDefault(u => u.FunctionName == e.FunctionName);
                     if (existingUsage == null)
-                        context.FunctionsTotalUsage.Add(e);
+                        context.FunctionsTotalUsage.Add(new FunctionTotalUsage
+                        {
+                            FunctionName = e.FunctionName,
+                            InvocationsCount = e.InvocationsCount
+                        });
                     else
                     {
                         existingUsage.InvocationsCount = e.InvocationsCount;
-                        context.FunctionsTotalUsage.Update(e);
                     }
 
                     var projection = dependencies.CreateFindProjectionQuery(context)
                         .Execute(KnownProjectionsNames.TotalFunctionUsage,
                             nameof(FunctionsTotalUsageProjector),
-                            nameof(FunctionsTotalUsageProjector));
+                            eventName);
                     
                     if (projection == null)
                         context.Projections.Add(new Projection

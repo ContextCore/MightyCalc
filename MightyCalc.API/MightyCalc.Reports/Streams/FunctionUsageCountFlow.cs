@@ -9,13 +9,13 @@ namespace MightyCalc.Reports.Streams
 {
     public static class FunctionUsageCountFlow
     {
-        public static Flow<EventEnvelope, SequencedUsage, NotUsed> Instance { get; } =
-            (Flow<EventEnvelope, SequencedUsage, NotUsed>) Flow.Create<EventEnvelope>()
+        public static Flow<EventEnvelope, SequencedFunctionUsage, NotUsed> Instance { get; } =
+            (Flow<EventEnvelope, SequencedFunctionUsage, NotUsed>) Flow.Create<EventEnvelope>()
                 .SelectMany(e =>
                 {
                     var calculationPerformed = (e.Event as CalculatorActor.CalculationPerformed);
                     //transform each element to pair with number of words in it
-                    return calculationPerformed?.FunctionsUsed.Select(f => new SequencedUsage
+                    return calculationPerformed?.FunctionsUsed.Select(f => new SequencedFunctionUsage
                     {
                         FunctionName = f,
                         Sequence = e.SequenceNr,
@@ -25,7 +25,7 @@ namespace MightyCalc.Reports.Streams
                 // split the words into separate streams first
                 .GroupBy(1000000, u => u.FunctionName)
                 // add counting logic to the streams
-                .Sum((l, r) => new SequencedUsage
+                .Sum((l, r) => new SequencedFunctionUsage
                 {
                     FunctionName = l.FunctionName, InvocationsCount = l.InvocationsCount + r.InvocationsCount,
                     Sequence = Math.Max(l.Sequence, r.Sequence)
