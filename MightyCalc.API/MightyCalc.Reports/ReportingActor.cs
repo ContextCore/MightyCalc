@@ -35,8 +35,8 @@ namespace MightyCalc.Reports
                 Offset offset;
                 using (var context = _dependencies.CreateFunctionUsageContext())
                 {
-                    var projection = _dependencies.CreateFindProjectionQuery(context).Execute(KnownProjections.TotalFunctionUsage,
-                        nameof(OverallFunctionUsageProjector),
+                    var projection = _dependencies.CreateFindProjectionQuery(context).Execute(KnownProjectionsNames.TotalFunctionUsage,
+                        nameof(FunctionsTotalUsageProjector),
                         eventName);
                     
                     offset = projection == null ? Offset.NoOffset() : Offset.Sequence(projection.Sequence);

@@ -13,9 +13,9 @@ namespace MightyCalc.Reports.DatabaseProjections
         {
             _context = context;
         }
-        public async Task<IReadOnlyCollection<TotalFunctionUsage>> Execute(string functionNameWildCard)
+        public async Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionNameWildCard)
         {
-            return await _context.TotalFunctionUsage
+            return await _context.FunctionsTotalUsage
                 .Where(f => f.FunctionName.Contains(functionNameWildCard))
                 .ToArrayAsync();
         }

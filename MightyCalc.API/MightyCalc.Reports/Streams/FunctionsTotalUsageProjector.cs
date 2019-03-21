@@ -9,9 +9,9 @@ namespace MightyCalc.Reports.Streams
     /// <summary>
     /// This projection relies on ordering on 
     /// </summary>
-    public class OverallFunctionUsageProjector : ReceiveActor
+    public class FunctionsTotalUsageProjector : ReceiveActor
     {
-        public OverallFunctionUsageProjector(string eventName = "unknown")
+        public FunctionsTotalUsageProjector(string eventName = "unknown")
         {
             var dependencies = Context.System.GetReportingExtension().GetDependencies();
             Func<FunctionUsageContext> contextFactory = () => dependencies.CreateFunctionUsageContext();
@@ -24,26 +24,26 @@ namespace MightyCalc.Reports.Streams
                 using (var context = contextFactory.Invoke())
                 {
                     var existingUsage =
-                        context.TotalFunctionUsage.SingleOrDefault(u => u.FunctionName == e.FunctionName);
+                        context.FunctionsTotalUsage.SingleOrDefault(u => u.FunctionName == e.FunctionName);
                     if (existingUsage == null)
-                        context.TotalFunctionUsage.Add(e);
+                        context.FunctionsTotalUsage.Add(e);
                     else
                     {
                         existingUsage.InvocationsCount = e.InvocationsCount;
-                        context.TotalFunctionUsage.Update(e);
+                        context.FunctionsTotalUsage.Update(e);
                     }
 
                     var projection = dependencies.CreateFindProjectionQuery(context)
-                        .Execute(KnownProjections.TotalFunctionUsage,
-                            nameof(OverallFunctionUsageProjector),
-                            nameof(OverallFunctionUsageProjector));
+                        .Execute(KnownProjectionsNames.TotalFunctionUsage,
+                            nameof(FunctionsTotalUsageProjector),
+                            nameof(FunctionsTotalUsageProjector));
                     
                     if (projection == null)
                         context.Projections.Add(new Projection
                         {
                             Event = eventName,
-                            Name = KnownProjections.TotalFunctionUsage,
-                            Projector = nameof(OverallFunctionUsageProjector),
+                            Name = KnownProjectionsNames.TotalFunctionUsage,
+                            Projector = nameof(FunctionsTotalUsageProjector),
                             Sequence = e.Sequence
                         });
                     else

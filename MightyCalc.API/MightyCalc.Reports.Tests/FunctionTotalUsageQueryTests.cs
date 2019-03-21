@@ -35,7 +35,7 @@ namespace MightyCalc.Reports.Tests
                 new FunctionTotalUsage {FunctionName = "testFunc", InvocationsCount = 1},
                 new FunctionTotalUsage {FunctionName = "myFunc", InvocationsCount = 2}
             };
-            context.TotalFunctionUsage.AddRange(functions);
+            context.FunctionsTotalUsage.AddRange(functions);
             await context.SaveChangesAsync();
             
             var res =  await query.Execute("");
@@ -58,7 +58,7 @@ namespace MightyCalc.Reports.Tests
                 new FunctionTotalUsage {FunctionName = "testFunc", InvocationsCount = 1},
                 new FunctionTotalUsage {FunctionName = "myFunc", InvocationsCount = 2}
             };
-            context.TotalFunctionUsage.AddRange(functions);
+            context.FunctionsTotalUsage.AddRange(functions);
             await context.SaveChangesAsync();
             
             var res =  await query.Execute("my");

@@ -5,7 +5,7 @@ namespace MightyCalc.Reports.DatabaseProjections
     public class FunctionUsageContext : DbContext
     {
         public DbSet<FunctionUsage> FunctionsUsage { get; set; }
-        public DbSet<FunctionTotalUsage> TotalFunctionUsage { get; set; }
+        public DbSet<FunctionTotalUsage> FunctionsTotalUsage { get; set; }
         public DbSet<Projection> Projections { get; set; }
 
         public FunctionUsageContext(DbContextOptions<FunctionUsageContext> options)
