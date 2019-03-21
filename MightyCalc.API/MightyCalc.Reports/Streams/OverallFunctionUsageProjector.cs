@@ -19,7 +19,7 @@ namespace MightyCalc.Reports.Streams
             Receive<Start>(s => { });
             Receive<ProjectionDone>(s => { });
             //Event processing intentionally made slow for simplicity
-            Receive<SequencedFunctionUsage>(e =>
+            Receive<SequencedUsage>(e =>
             {
                 using (var context = contextFactory.Invoke())
                 {

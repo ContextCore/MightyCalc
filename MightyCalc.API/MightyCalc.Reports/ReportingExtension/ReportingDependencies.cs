@@ -3,7 +3,7 @@ using MightyCalc.Reports.DatabaseProjections;
 
 namespace MightyCalc.Reports.ReportingExtension
 {
-    class ReportingDependencies : IReportingDependencies
+    public class ReportingDependencies : IReportingDependencies
     {
         private readonly DbContextOptions<FunctionUsageContext> _dbContextOptions;
 
