@@ -60,11 +60,11 @@ namespace MightyCalc.Reports
 
         protected override void PostStop()
         {
-            _materializer.Dispose();
+            _materializer?.Dispose();
             base.PostStop();
         }
 
-        private class Start
+        public class Start
         {
             private Start()
             {

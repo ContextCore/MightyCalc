@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MightyCalc.Reports;
 using MightyCalc.Reports.DatabaseProjections;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -19,7 +18,19 @@ namespace MightyCalc.Reports.Migrations
                 .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("MightyCalc.Reports.FunctionUsage", b =>
+            modelBuilder.Entity("MightyCalc.Reports.DatabaseProjections.FunctionTotalUsage", b =>
+                {
+                    b.Property<string>("FunctionName")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long>("InvocationsCount");
+
+                    b.HasKey("FunctionName");
+
+                    b.ToTable("FunctionsTotalUsage");
+                });
+
+            modelBuilder.Entity("MightyCalc.Reports.DatabaseProjections.FunctionUsage", b =>
                 {
                     b.Property<string>("CalculatorName");
 
@@ -29,18 +40,20 @@ namespace MightyCalc.Reports.Migrations
 
                     b.HasKey("CalculatorName", "FunctionName");
 
-                    b.ToTable("Blogs");
+                    b.ToTable("FunctionsUsage");
                 });
 
-            modelBuilder.Entity("MightyCalc.Reports.Projections", b =>
+            modelBuilder.Entity("MightyCalc.Reports.Projection", b =>
                 {
                     b.Property<string>("Name");
 
+                    b.Property<string>("Projector");
+
                     b.Property<string>("Event");
 
-                    b.Property<int>("Sequence");
+                    b.Property<long>("Sequence");
 
-                    b.HasKey("Name", "Event");
+                    b.HasKey("Name", "Projector", "Event");
 
                     b.ToTable("Projections");
                 });

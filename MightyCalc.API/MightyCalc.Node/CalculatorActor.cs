@@ -6,6 +6,10 @@ using MightyCalc.Calculations;
 
 namespace MightyCalc.Node
 {
+    public interface IDomainEvent
+    {
+        
+    }
     public class CalculatorActor : ReceivePersistentActor
     {
         public CalculatorActor()
@@ -38,6 +42,7 @@ namespace MightyCalc.Node
                 try
                 {
                     var result = calculator.Calculate(c.Representation, c.Parameters);
+                    Log.Debug("Calculating expression " + c.Representation);
                     PersistAsync(new CalculationPerformed(PersistenceId, c.Representation,
                         c.Parameters, result.FunctionUsages.ToArray()), e => { });
                     Sender.Tell(new CalculatorActorProtocol.CalculationResult(result.Value));
@@ -70,7 +75,7 @@ namespace MightyCalc.Node
 
         
         
-        public class CalculationPerformed
+        public class CalculationPerformed:IDomainEvent
         {
             public string CalculatorId { get; }
             public string Expression { get; }
@@ -87,7 +92,7 @@ namespace MightyCalc.Node
             }
         }
 
-        public class FunctionAdded
+        public class FunctionAdded:IDomainEvent
         {
             public string CalculatorId { get; }
             public FunctionDefinition Definition { get; }
