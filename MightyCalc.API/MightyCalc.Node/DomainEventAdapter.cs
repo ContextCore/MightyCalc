@@ -1,3 +1,4 @@
+using System;
 using Akka.Persistence.Journal;
 
 namespace MightyCalc.Node
@@ -6,17 +7,17 @@ namespace MightyCalc.Node
     {
         public string Manifest(object evt)
         {
-            return string.Empty; // when no manifest needed, return ""
+            return string.Empty;
         }
 
         public object ToJournal(object evt)
         {
-            return evt; // identity
+            return new Tagged(evt,new []{"aggregate",evt.GetType().Name}); 
         }
 
         public IEventSequence FromJournal(object evt, string manifest)
         {
-            return EventSequence.Single(evt); // identity
+            return EventSequence.Single(evt); 
         }
     }
 }

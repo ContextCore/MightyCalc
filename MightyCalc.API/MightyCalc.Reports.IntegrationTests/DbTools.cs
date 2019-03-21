@@ -15,18 +15,9 @@ namespace MightyCalc.Reports.IntegrationTests
                 new DbContextOptionsBuilder<FunctionUsageContext>().UseNpgsql(connectionString).Options;
             using (var context = new FunctionUsageContext(journalOptions))
             {
-                try
-                {
-                    await context.Database.ExecuteSqlCommandAsync(
-                        $"TRUNCATE {string.Join(",", tables.Select(t => $"\"{t}\""))} RESTART IDENTITY CASCADE;");
-                }
-                catch (PostgresException e)
-                {
-                    Console.WriteLine(e);
-                }
+                var sql = $"TRUNCATE {string.Join(",", tables.Select(t => $"\"{t}\""))} RESTART IDENTITY CASCADE;";
+                await context.Database.ExecuteSqlCommandAsync(sql);
             }
-
-            ;
         }
     }
 }

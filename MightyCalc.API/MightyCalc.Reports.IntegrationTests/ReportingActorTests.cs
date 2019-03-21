@@ -29,6 +29,27 @@ namespace MightyCalc.Reports.IntegrationTests
 akka.persistence.journal.plugin = ""akka.persistence.journal.postgresql""
 akka.persistence.snapshot-store.plugin = ""akka.persistence.snapshot-store.postgresql""
 
+akka.persistence.query.journal.sql {
+		# Implementation class of the SQL ReadJournalProvider
+			 class = ""Akka.Persistence.Query.Sql.SqlReadJournalProvider, Akka.Persistence.Query.Sql""
+  
+		# Absolute path to the write journal plugin configuration entry that this 
+		# query journal will connect to. 
+		# If undefined (or """") it will connect to the default journal as specified by the
+		# akka.persistence.journal.plugin property.
+        #write-plugin = """"
+  
+		# The SQL write journal is notifying the query side as soon as things
+		# are persisted, but for efficiency reasons the query side retrieves the events 
+		# in batches that sometimes can be delayed up to the configured `refresh-interval`.
+
+        refresh-interval = 1s
+  
+		# How many events to fetch in one query (replay) and keep buffered until they
+		# are delivered downstreams.
+	        max-buffer-size = 10
+    }
+
 akka.persistence{
 	journal {
 		postgresql {
@@ -134,18 +155,18 @@ akka.persistence{
 
             _output.WriteLine(Sys.Settings.ToString());
             //generate some data
+   
+            var reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
 
+            reportActor.Tell(ReportingActor.Start.Instance);
+            
             var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), "CalculatorOne");
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1-2*3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1/2+3"));
 
-            await Task.Delay(30000);
+            await Task.Delay(20000);
             
-            var reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
-
-            reportActor.Tell(ReportingActor.Start.Instance);
-
             var projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
             Assert.Equal(projected.Sequence, 3);
 
