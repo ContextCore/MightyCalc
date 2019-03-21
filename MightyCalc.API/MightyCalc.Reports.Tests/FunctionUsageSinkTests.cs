@@ -37,7 +37,7 @@ namespace MightyCalc.Reports.Tests
                 new SequencedFunctionUsage {FunctionName = "addition", InvocationsCount = 1, Sequence = 15},
             });
 
-            var sink = OverallFunctionUsageSink.Create(Sys, "testEvent");
+            var sink = FunctionTotalUsageSink.Create(Sys, "testEvent");
 
             source.RunWith(sink, Sys.Materializer());
 

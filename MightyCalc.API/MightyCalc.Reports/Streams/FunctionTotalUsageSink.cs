@@ -5,7 +5,7 @@ using Akka.Streams.Dsl;
 
 namespace MightyCalc.Reports.Streams
 {
-    public static class OverallFunctionUsageSink
+    public static class FunctionTotalUsageSink
     {
         public static Sink<SequencedFunctionUsage, NotUsed> Create(IActorRefFactory system, string eventName)
         {

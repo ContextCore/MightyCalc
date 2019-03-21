@@ -42,10 +42,11 @@ namespace MightyCalc.Reports
                     offset = projection == null ? Offset.NoOffset() : Offset.Sequence(projection.Sequence);
                 }
 
-                var stream = _readJournal.EventsByTag(eventName, offset);
-                var counts = FunctionUsageCountFlow.Instance;
-                var sink = OverallFunctionUsageSink.Create(Context, eventName);
-                var projectionGraph = stream.Via(counts).To(sink);
+                var source = _readJournal.EventsByTag(eventName, offset);
+                var groupingFlow = FunctionTotalUsageFlow.Instance;
+                var projectionSink = FunctionTotalUsageSink.Create(Context, eventName);
+                
+                var projectionGraph = source.Via(groupingFlow).To(projectionSink);
 
                 _materializer = Context.System.Materializer();
                 projectionGraph.Run(_materializer);

@@ -7,7 +7,7 @@ using MightyCalc.Node;
 
 namespace MightyCalc.Reports.Streams
 {
-    public static class FunctionUsageCountFlow
+    public static class FunctionTotalUsageFlow
     {
         public static Flow<EventEnvelope, SequencedFunctionUsage, NotUsed> Instance { get; } =
             (Flow<EventEnvelope, SequencedFunctionUsage, NotUsed>) Flow.Create<EventEnvelope>()
@@ -18,7 +18,7 @@ namespace MightyCalc.Reports.Streams
                     return calculationPerformed?.FunctionsUsed.Select(f => new SequencedFunctionUsage
                     {
                         FunctionName = f,
-                        Sequence = e.SequenceNr,
+                        Sequence = (e.Offset as Sequence).Value,
                         InvocationsCount = 1
                     });
                 })
