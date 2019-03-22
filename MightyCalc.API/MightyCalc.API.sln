@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.Reports.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.Reports.IntegrationTests", "MightyCalc.Reports.IntegrationTests\MightyCalc.Reports.IntegrationTests.csproj", "{FE70D02B-870D-4232-811C-48D40BD6C7BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.API.IntegrationTests", "MightyCalc.API.IntegrationTests\MightyCalc.API.IntegrationTests.csproj", "{0D26B04C-A4A2-4B34-8DFC-CEF963FF62F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.IntegrationTests.Tools", "MightyCalc.IntegrationTests.Tools\MightyCalc.IntegrationTests.Tools.csproj", "{8A4324BA-6B2E-45B0-B977-FAB7881D9CE6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +70,13 @@ Global
 		{FE70D02B-870D-4232-811C-48D40BD6C7BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE70D02B-870D-4232-811C-48D40BD6C7BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE70D02B-870D-4232-811C-48D40BD6C7BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D26B04C-A4A2-4B34-8DFC-CEF963FF62F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D26B04C-A4A2-4B34-8DFC-CEF963FF62F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D26B04C-A4A2-4B34-8DFC-CEF963FF62F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D26B04C-A4A2-4B34-8DFC-CEF963FF62F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A4324BA-6B2E-45B0-B977-FAB7881D9CE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A4324BA-6B2E-45B0-B977-FAB7881D9CE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A4324BA-6B2E-45B0-B977-FAB7881D9CE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A4324BA-6B2E-45B0-B977-FAB7881D9CE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

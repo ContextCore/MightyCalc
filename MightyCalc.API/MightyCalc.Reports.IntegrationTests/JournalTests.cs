@@ -10,6 +10,7 @@ using Akka.TestKit.Xunit2;
 using Autofac;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using MightyCalc.IntegrationTests.Tools;
 using MightyCalc.Node;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
@@ -35,7 +36,7 @@ namespace MightyCalc.Reports.IntegrationTests
                 .UseNpgsql(KnownConnectionStrings.ReadModel)
                 .EnableSensitiveDataLogging()
                 .Options;
-            await ResetDB();
+            await DbTools.ResetDatabases();
 
             var container = new ContainerBuilder();
             container.RegisterInstance<IReportingDependencies>(new ReportingDependencies(options));
@@ -234,16 +235,6 @@ akka.persistence{
             var res = await runTask;
 
             res.Should().NotBeEmpty();
-        }
-
-        private async Task ResetDB()
-        {
-            await DbTools.TruncateTables(KnownConnectionStrings.ReadModel,
-                "Projections",
-                "FunctionsUsage",
-                "FunctionsTotalUsage");
-            await DbTools.TruncateTables(KnownConnectionStrings.Journal, "event_journal","metadata");
-            await DbTools.TruncateTables(KnownConnectionStrings.SnapshotStore, "snapshot_store");
         }
     }
 }

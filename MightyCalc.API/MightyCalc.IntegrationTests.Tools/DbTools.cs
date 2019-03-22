@@ -1,11 +1,9 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MightyCalc.Reports.DatabaseProjections;
-using Npgsql;
 
-namespace MightyCalc.Reports.IntegrationTests
+namespace MightyCalc.IntegrationTests.Tools
 {
     public static class DbTools
     {
@@ -18,6 +16,16 @@ namespace MightyCalc.Reports.IntegrationTests
                 var sql = $"TRUNCATE {string.Join(",", tables.Select(t => $"\"{t}\""))} RESTART IDENTITY CASCADE;";
                 await context.Database.ExecuteSqlCommandAsync(sql);
             }
+        }
+        
+        public static async Task ResetDatabases()
+        {
+            await DbTools.TruncateTables(KnownConnectionStrings.ReadModel,
+                "Projections",
+                "FunctionsUsage",
+                "FunctionsTotalUsage");
+            await DbTools.TruncateTables(KnownConnectionStrings.Journal, "event_journal","metadata");
+            await DbTools.TruncateTables(KnownConnectionStrings.SnapshotStore, "snapshot_store");
         }
     }
 }

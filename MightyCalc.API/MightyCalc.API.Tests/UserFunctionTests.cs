@@ -1,34 +1,27 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using MightyCalc.Client;
 using Xunit;
 
 namespace MightyCalc.API.Tests
 {
-    public class UserFunctionTests
+    public abstract class UserFunctionTests
     {
-        private readonly IMightyCalcClient _client;
-
-        public UserFunctionTests()
+        private IMightyCalcClient Client => _lazyClient.Value;
+        private readonly Lazy<IMightyCalcClient> _lazyClient;
+        protected abstract IMightyCalcClient CreateClient();
+    
+        protected UserFunctionTests()
         {
-            var builder = new WebHostBuilder()
-                .UseEnvironment("Development")
-                .UseStartup<Startup>();
-
-            var server = new TestServer(builder);
-            var httpClient = server.CreateClient();
-
-            _client = new MightyCalcClient("", httpClient);
+            _lazyClient = new Lazy<IMightyCalcClient>(CreateClient);
         }
-
+        
 
         [Fact]
         public async Task Given_only_builtin_functions_When_getting_function_list_Then_it_contains_all_functions()
         {
-            var functions = await _client.FindFunctionsAsync();
+            var functions = await Client.FindFunctionsAsync();
             var expectedNames =
                 new[]
                 {
@@ -60,9 +53,9 @@ namespace MightyCalc.API.Tests
                 Description = "cuberoot description"
             };
             
-            await _client.CreateFunctionAsync(namedExpression);
+            await Client.CreateFunctionAsync(namedExpression);
 
-            var functionNames = await _client.FindFunctionsAsync();
+            var functionNames = await Client.FindFunctionsAsync();
             Assert.Contains(namedExpression.Name, functionNames.Select(f => f.Name));
             Assert.Contains(namedExpression.Expression.Representation, functionNames.Select(f => f.Expression.Representation));
             Assert.Contains(namedExpression.Description, functionNames.Select(f => f.Description));
@@ -85,8 +78,8 @@ namespace MightyCalc.API.Tests
                 Description = "cuberoot description"
             };
             
-            await _client.CreateFunctionAsync(namedExpression);
-            var result = await _client.CalculateAsync(new Client.Expression()
+            await Client.CreateFunctionAsync(namedExpression);
+            var result = await Client.CalculateAsync(new Client.Expression()
             {
                 Representation = "testFunction(a,b) + 1", Parameters = new[]
                 {
@@ -126,10 +119,10 @@ namespace MightyCalc.API.Tests
             };
             
             
-            await _client.CreateFunctionAsync(initialFunc);
-            await _client.ReplaceFunctionAsync(replacedFunc);
+            await Client.CreateFunctionAsync(initialFunc);
+            await Client.ReplaceFunctionAsync(replacedFunc);
             
-            var result = await _client.CalculateAsync(new Client.Expression()
+            var result = await Client.CalculateAsync(new Client.Expression()
             {
                 Representation = "testFunction(a,b) + 1", Parameters = new[]
                 {
@@ -157,8 +150,8 @@ namespace MightyCalc.API.Tests
             };
             
             
-            await _client.CreateFunctionAsync(initialFunc);
-            await Assert.ThrowsAsync<MightyCalcException>(() => _client.CreateFunctionAsync(initialFunc));
+            await Client.CreateFunctionAsync(initialFunc);
+            await Assert.ThrowsAsync<MightyCalcException>(() => Client.CreateFunctionAsync(initialFunc));
         }
     }
 }

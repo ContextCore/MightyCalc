@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using MightyCalc.IntegrationTests.Tools;
 using MightyCalc.Reports.DatabaseProjections;
 
 namespace MightyCalc.Reports.IntegrationTests

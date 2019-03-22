@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\MightyCalc.IntegrationTests.Tools\MightyCalc.IntegrationTests.Tools.csproj" />
       <ProjectReference Include="..\MightyCalc.Reports\MightyCalc.Reports.csproj" />
     </ItemGroup>
 

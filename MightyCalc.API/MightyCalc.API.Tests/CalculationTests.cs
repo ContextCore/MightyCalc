@@ -1,31 +1,26 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Akka.DistributedData;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using MightyCalc.Client;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace MightyCalc.API.Tests
 {
-    public class CalculationTests
-    {
-        private readonly IMightyCalcClient _client;
+    public abstract class CalculationTests
+    {    
+        private IMightyCalcClient Client => _lazyClient.Value;
+        private readonly Lazy<IMightyCalcClient> _lazyClient;
+        protected abstract IMightyCalcClient CreateClient();
 
-        public CalculationTests()
+        protected CalculationTests()
         {
-            var builder = new WebHostBuilder()
-                .UseEnvironment("Development")
-                .UseStartup<Startup>(); 
-            
-            var server = new TestServer(builder);
-            var httpClient = server.CreateClient();
-
-            _client = new MightyCalcClient("", httpClient);
+            _lazyClient = new Lazy<IMightyCalcClient>(CreateClient);
         }
-        
+
+
         [Theory(Skip = "statistics not implemented yet")]
         [InlineData(new[]{"1+1.5"},"AdditionSigned",1)] //add
         [InlineData(new[]{"1+1.5+1","0+0+0+1"},"AdditionSigned",5)] //add
@@ -44,12 +39,12 @@ namespace MightyCalc.API.Tests
 
             foreach (var expression in expressions)
             {
-                await _client.CalculateAsync(new Client.Expression{Representation = expression});
+                await Client.CalculateAsync(new Client.Expression{Representation = expression});
             }
 
             await Task.Delay(2000); // for projection
             
-            var report = await _client.UsageStatsAsync();
+            var report = await Client.UsageStatsAsync();
             
             foreach(var expected in expectedUsage)
                 Assert.Equal(expected.Value,report.UsageStatistics.First(u => u.Name == expected.Key).UsageCount);
@@ -67,7 +62,7 @@ namespace MightyCalc.API.Tests
         [InlineData("fact(5)",120D)] //factorial
         public async Task Given_term_expression_with_build_in_functions_When_calculating_Then_answer_is_provided(string expression, double answer)
         {
-            Assert.Equal(answer, await _client.CalculateAsync(new Client.Expression(){Representation = expression}));
+            Assert.Equal(answer, await Client.CalculateAsync(new Client.Expression(){Representation = expression}));
         }
         
         [Theory]
@@ -86,13 +81,13 @@ namespace MightyCalc.API.Tests
                 parametersList.Add(new Client.Parameter{Name = name, Value = value});
             }
 
-            Assert.Equal(answer, await _client.CalculateAsync(new Client.Expression(){Representation = expression, Parameters = parametersList}));
+            Assert.Equal(answer, await Client.CalculateAsync(new Client.Expression(){Representation = expression, Parameters = parametersList}));
         }
         
         [Fact]
         public async Task Given_parametrized_expression_And_defining_not_existing_parameters_calculating_When_calculating_Then_not_existing_parameters_are_ignored()
         {
-            Assert.Equal(2, await _client.CalculateAsync(new Client.Expression(){Representation = "a+1", Parameters = new []
+            Assert.Equal(2, await Client.CalculateAsync(new Client.Expression(){Representation = "a+1", Parameters = new []
             {
                 new Client.Parameter(){Name ="a", Value=1},
                 new Client.Parameter(){Name = "b", Value=2}, 
@@ -102,7 +97,7 @@ namespace MightyCalc.API.Tests
         [Fact]
         public async Task Given_parametrized_expression_And_redefining_parameters_calculating_When_calculating_Then_error_is_thrown()
         {
-            Assert.Equal(3, await _client.CalculateAsync(new Client.Expression(){Representation = "add(a,1)", Parameters = new []
+            Assert.Equal(3, await Client.CalculateAsync(new Client.Expression(){Representation = "add(a,1)", Parameters = new []
             {
                 new Client.Parameter(){Name = "a", Value=1},
                 new Client.Parameter(){Name = "a", Value=2}, 
@@ -112,7 +107,7 @@ namespace MightyCalc.API.Tests
         [Fact]
         public async Task Given_divide_by_zero_expression_When_calculating_Then_error_is_not_thrown()
         {
-            Assert.Equal(double.PositiveInfinity, await _client.CalculateAsync(new Client.Expression(){Representation = "a/b", Parameters = new []
+            Assert.Equal(double.PositiveInfinity, await Client.CalculateAsync(new Client.Expression(){Representation = "a/b", Parameters = new []
             {
                 new Client.Parameter(){Name = "a", Value=1},
                 new Client.Parameter(){Name = "b", Value=0}, 
@@ -121,7 +116,7 @@ namespace MightyCalc.API.Tests
         [Fact]
         public async Task Given_sqrt_from_negative_expression_When_calculating_Then_error_is_not_thrown()
         {
-            Assert.Equal(double.NaN, await _client.CalculateAsync(new Client.Expression(){Representation = "sqrt(a/b)", Parameters = new []
+            Assert.Equal(double.NaN, await Client.CalculateAsync(new Client.Expression(){Representation = "sqrt(a/b)", Parameters = new []
             {
                 new Client.Parameter(){Name = "a", Value=-1},
                 new Client.Parameter(){Name = "b", Value=1}, 
@@ -133,7 +128,7 @@ namespace MightyCalc.API.Tests
         [Fact]
         public async Task Given_expression_with_non_existing_function_When_calculating_Then_error_is_raised_AND_code_is_500()
         {
-            var ex = await Assert.ThrowsAsync<MightyCalcException>( () => _client.CalculateAsync(new Client.Expression(){Representation = "test(2,1)"}));
+            var ex = await Assert.ThrowsAsync<MightyCalcException>( () => Client.CalculateAsync(new Client.Expression(){Representation = "test(2,1)"}));
             Assert.Equal(500, ex.StatusCode);
         }
     }

@@ -1,6 +1,6 @@
 using System;
 
-namespace MightyCalc.Reports.IntegrationTests
+namespace MightyCalc.IntegrationTests.Tools
 {
     public static class KnownConnectionStrings
     {
