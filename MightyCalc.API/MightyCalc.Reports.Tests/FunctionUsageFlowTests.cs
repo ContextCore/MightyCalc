@@ -27,12 +27,6 @@ namespace MightyCalc.Reports.Tests
             
         }
         
-        public static Sink<string, Task<IOResult>> LineSink(string filename) {
-            return Flow.Create<string>()
-                .Select(s => ByteString.FromString($"{s}\n"))
-                .ToMaterialized(FileIO.ToFile(new FileInfo(filename)), Keep.Right);
-        }
-        
         [Fact]
         public async Task Given_flow_When_pushing_eventEnvelops_to_it_Then_functions_should_be_counted()
         {
@@ -43,11 +37,6 @@ namespace MightyCalc.Reports.Tests
                     new CalculatorActor.CalculationPerformed("calcA","a+b+c+d",null, new[]{"add","add","add","add"})),
                 new EventEnvelope(Offset.Sequence(2),"calcB",1,
                     new CalculatorActor.CalculationPerformed("calcB","a-b+c",null, new[]{"sub","add"})),
-                new EventEnvelope(Offset.Sequence(3),"calcA",2,
-                    new CalculatorActor.CalculationPerformed("calcA","a+b",null, new[]{"add"})),
-                new EventEnvelope(Offset.Sequence(4),"calcC",1,
-                    new CalculatorActor.CalculationPerformed("calcC","a+b*e",null, new[]{"add","mul"})),
-                
             });
 
             var sink = Sink.Seq<SequencedFunctionUsage>();
@@ -57,9 +46,10 @@ namespace MightyCalc.Reports.Tests
             var result = await runTask;
 
             result.Should().BeEquivalentTo(
-                new SequencedFunctionUsage {FunctionName = "add", InvocationsCount = 7, Sequence = 4},
+                
+                new SequencedFunctionUsage {FunctionName = "add", InvocationsCount = 4, Sequence = 1},
                 new SequencedFunctionUsage {FunctionName = "sub", InvocationsCount = 1, Sequence = 2},
-                new SequencedFunctionUsage {FunctionName = "mul", InvocationsCount = 1, Sequence = 4}
+                new SequencedFunctionUsage {FunctionName = "add", InvocationsCount = 1, Sequence = 2}
             );
         }
     }

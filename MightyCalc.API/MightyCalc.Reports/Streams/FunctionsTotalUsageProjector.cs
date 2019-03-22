@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using Akka.Actor;
+using Akka.Event;
+using Akka.Streams.Implementation.Fusing;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 
@@ -15,17 +17,22 @@ namespace MightyCalc.Reports.Streams
         {
             var dependencies = Context.System.GetReportingExtension().GetDependencies();
             Func<FunctionUsageContext> contextFactory = () => dependencies.CreateFunctionUsageContext();
-
+            var log = Context.GetLogger();
+            
             Receive<Start>(s =>
             {
+                log.Info("Starting projection");
                 Sender.Tell(Next.Instance);
             });
             Receive<ProjectionDone>(s =>
             {
+                log.Info("Stopping projection");
             });
             //Event processing intentionally made slow for simplicity
             Receive<SequencedFunctionUsage>(e =>
             {
+                log.Debug("Received event to project");
+
                 using (var context = contextFactory.Invoke())
                 {
                     var existingUsage =
@@ -38,7 +45,7 @@ namespace MightyCalc.Reports.Streams
                         });
                     else
                     {
-                        existingUsage.InvocationsCount = e.InvocationsCount;
+                        existingUsage.InvocationsCount += e.InvocationsCount;
                     }
 
                     var projection = dependencies.CreateFindProjectionQuery(context)
@@ -63,6 +70,8 @@ namespace MightyCalc.Reports.Streams
 
                 Sender.Tell(Next.Instance);
             });
+            
+            ReceiveAny(o => log.Warning("missing message: " + o.ToString()));
         }
 
         public class Start

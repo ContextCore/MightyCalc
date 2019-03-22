@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Configuration;
-using Akka.Remote;
+using Akka.Persistence.Query;
+using Akka.Persistence.Query.Sql;
+using Akka.Streams;
+using Akka.Streams.Dsl;
 using Akka.TestKit.Xunit2;
 using Autofac;
 using FluentAssertions;
@@ -14,16 +13,36 @@ using Microsoft.EntityFrameworkCore;
 using MightyCalc.Node;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
-using Newtonsoft.Json;
+using MightyCalc.Reports.Streams;
 using Xunit;
 using Xunit.Abstractions;
 
+
 namespace MightyCalc.Reports.IntegrationTests
 {
-	public class ReportingActorTests : TestKit
+    public class JournalTests: TestKit
     {
         private readonly ITestOutputHelper _output;
 
+        public JournalTests(ITestOutputHelper output) : base(GetAkkaConfig(), "Test", output)
+        {
+            _output = output;
+        }
+
+        private async Task<IReportingDependencies> Init()
+        {
+            var options = new DbContextOptionsBuilder<FunctionUsageContext>()
+                .UseNpgsql(KnownConnectionStrings.ReadModel)
+                .EnableSensitiveDataLogging()
+                .Options;
+            await ResetDB();
+
+            var container = new ContainerBuilder();
+            container.RegisterInstance<IReportingDependencies>(new ReportingDependencies(options));
+            Sys.InitReportingExtension(container.Build());
+            return Sys.GetReportingExtension().GetDependencies();
+        }
+		 
         private static Config GetAkkaConfig()
         {
             return akkaConfig.WithFallback(FullDebugConfig);
@@ -115,61 +134,31 @@ akka.persistence{
 	}
 }
 ";
-
-        private async Task ResetDB()
-        {
-            await DbTools.TruncateTables(KnownConnectionStrings.ReadModel,
-                "Projections",
-                "FunctionsUsage",
-                "FunctionsTotalUsage");
-            await DbTools.TruncateTables(KnownConnectionStrings.Journal, "event_journal","metadata");
-            await DbTools.TruncateTables(KnownConnectionStrings.SnapshotStore, "snapshot_store");
-        }
-
-        public ReportingActorTests(ITestOutputHelper output) : base(GetAkkaConfig(), "Test", output)
-        {
-            _output = output;
-        }
-
-        private async Task<IReportingDependencies> Init()
-        {
-            var options = new DbContextOptionsBuilder<FunctionUsageContext>()
-                .UseNpgsql(KnownConnectionStrings.ReadModel)
-                .EnableSensitiveDataLogging()
-                .Options;
-            await ResetDB();
-
-            var container = new ContainerBuilder();
-            container.RegisterInstance<IReportingDependencies>(new ReportingDependencies(options));
-            Sys.InitReportingExtension(container.Build());
-            return Sys.GetReportingExtension().GetDependencies();
-        }
-
-
         [Fact]
-        public async Task DbRest_should_work()
-        {
-            await Init();
-        }
-
-        [Fact]
-        public async Task Given_ReportActor_When_sending_start_message_Then_projection_launched_producing_data()
+        public async Task Given_journal_When_starting_projection_stream_Then_projection_launched_producing_data()
         {
             var dep = await Init();
 
             _output.WriteLine(Sys.Settings.ToString());
             //generate some data
-   
-            var reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
-
-            reportActor.Tell(ReportingActor.Start.Instance);
-            
             var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), "CalculatorOne");
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1-2*3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1/2+3"));
-         
-            await Task.Delay(10000);
+
+            var eventName = nameof(CalculatorActor.CalculationPerformed);
+            
+            var readJournal = PersistenceQuery.Get(Sys).ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
+            var sharedKillSwitch = KillSwitches.Shared("test");
+            var source = readJournal.EventsByTag(eventName, Offset.NoOffset())
+	            .Via(sharedKillSwitch.Flow<EventEnvelope>());
+            
+            var flow = FunctionTotalUsageFlow.Instance;
+            var sink = FunctionTotalUsageSink.Create(Sys, eventName);
+	            
+            source.Via(flow).To(sink).Run(Sys.Materializer());
+	        
+            await Task.Delay(5000);
             
             var projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
             Assert.Equal(3,projected.Sequence);
@@ -181,58 +170,80 @@ akka.persistence{
                 new FunctionTotalUsage {FunctionName = "SubtractChecked", InvocationsCount = 2},
                 new FunctionTotalUsage {FunctionName = "MultiplyChecked", InvocationsCount = 1},
                 new FunctionTotalUsage {FunctionName = "Divide", InvocationsCount = 1});
-        }
+        }  
         
-     
         [Fact]
-        public async Task Given_existing_projection_When_starting_it_Then_projection_is_resumed()
+        public async Task Given_journal_When_starting_projection_stream_Then_sink_receives_all_events()
         {
-            var dep = await Init();
+            await Init();
 
-            var reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
-
-            reportActor.Tell(ReportingActor.Start.Instance);
-
+            _output.WriteLine(Sys.Settings.ToString());
             //generate some data
-
             var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), "CalculatorOne");
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1-2*3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1/2+3"));
+           
+            var eventName = nameof(CalculatorActor.CalculationPerformed);
 
+            var readJournal = PersistenceQuery.Get(Sys).ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
             
+            var sharedKillSwitch = KillSwitches.Shared("test");
+            var source = readJournal.EventsByTag(eventName, Offset.NoOffset())
+						            .Via(sharedKillSwitch.Flow<EventEnvelope>());
+            
+            var flow = FunctionTotalUsageFlow.Instance;
+            var sink = Sink.Seq<SequencedFunctionUsage>();
+
+            var	materializer = Sys.Materializer();
+            var runTask = source.RunWith(flow.ToMaterialized(sink, Keep.Right), materializer);
+
             await Task.Delay(5000);
 
-            //ensure it is persisted
+            sharedKillSwitch.Shutdown();
             
-            var projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
-            Assert.Equal(3, projected.Sequence);
-            
-            //restart report actor to allow it to get latest projected sequence from DB
-            Watch(reportActor);
-            Sys.Stop(reportActor);
-            FishForMessage<Terminated>(t => t.ActorRef == reportActor);
+            var res = await runTask;
+
+            res.Should().HaveCount(6);
+        }
+        
+        [Fact]
+        public async Task Given_calculator_executed_commands_When_reading_events_from_journal_Then_it_is_available()
+        {
+            var dep = await Init();
+
+            _output.WriteLine(Sys.Settings.ToString());
+            //generate some data
+            var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), "CalculatorOne");
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3"));
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1-2*3"));
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1/2+3"));
+           
+            var eventName = nameof(CalculatorActor.CalculationPerformed);
+
+            var readJournal = PersistenceQuery.Get(Sys).ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
+
             await Task.Delay(1000);
-            
-            reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
-            reportActor.Tell(ReportingActor.Start.Instance);
+	        
+            var source = readJournal.CurrentEventsByTag(eventName, Offset.NoOffset());
 
-            //add new events
-            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3*4/5"));
+            var sink = Sink.Seq<EventEnvelope>();
 
-            await Task.Delay(5000);
+            var runTask = source.RunWith(sink, Sys.Materializer());
 
-            //check the results
-            projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
-            Assert.Equal(4, projected.Sequence);
+            var res = await runTask;
 
-            var usage = await new FunctionsTotalUsageQuery(dep.CreateFunctionUsageContext()).Execute();
+            res.Should().NotBeEmpty();
+        }
 
-            usage.Should().BeEquivalentTo(
-                new FunctionTotalUsage {FunctionName = "AddChecked", InvocationsCount = 3},
-                new FunctionTotalUsage {FunctionName = "SubtractChecked", InvocationsCount = 3},
-                new FunctionTotalUsage {FunctionName = "MultiplyChecked", InvocationsCount = 2},
-                new FunctionTotalUsage {FunctionName = "Divide", InvocationsCount = 2});
+        private async Task ResetDB()
+        {
+            await DbTools.TruncateTables(KnownConnectionStrings.ReadModel,
+                "Projections",
+                "FunctionsUsage",
+                "FunctionsTotalUsage");
+            await DbTools.TruncateTables(KnownConnectionStrings.Journal, "event_journal","metadata");
+            await DbTools.TruncateTables(KnownConnectionStrings.SnapshotStore, "snapshot_store");
         }
     }
 }

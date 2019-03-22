@@ -47,7 +47,6 @@ namespace MightyCalc.Reports
                 var projectionSink = FunctionTotalUsageSink.Create(Context, eventName);
                 
                 var projectionGraph = source.Via(groupingFlow).To(projectionSink);
-
                 _materializer = Context.System.Materializer();
                 projectionGraph.Run(_materializer);
                 Behavior.Become(Working, nameof(Working));

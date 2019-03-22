@@ -45,7 +45,8 @@ namespace MightyCalc.Reports.Tests
             var actor = Sys.ActorOf(Props.Create<FunctionsTotalUsageProjector>(eventName));
             
             actor.Tell(FunctionsTotalUsageProjector.Start.Instance);
-
+            ExpectMsg<FunctionsTotalUsageProjector.Next>();
+            
             var usage = new SequencedFunctionUsage
             {
                 FunctionName = "testFunction",
@@ -92,7 +93,8 @@ namespace MightyCalc.Reports.Tests
             var actor = Sys.ActorOf(Props.Create<FunctionsTotalUsageProjector>(eventName));
             
             actor.Tell(FunctionsTotalUsageProjector.Start.Instance);
-
+            ExpectMsg<FunctionsTotalUsageProjector.Next>();
+            
             var usage = new SequencedFunctionUsage
             {
                 FunctionName = "testFunction",
@@ -104,8 +106,8 @@ namespace MightyCalc.Reports.Tests
 
             var query = dependencies.CreateFindProjectionQuery();
             var projection = query.Execute(KnownProjectionsNames.TotalFunctionUsage,
-                nameof(FunctionsTotalUsageProjector),
-                eventName);
+                                  nameof(FunctionsTotalUsageProjector),
+                                           eventName);
             
             //we have an existing projection
             Assert.Equal(usage.Sequence, projection.Sequence);
