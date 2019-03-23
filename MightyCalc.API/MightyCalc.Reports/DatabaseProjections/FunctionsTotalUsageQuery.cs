@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MightyCalc.Reports.DatabaseProjections
 {
-    public class FunctionsTotalUsageQuery: IOverallFunctionUsageQuery
+    public class FunctionsTotalUsageQuery: IFunctionsTotalUsageQuery
     {
         private readonly FunctionUsageContext _context;
 
@@ -14,7 +14,7 @@ namespace MightyCalc.Reports.DatabaseProjections
         {
             _context = context;
         }
-        public async Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionName = null)
+        public async Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionName = null, DateTimeOffset? @from = null, DateTimeOffset? to = null)
         {
             if (String.IsNullOrEmpty(functionName))
                 return await _context.FunctionsTotalUsage.ToArrayAsync();

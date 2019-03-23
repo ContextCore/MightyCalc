@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MightyCalc.Node;
+using MightyCalc.Reports;
 
 namespace MightyCalc.API
 {
     class AkkaApi : IApiController
     {
         private readonly INamedCalculatorPool _pool;
+        private readonly IFunctionsTotalUsageQuery _functionsTotalUsageQuery;
 
         public AkkaApi(INamedCalculatorPool pool)
         {
+           // _functionsTotalUsageQuery = functionsTotalUsageQuery;
             _pool = pool;
         }
 
@@ -27,11 +30,14 @@ namespace MightyCalc.API
             return definitions.Select(d => new NamedExpression()
             {
                 Description = d.Description,
-                Expression = new Expression{Parameters = d.Parameters.Select(p => new Parameter()
-                                                        {
-                                                            Name = p
-                                                        }).ToList(), 
-                                             Representation = d.Expression},
+                Expression = new Expression
+                {
+                    Parameters = d.Parameters.Select(p => new Parameter()
+                    {
+                        Name = p
+                    }).ToList(),
+                    Representation = d.Expression
+                },
                 Name = d.Name
             }).ToArray();
         }
@@ -40,13 +46,13 @@ namespace MightyCalc.API
         {
             //API-specific restriction, not coming from business logic! 
             var functionDefinitions = await _pool.For("anonymous").GetKnownFunction(body.Name);
-            if(functionDefinitions.Any(f => f.Name == body.Name))
+            if (functionDefinitions.Any(f => f.Name == body.Name))
                 throw new FunctionAlreadyExistsException();
 
             await _pool.For("anonymous").AddFunction(body.Name,
-                                                            body.Description,
-                                                            body.Expression.Representation,
-                                                            body.Expression.Parameters.Select(p => p.Name).ToArray());
+                body.Description,
+                body.Expression.Representation,
+                body.Expression.Parameters.Select(p => p.Name).ToArray());
         }
 
         public Task ReplaceFunctionAsync(NamedExpression body)
@@ -57,10 +63,15 @@ namespace MightyCalc.API
                 body.Expression.Parameters.Select(p => p.Name).ToArray());
         }
 
-        public Task<Report> UsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
+        public async Task<Report> UsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
         {
-            return Task.FromResult(new Report()
-                {UsageStatistics = new List<FunctionUsage>() {new FunctionUsage {Name = "Test", UsageCount = 1}}});
+            var usage = await _functionsTotalUsageQuery.Execute();
+            return new Report()
+            {
+                UsageStatistics = usage.Select(u => new FunctionUsage {
+                     Name = u.FunctionName, 
+                     UsageCount = (int) u.InvocationsCount}).ToList()
+            };
         }
     }
 }
