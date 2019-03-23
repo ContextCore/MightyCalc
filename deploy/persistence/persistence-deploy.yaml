@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mightycalc-persistence-statefulset
+spec:
+  selector:
+    matchLabels:
+      app: mightycalc-persistence-statefulset # has to match .spec.template.metadata.labels
+  serviceName: "mightycalc-persistence"
+  replicas: 1 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: mightycalc-persistence-statefulset # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: postgres
+        image: aleskov/mightycalc-persistence
+        ports:
+        - containerPort: 5432
+          name: postgres
+        volumeMounts:
+        - name: mightycalc-persistence-volumeclaim
+          mountPath: /var/lib/postgresql/
+  volumeClaimTemplates:
+  - metadata:
+      name: mightycalc-persistence-volumeclaim
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "mightycalc-storage"
+      resources:
+        requests:
+          storage: 10Gi

@@ -1,7 +1,10 @@
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MightyCalc.Reports.DatabaseProjections;
+using Npgsql;
 
 namespace MightyCalc.IntegrationTests.Tools
 {
@@ -13,8 +16,19 @@ namespace MightyCalc.IntegrationTests.Tools
                 new DbContextOptionsBuilder<FunctionUsageContext>().UseNpgsql(connectionString).Options;
             using (var context = new FunctionUsageContext(journalOptions))
             {
-                var sql = $"TRUNCATE {string.Join(",", tables.Select(t => $"\"{t}\""))} RESTART IDENTITY CASCADE;";
-                await context.Database.ExecuteSqlCommandAsync(sql);
+                foreach (var table in tables)
+                {
+                    await context.Database.ExecuteSqlCommandAsync(@" 
+do $$
+begin
+    perform 1
+    from information_schema.tables 
+    where table_name = '"+table+@"';
+    if found then
+        execute format('truncate %I RESTART IDENTITY cascade', '"+table+@"');
+    end if;
+end $$;");
+                }
             }
         }
         

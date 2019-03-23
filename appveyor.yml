@@ -22,10 +22,20 @@ install:
 build_script:
 - sh: |
     cd MightyCalc.API
-    docker build . -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
-    docker save aleskov/mightycalc > mightycalc.tar 
+    docker build . -f Dockerfile-buildenv -t aleskov/mightycalc-buildenv:latest -t aleskov/mightycalc-buildenv:$APP_VERSION
+    docker build . -f Dockerfile-persistence -t aleskov/mightycalc-persistence:latest -t aleskov/aleskov/mightycalc-persistence:$APP_VERSION
+    
+   
+test_script:
 - sh: |
-    #dotnet test
+    cd MightyCalc.API
+    docker run aleskov/mightycalc-buildenv test ./MightyCalc.API.Tests/MightyCalc.API.Tests.csproj  -c Release --no-build 
+    docker run aleskov/mightycalc-buildenv test ./MightyCalc.API.Tests/MightyCalc.API.Tests.csproj  -c Release --no-build 
+    docker run aleskov/mightycalc-buildenv test ./MightyCalc.Node.Tests/MightyCalc.Node.Tests.csproj -c Release --no-build
+    docker run aleskov/mightycalc-buildenv test ./MightyCalc.Reports.Tests/MightyCalc.Reports.Tests.csproj -c Release --no-build 
+    docker build . -f Dockerfile-runtime -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
+    docker save aleskov/mightycalc > mightycalc.tar   
+
 artifacts:
 - path: '**\mighty*.tar'
   name: Containers
@@ -34,4 +44,6 @@ deploy_script:
     echo $dockerUser 
     echo $dockerPassword  
     docker login -u $dockerUser -p $dockerPassword
-    docker push aleskov/mightycalc
+    docker push aleskov/mightycalc-buildenv
+    #docker push aleskov/mightycalc-persistence
+    docker push aleskov/mightycalc 
