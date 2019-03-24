@@ -23,7 +23,7 @@ FROM microsoft/dotnet:3.0-sdk as build-env
 
 COPY --from=api-gen-env /usr/bin/MightyCalc /usr/bin/MightyCalc
 WORKDIR /usr/bin/MightyCalc
-RUN dotnet build -c Release -v quite
+RUN dotnet build -c Release -v quiet
 RUN mkdir -p /swagger
 RUN cp ./MightyCalcAPI.yaml /swagger/MightyCalcAPI.yaml #for tests
 COPY ./integration_tests.sh ./integration_tests.sh
@@ -34,7 +34,7 @@ CMD ["./integration_tests.sh"]
 FROM microsoft/dotnet:3.0-sdk as publish-env
 WORKDIR /usr/bin/MightyCalc
 RUN ls
-RUN dotnet publish ./MightyCalc.API/MightyCalc.API.csproj -c Release --no-build -o publish
+RUN dotnet publish ./MightyCalc.API/MightyCalc.API.csproj -c Release --no-build -o publish -v quiet
 FROM microsoft/dotnet:3.0-aspnetcore-runtime as runtime
 COPY --from=publish-env /usr/bin/MightyCalc/publish /usr/bin/MightyCalc  
 WORKDIR /usr/bin/MightyCalc
