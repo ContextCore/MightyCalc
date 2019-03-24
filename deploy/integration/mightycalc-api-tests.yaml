@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mightycalc-api-test-deploy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mightycalc
+    spec:
+      containers:
+      - name: mightycalc-container
+        image: aleskov/mightycalc-buildenv
+        imagePullPolicy: Always
+        ports:
+        - name: ssh
+          containerPort: 22
+      terminationGracePeriodSeconds: 1200
