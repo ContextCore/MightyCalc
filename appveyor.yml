@@ -24,11 +24,10 @@ build_script:
     cd ./src 
     docker build . -f ./buildenv.dockerfile --target=build-env -t aleskov/mightycalc-buildenv:latest -t aleskov/mightycalc-buildenv:$APP_VERSION
     docker build . -f ./buildenv.dockerfile  -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
+    docker save aleskov/mightycalc:latest > mightycalc.tar  
     cd ..
    
     docker build . -f ./build/persistence/persistence.dockerfile -t aleskov/mightycalc-persistence:latest -t aleskov/mightycalc-persistence:$APP_VERSION
-    
-    docker save aleskov/mightycalc > mightycalc.tar   
 test_script:
 - sh: |
     docker run --entrypoint dotnet aleskov/mightycalc-buildenv test ./src/MightyCalc.API.Tests/MightyCalc.API.Tests.csproj -c Release --no-build 
@@ -42,6 +41,5 @@ deploy_script:
     echo $dockerUser 
     echo $dockerPassword  
     docker login -u $dockerUser -p $dockerPassword
-    #docker push aleskov/mightycalc-buildenv
     docker push aleskov/mightycalc-persistence
     docker push aleskov/mightycalc 
