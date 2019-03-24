@@ -3,6 +3,6 @@
 FROM aleskov/mightycalc-buildenv as build-env
 FROM microsoft/dotnet:3.0-aspnetcore-runtime as runtime
 COPY --from=build-env /MightyCalc/publish /MightyCalc   
-WORKDIR /MightyCalc.API
+WORKDIR /MightyCalc
 EXPOSE 80
 ENTRYPOINT ["dotnet", "MightyCalc.API.dll"]
