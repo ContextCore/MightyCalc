@@ -1,8 +1,9 @@
 #create production-ready container
-#want to use different image, but swagger UI has compatibility issues with .net core preview3 version
-FROM aleskov/mightycalc-buildenv as integration-env
+FROM aleskov/mightycalc-buildenv as publish-env
+WORKDIR /usr/bin/MightyCalc
+RUN dotnet publish ./MightyCalc.API/MightyCalc.API.csproj -c Release --no-build -o publish
 FROM microsoft/dotnet:3.0-aspnetcore-runtime as runtime
-COPY --from=integration-env /MightyCalc/publish /MightyCalc   
-WORKDIR /MightyCalc
+COPY --from=publish-env /usr/bin/MightyCalc/publish /usr/bin/MightyCalc  
+WORKDIR /usr/bin/MightyCalc
 EXPOSE 80
 ENTRYPOINT ["dotnet", "MightyCalc.API.dll"]
