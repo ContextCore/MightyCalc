@@ -10,8 +10,8 @@ RUN curl -L http://rsuter.com/Projects/NSwagStudio/archive.php --output ./NSwag.
 RUN unzip ../NSwag.zip -d NSwag > /dev/null
 RUN rm ../NSwag.zip > /dev/null
 
-COPY . ./MightyCalc.API
-WORKDIR MightyCalc.API
+COPY . ./MightyCalc
+WORKDIR MightyCalc
 
 #Generating API controller
 RUN dotnet ../NSwag/NetCore22/dotnet-nswag.dll swagger2cscontroller /input:"./MightyCalcAPI.yaml" /classname:Api /namespace:MightyCalc.API /UseLiquidTemplates:true /ControllerBaseClass:Microsoft.AspNetCore.Mvc.ControllerBase /AspNetNamespace:"Microsoft.AspNetCore.Mvc" /output:"/MightyCalc.API/MightyCalc.API/Controllers/MightyCalcController.cs" /ResponseArrayType:"System.Collections.Generic.IReadOnlyCollection"  /ArrayBaseType:"System.Collections.Generic.IReadonlyCollection" /ArrayInstanceType:"System.Collections.Generic.List"
@@ -21,10 +21,15 @@ RUN dotnet ../NSwag/NetCore22/dotnet-nswag.dll swagger2csclient /input:"./Mighty
 #build the project and get binaries for production 
 FROM microsoft/dotnet:3.0-sdk as build-env
 
-COPY --from=api-gen-env ./MightyCalc.API ./MightyCalc.API
-WORKDIR MightyCalc.API
+COPY --from=api-gen-env ./MightyCalc ./MightyCalc
+WORKDIR MightyCalc
 
 RUN dotnet build -c Release -v minimal
 RUN mkdir -p /swagger
 RUN cp ./MightyCalcAPI.yaml /swagger/MightyCalcAPI.yaml #for tests
-RUN dotnet publish -c Release -o publish --no-build
+
+FROM microsoft/dotnet:3.0-sdk as integration
+COPY ./integration_tests.sh ./MightyCalc/integration_tests.sh
+RUN chmod +x ./MightyCalc/integration_tests.sh
+ENTRYPOINT [ "bash" ]
+CMD ["./MightyCalc/integration_tests.sh"]
