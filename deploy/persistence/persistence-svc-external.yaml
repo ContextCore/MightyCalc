@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: persistence-svc-external
+  name: postgres-svc-external
   labels:
-    app: persistence-svc-external
+    app: postgres-svc-external
 spec:
   type: NodePort
   ports:

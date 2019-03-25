@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using MightyCalc.IntegrationTests.Tools;
@@ -10,6 +11,9 @@ namespace MightyCalc.Reports.IntegrationTests
     {
         public FunctionUsageContext CreateDbContext(string[] args)
         {
+
+            Console.WriteLine("Creating readmodel at " + KnownConnectionStrings.ReadModel);
+            
             var optionsBuilder = new DbContextOptionsBuilder<FunctionUsageContext>();
             optionsBuilder.UseNpgsql(KnownConnectionStrings.ReadModel,
             b => b.MigrationsAssembly("MightyCalc.Reports"));
