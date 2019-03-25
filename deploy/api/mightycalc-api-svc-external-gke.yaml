@@ -2,15 +2,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mightycalc-svc-external
+  name: mightycalc-api-svc-external
   labels:
-    app: mightycalc
+    app: mightycalc-api-svc-external
 spec:
   type: LoadBalancer
-  externalTrafficPolicy: Cluster
   ports:
   - port: 80
     protocol: TCP
     name: mightycalc-http
   selector:
-    app: mightycalc
+    app: mightycalc-api

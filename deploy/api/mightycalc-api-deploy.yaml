@@ -1,16 +1,16 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: mightycalc-deploy
+  name: mightycalc-api
 spec:
   replicas: 2
   template:
     metadata:
       labels:
-        app: mightycalc
+        app: mightycalc-api
     spec:
       containers:
-      - name: mightycalc-container
+      - name: mightycalc-api-container
         image: aleskov/mightycalc
         imagePullPolicy: Always
         ports:

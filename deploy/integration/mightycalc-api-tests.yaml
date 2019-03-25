@@ -1,19 +1,22 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: mightycalc-api-test-deploy
+  name: mightycalc-api-test
+  labels:
+    app: mightycalc-api-test
 spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: mightycalc
-    spec:
-      containers:
-      - name: mightycalc-container
-        image: aleskov/mightycalc-buildenv
-        imagePullPolicy: Always
-        ports:
-        - name: ssh
-          containerPort: 22
-      terminationGracePeriodSeconds: 1200
+  containers:
+  - name: mightycalc-container
+    image: aleskov/mightycalc-buildenv
+    ports:
+    - name: ssh
+      containerPort: 22
+    env:
+    - name: MightyCalc_ApiUrl
+      value: "http://mightycalc-api-svc"
+    - name: MightyCalc_Journal
+      value: "Host=postgres-svc;Port=5432;Database=journal;User ID=postgres;"
+    - name: MightyCalc_SnapshotStore
+      value: "Host=postgres-svc;Port=5432;Database=snapshotstore;User ID=postgres;"
+    - name: MightyCalc_ReadModel
+      value: "Host=postgres-svc;Port=5432;Database=readmodel;User ID=postgres;"
