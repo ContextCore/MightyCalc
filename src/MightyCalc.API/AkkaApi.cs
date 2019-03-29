@@ -12,9 +12,9 @@ namespace MightyCalc.API
         private readonly INamedCalculatorPool _pool;
         private readonly IFunctionsTotalUsageQuery _functionsTotalUsageQuery;
 
-        public AkkaApi(INamedCalculatorPool pool)
+        public AkkaApi(INamedCalculatorPool pool, IFunctionsTotalUsageQuery query)
         {
-           // _functionsTotalUsageQuery = functionsTotalUsageQuery;
+            _functionsTotalUsageQuery = query;
             _pool = pool;
         }
 

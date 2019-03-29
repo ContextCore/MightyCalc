@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mightycalc-api-test
+  name: integration-test
   labels:
-    app: mightycalc-api-test
+    app: integration-test
 spec:
   containers:
   - name: mightycalc-container

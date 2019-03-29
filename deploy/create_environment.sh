@@ -7,7 +7,7 @@ kubectl apply -f ./api/mightycalc-api-svc-external-${k8sProvider}.yaml
 
 kubectl apply -f ./persistence/persistence-deploy.yaml
 kubectl apply -f ./persistence/persistence-svc.yaml
-if("$k8sProvider" -eq "dd")
+if [ $k8sProvider = "dd" ]
 then
 kubectl apply -f ./persistence/persistence-svc-external.yaml
 fi

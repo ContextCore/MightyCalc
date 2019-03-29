@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.TestHost;
 using MightyCalc.API.Tests;
 using MightyCalc.Client;
+using MightyCalc.IntegrationTests.Tools;
 using Xunit;
 
 namespace MightyCalc.API.IntegrationTests
@@ -14,6 +15,8 @@ namespace MightyCalc.API.IntegrationTests
     {
         protected override IMightyCalcClient CreateClient()
         {
+            DbTools.ResetDatabases().Wait();
+            
             var url = Environment.GetEnvironmentVariable("MightyCalc_ApiUrl") ?? "http://localhost:5000";
 
             //disabling https checks

@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: postgres-svc
   labels:
-    app: mightycalc-persistence
+    app: postgres-svc
 spec:
   ports:
   - port: 5432
     name: postgres
   selector:
-    app: mightycalc-persistence
+    app: mightycalc-persistence-statefulset

@@ -1,16 +1,22 @@
 using System;
 using System.IO;
+using System.Reflection;
 using Akka.Actor;
 using Akka.Cluster;
-using Akka.Configuration;
+using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using MightyCalc.Calculations;
 using MightyCalc.Node;
+using MightyCalc.Reports;
+using MightyCalc.Reports.DatabaseProjections;
+using MightyCalc.Reports.ReportingExtension;
 using Swashbuckle.AspNetCore.Swagger;
+using Autofac.Extensions.DependencyInjection;
 
 namespace MightyCalc.API
 {
@@ -26,25 +32,37 @@ namespace MightyCalc.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-           services.AddSwaggerGen(c =>
-              {
-                    c.SwaggerDoc("v1", new Info {Title = "Mighty Calc API", Version = "v1"});
-               })
+            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info {Title = "Mighty Calc API", Version = "v1"}); })
                 .AddMvc()
                 .AddNewtonsoftJson();
 
+            var settings = new MightyCalcApiConfiguration();
+            Configuration.GetSection("ApiSettings").Bind(settings);
+
+            var config = settings.Akka;
+            var system = ActorSystem.Create("Calc", config) as ExtendedActorSystem;
+            var cluster = Cluster.Get(system);
+            cluster.Join(system.Provider.DefaultAddress);
+
+            var options = new DbContextOptionsBuilder<FunctionUsageContext>()
+                .UseNpgsql(settings.ReadModel).Options;
+
+            services.AddSingleton<ActorSystem>(system);
+            services.AddTransient<FunctionUsageContext>();
             services.AddTransient<IApiController, AkkaApi>();
-            services.AddSingleton<ActorSystem>(p =>
-            {
-                var config = Configuration.GetValue<string>("AkkaConfig");
-                config = config ?? "akka.actor.provider = \"Akka.Cluster.ClusterActorRefProvider, Akka.Cluster\"";  
-                var system= ActorSystem.Create("Calc", config) as ExtendedActorSystem;
-                var cluster = Cluster.Get(system);
-                cluster.Join(system.Provider.DefaultAddress);
-                return system;
-            });
+            services.AddSingleton(options);
+            services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
             services.AddSingleton<INamedCalculatorPool, AkkaCalculatorPool>();
-            services.AddSingleton<ICalculator,SpracheCalculator>();
+
+
+            var builder = new ContainerBuilder();
+            builder.RegisterInstance(options);
+            builder.RegisterType<FunctionUsageContext>();
+            builder.RegisterType<ReportingDependencies>().As<IReportingDependencies>().SingleInstance();
+            var container = builder.Build();
+            
+            system.InitReportingExtension(container);
+                
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,7 +78,10 @@ namespace MightyCalc.API
                 app.UseHsts();
             }
 
-            var provider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(),"swagger"));
+            //map /swagger folder in the same folder as executing assembly
+            var location = Assembly.GetExecutingAssembly().Location;
+            var executingAssemblyFolder = Path.GetDirectoryName(location);
+            var provider = new PhysicalFileProvider(Path.Combine(executingAssemblyFolder,"swagger"));
             
             app.UseDirectoryBrowser(new DirectoryBrowserOptions
             {
@@ -72,8 +93,7 @@ namespace MightyCalc.API
             {
                 FileProvider = provider,
                 RequestPath = "/swagger",
-                ServeUnknownFileTypes = true
-            });
+                ServeUnknownFileTypes = true });
             
             app.UseSwagger();
             app.UseSwaggerUI(c =>

@@ -1,10 +1,6 @@
-using System.Data.SqlClient;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using MightyCalc.Reports.DatabaseProjections;
-using Npgsql;
 
 namespace MightyCalc.IntegrationTests.Tools
 {
@@ -34,12 +30,12 @@ end $$;");
         
         public static async Task ResetDatabases()
         {
-            await DbTools.TruncateTables(KnownConnectionStrings.ReadModel,
+            await TruncateTables(KnownConnectionStrings.ReadModel,
                 "Projections",
                 "FunctionsUsage",
                 "FunctionsTotalUsage");
-            await DbTools.TruncateTables(KnownConnectionStrings.Journal, "event_journal","metadata");
-            await DbTools.TruncateTables(KnownConnectionStrings.SnapshotStore, "snapshot_store");
+            await TruncateTables(KnownConnectionStrings.Journal, "event_journal","metadata");
+            await TruncateTables(KnownConnectionStrings.SnapshotStore, "snapshot_store");
         }
     }
 }
