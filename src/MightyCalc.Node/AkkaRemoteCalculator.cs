@@ -9,11 +9,14 @@ namespace MightyCalc.Node
     {
         private readonly IActorRef _calculatorActorRegion;
         private readonly string _calculatorId;
+        private TimeSpan _timeout;
 
-        public AkkaRemoteCalculator(string calculatorId, IActorRef calculatorActorRegion)
+        public AkkaRemoteCalculator(string calculatorId, IActorRef calculatorActorRegion, TimeSpan? timeout = null)
         {
             _calculatorId = calculatorId;
             _calculatorActorRegion = calculatorActorRegion;
+            _timeout = timeout ?? TimeSpan.FromSeconds(5);
+
         }
 
         public async Task<double> Calculate(string expression, params Parameter[] parameters)
@@ -21,7 +24,7 @@ namespace MightyCalc.Node
             var res = await _calculatorActorRegion.Ask<CalculatorActorProtocol.CalculationResult>(new ShardEnvelop(
                 _calculatorId,
                 ShardIdGenerator.Instance.GetShardId(_calculatorId),
-                new CalculatorActorProtocol.CalculateExpression(expression, parameters)),TimeSpan.FromSeconds(5));
+                new CalculatorActorProtocol.CalculateExpression(expression, parameters)),_timeout);
             
             if (res is CalculatorActorProtocol.CalculationError e)
                 throw e.Reason;
@@ -37,7 +40,7 @@ namespace MightyCalc.Node
                     _calculatorId,
                     ShardIdGenerator.Instance.GetShardId(_calculatorId),
                     new CalculatorActorProtocol.AddFunction(new FunctionDefinition(functionName,parameterNames.Length,description,expression,parameterNames)))
-                ,TimeSpan.FromSeconds(5));
+                ,_timeout);
             
             if (res is CalculatorActorProtocol.FunctionAddError e)
                 throw e.Reason;
@@ -49,7 +52,7 @@ namespace MightyCalc.Node
                     _calculatorId,
                     ShardIdGenerator.Instance.GetShardId(_calculatorId),
                     CalculatorActorProtocol.GetKnownFunctions.Instance)
-                ,TimeSpan.FromSeconds(5));
+                ,_timeout);
             return res.Definitions;
         }
     }

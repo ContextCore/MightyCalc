@@ -20,3 +20,4 @@ spec:
       value: "Host=postgres-svc;Port=5432;Database=snapshotstore;User ID=postgres;"
     - name: MightyCalc_ReadModel
       value: "Host=postgres-svc;Port=5432;Database=readmodel;User ID=postgres;"
+  restartPolicy: Never

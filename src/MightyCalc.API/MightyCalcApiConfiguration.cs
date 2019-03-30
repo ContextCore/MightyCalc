@@ -25,23 +25,24 @@ namespace MightyCalc.API
         private static Config GetDefaultAkkaConfig(string journalConnectionString, string snapshotConnectionString)
         {
 	        
-		        
-            Config clusterAndPersistenceConfig = @"
+		      Config clusterAndPersistenceConfig = @"
 akka.actor.provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
-#akka.actor{
-#				serializers {
-#                  hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
-#                }
-#                serialization-bindings {
-##                  ""System.Object"" = hyperion
-#                }
-#}
+akka.actor{
+    #serializers {
+	#     hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
+    #}
+    #serialization-bindings {
+    #	  ""Akka.Cluster.Sharding.IClusterShardingSerializable, Akka.Cluster.Sharding"" = akka-sharding
+    #     ""System.Object"" = hyperion
+    #}
+}
+                        
 
 akka.persistence.journal.plugin = ""akka.persistence.journal.postgresql""
 akka.persistence.snapshot-store.plugin = ""akka.persistence.snapshot-store.postgresql""
 
 akka.persistence.query.journal.sql {
-			 class = ""Akka.Persistence.Query.Sql.SqlReadJournalProvider, Akka.Persistence.Query.Sql""
+			class = ""Akka.Persistence.Query.Sql.SqlReadJournalProvider, Akka.Persistence.Query.Sql""
 		    refresh-interval = 1s
 	        max-buffer-size = 1
     }
@@ -79,14 +80,13 @@ akka.persistence{
 			metadata-table-name = metadata
 
 			# Postgres data type for payload column. Allowed options: bytea, json, jsonb
-			stored-as = json
+			stored-as = bytea
 
 			# Setting used to toggle sequential read access when loading large objects
 			# from journals and snapshot stores.
 			sequential-access = off
 		}
 	}
-
 	snapshot-store {
 		postgresql {
 			# qualified type name of the PostgreSql persistence journal actor
@@ -121,7 +121,7 @@ akka.log-dead-letters = true
 akka.loglevel = DEBUG
 akka.stdout-loglevel = DEBUG");
 
-            return clusterAndPersistenceConfig;//.WithFallback(fullDebugConfig);
+            return clusterAndPersistenceConfig.WithFallback(fullDebugConfig);
         }
     }
 }

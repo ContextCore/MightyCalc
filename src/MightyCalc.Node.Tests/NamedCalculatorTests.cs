@@ -15,17 +15,38 @@ namespace MightyCalc.Node.Tests
     {
         private readonly INamedCalculatorPool _pool;
 
-        public NamedCalculatorTests(ITestOutputHelper output):base(
-            ((Config)("akka.actor.provider = \"Akka.Cluster.ClusterActorRefProvider, Akka.Cluster\""))
-                .WithFallback(FullDebugConfig),
-            "Test",output)
+        private static readonly Config Config = @"akka.actor.provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"" 
+                               akka.actor.serialize-messages = on 
+                               akka.actor.serialize-creators = on
+                               akka.actor{
+							        serializers : {
+                                  #      akka-sharding = ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding""
+                                        hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
+
+                                    }
+                                    serialization-bindings : {
+                                 #      ""Akka.Cluster.Sharding.IClusterShardingSerializable, Akka.Cluster.Sharding"" = akka-sharding
+                                        ""System.Object"" = hyperion
+                                    }
+                                  #  serialization-identifiers : {
+                                  #   ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding"" = 13
+                                  #  }
+                               }    
+                              ";
+
+        protected NamedCalculatorTests(ITestOutputHelper output, Config config) : base(config,"Test",output)
         {
-            var clusterType = typeof(Akka.Cluster.ClusterActorRefProvider);
+           // var clusterType = typeof(Akka.Cluster.ClusterActorRefProvider);
             var cluster = Cluster.Get(Sys);
             cluster.Join((Sys as ExtendedActorSystem).Provider.DefaultAddress);
-            _pool = new AkkaCalculatorPool(Sys);
+            _pool = new AkkaCalculatorPool(Sys, TimeSpan.FromSeconds(10));
         }
-        
+
+        public NamedCalculatorTests(ITestOutputHelper output) : this(
+            output, Config)
+        {
+        }
+
         [Fact]
         public async Task Given_empty_pool_When_getting_a_calculator_and_calculate_Then_calculation_succeeds()
         {
