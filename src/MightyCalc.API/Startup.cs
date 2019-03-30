@@ -17,9 +17,12 @@ using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 using Swashbuckle.AspNetCore.Swagger;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting.Internal;
 
 namespace MightyCalc.API
 {
+    
+    
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -29,6 +32,21 @@ namespace MightyCalc.API
 
         public IConfiguration Configuration { get; }
 
+        protected virtual DbContextOptions<FunctionUsageContext> GetDbOptions(MightyCalcApiConfiguration cfg)
+        {
+            return new DbContextOptionsBuilder<FunctionUsageContext>()
+                .UseNpgsql(cfg.ReadModel).Options;
+        }
+
+        protected virtual void ConfigureExtensions(ActorSystem system, MightyCalcApiConfiguration cfg)
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterInstance(GetDbOptions(cfg));
+            builder.RegisterType<FunctionUsageContext>();
+            builder.RegisterType<ReportingDependencies>().As<IReportingDependencies>().SingleInstance();
+            var container = builder.Build();
+            system.InitReportingExtension(container);
+        }
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -39,13 +57,11 @@ namespace MightyCalc.API
             var settings = new MightyCalcApiConfiguration();
             Configuration.GetSection("ApiSettings").Bind(settings);
 
-            var config = settings.Akka;
-            var system = ActorSystem.Create("Calc", config) as ExtendedActorSystem;
+            var system = CreateActorSystem(settings);
             var cluster = Cluster.Get(system);
             cluster.Join(system.Provider.DefaultAddress);
 
-            var options = new DbContextOptionsBuilder<FunctionUsageContext>()
-                .UseNpgsql(settings.ReadModel).Options;
+            var options = GetDbOptions(settings);
 
             services.AddSingleton<ActorSystem>(system);
             services.AddTransient<FunctionUsageContext>();
@@ -54,15 +70,12 @@ namespace MightyCalc.API
             services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
             services.AddSingleton<INamedCalculatorPool, AkkaCalculatorPool>();
 
+            ConfigureExtensions(system, settings);
+        }
 
-            var builder = new ContainerBuilder();
-            builder.RegisterInstance(options);
-            builder.RegisterType<FunctionUsageContext>();
-            builder.RegisterType<ReportingDependencies>().As<IReportingDependencies>().SingleInstance();
-            var container = builder.Build();
-            
-            system.InitReportingExtension(container);
-                
+        protected virtual ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
+        {
+            return (ExtendedActorSystem)ActorSystem.Create("Calc", cfg.Akka);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

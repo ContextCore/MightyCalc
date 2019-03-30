@@ -7,7 +7,7 @@ using MightyCalc.Reports;
 
 namespace MightyCalc.API
 {
-    class AkkaApi : IApiController
+    public class AkkaApi : IApiController
     {
         private readonly INamedCalculatorPool _pool;
         private readonly IFunctionsTotalUsageQuery _functionsTotalUsageQuery;
@@ -53,6 +53,10 @@ namespace MightyCalc.API
                 body.Description,
                 body.Expression.Representation,
                 body.Expression.Parameters.Select(p => p.Name).ToArray());
+        }
+
+        internal class FunctionAlreadyExistsException : Exception
+        {
         }
 
         public Task ReplaceFunctionAsync(NamedExpression body)
