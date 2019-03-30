@@ -107,7 +107,7 @@ akka.persistence{
 			metadata-table-name = metadata
 
 			# Postgres data type for payload column. Allowed options: bytea, json, jsonb
-			stored-as = json
+			stored-as = bytea
 
 			# Setting used to toggle sequential read access when loading large objects
 			# from journals and snapshot stores.
