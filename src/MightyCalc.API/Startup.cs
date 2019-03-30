@@ -10,21 +10,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using MightyCalc.Calculations;
 using MightyCalc.Node;
 using MightyCalc.Reports;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 using Swashbuckle.AspNetCore.Swagger;
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Hosting.Internal;
+using Microsoft.Extensions.Logging;
 
 namespace MightyCalc.API
 {
-    
-    
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -35,7 +32,8 @@ namespace MightyCalc.API
         protected virtual DbContextOptions<FunctionUsageContext> GetDbOptions(MightyCalcApiConfiguration cfg)
         {
             return new DbContextOptionsBuilder<FunctionUsageContext>()
-                .UseNpgsql(cfg.ReadModel).Options;
+                          .UseNpgsql(cfg.ReadModel)
+                          .Options;
         }
 
         protected virtual void ConfigureExtensions(ActorSystem system, MightyCalcApiConfiguration cfg)
@@ -47,16 +45,20 @@ namespace MightyCalc.API
             var container = builder.Build();
             system.InitReportingExtension(container);
         }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info {Title = "Mighty Calc API", Version = "v1"}); })
-                .AddMvc()
-                .AddNewtonsoftJson();
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new Info {Title = "Mighty Calc API", Version = "v1"}))
+                    .AddMvc()
+                    .AddNewtonsoftJson();
 
             var settings = new MightyCalcApiConfiguration();
             Configuration.GetSection("ApiSettings").Bind(settings);
 
+            //cannot inject ILogger<> due to asp.net core 3.0 bug https://github.com/aspnet/Extensions/issues/1096
+            Console.WriteLine($"Using read model connection string {settings.ReadModel}");
+            
             var system = CreateActorSystem(settings);
             var cluster = Cluster.Get(system);
             cluster.Join(system.Provider.DefaultAddress);
@@ -75,7 +77,7 @@ namespace MightyCalc.API
 
         protected virtual ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
         {
-            return (ExtendedActorSystem)ActorSystem.Create("Calc", cfg.Akka);
+            return (ExtendedActorSystem) ActorSystem.Create("Calc", cfg.Akka);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -94,8 +96,8 @@ namespace MightyCalc.API
             //map /swagger folder in the same folder as executing assembly
             var location = Assembly.GetExecutingAssembly().Location;
             var executingAssemblyFolder = Path.GetDirectoryName(location);
-            var provider = new PhysicalFileProvider(Path.Combine(executingAssemblyFolder,"swagger"));
-            
+            var provider = new PhysicalFileProvider(Path.Combine(executingAssemblyFolder, "swagger"));
+
             app.UseDirectoryBrowser(new DirectoryBrowserOptions
             {
                 FileProvider = provider,
@@ -106,8 +108,9 @@ namespace MightyCalc.API
             {
                 FileProvider = provider,
                 RequestPath = "/swagger",
-                ServeUnknownFileTypes = true });
-            
+                ServeUnknownFileTypes = true
+            });
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {

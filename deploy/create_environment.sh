@@ -1,3 +1,4 @@
+set -Eeuxo pipefail
 # this script will create an environment on target Kubernetes cluster
 k8sProvider=$1 #gke or dd (docker-desktop)
 
