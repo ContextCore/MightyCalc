@@ -1,7 +1,9 @@
 using Akka.Actor;
+using Akka.Event;
 using Akka.Persistence.Query;
 using Akka.Persistence.Query.Sql;
 using Akka.Streams;
+using Akka.Streams.Implementation.Fusing;
 using MightyCalc.Node;
 using MightyCalc.Reports.ReportingExtension;
 using MightyCalc.Reports.Streams;
@@ -13,6 +15,7 @@ namespace MightyCalc.Reports
         private readonly SqlReadJournal _readJournal;
         private ActorMaterializer _materializer;
         private readonly IReportingDependencies _dependencies;
+        private readonly ILoggingAdapter _log;
 
         private BehaviorQueue Behavior { get; }
 
@@ -24,6 +27,7 @@ namespace MightyCalc.Reports
                 .ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
             Behavior.Become(Initializing, nameof(Initializing));
             _dependencies = Context.System.GetReportingExtension().GetDependencies();
+            _log = Context.GetLogger();
         }
 
         public void Initializing()
@@ -38,8 +42,19 @@ namespace MightyCalc.Reports
                     var projection = _dependencies.CreateFindProjectionQuery(context).Execute(KnownProjectionsNames.TotalFunctionUsage,
                         nameof(FunctionsTotalUsageProjector),
                         eventName);
-                    
-                    offset = projection == null ? Offset.NoOffset() : Offset.Sequence(projection.Sequence);
+
+                    if (projection == null)
+                    {
+                        offset = Offset.NoOffset();
+                        _log.Info(
+                            $"Starting fresh projection '{KnownProjectionsNames.TotalFunctionUsage}' from start");
+                    }
+                    else
+                    {
+                        offset = Offset.Sequence(projection.Sequence+1);
+                        _log.Info(
+                            $"Starting projection '{KnownProjectionsNames.TotalFunctionUsage}' from sequence {projection.Sequence+1}");
+                    }
                 }
 
                 var source = _readJournal.EventsByTag(eventName, offset);
