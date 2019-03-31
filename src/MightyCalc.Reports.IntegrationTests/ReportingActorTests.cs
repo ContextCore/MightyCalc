@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.Cluster;
 using Akka.Configuration;
 using Akka.Remote;
 using Akka.TestKit.Xunit2;
@@ -31,6 +32,7 @@ namespace MightyCalc.Reports.IntegrationTests
         }
 
         private static Config akkaConfig = @"
+akka.actor.provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
 akka.persistence.journal.plugin = ""akka.persistence.journal.postgresql""
 akka.persistence.snapshot-store.plugin = ""akka.persistence.snapshot-store.postgresql""
 
@@ -129,9 +131,12 @@ akka.persistence{
                 .Options;
             await DbTools.ResetDatabases();
 
+            var cluster = Cluster.Get(Sys);
+            cluster.Join(((ExtendedActorSystem)Sys).Provider.DefaultAddress);
             var container = new ContainerBuilder();
             container.RegisterInstance<IReportingDependencies>(new ReportingDependencies(options));
-            Sys.InitReportingExtension(container.Build());
+            var ext = Sys.InitReportingExtension(container.Build());
+            ext.Start();
             return Sys.GetReportingExtension().GetDependencies();
         }
 
@@ -149,10 +154,6 @@ akka.persistence{
 
             _output.WriteLine(Sys.Settings.ToString());
             //generate some data
-   
-            var reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
-
-            reportActor.Tell(ReportingActor.Start.Instance);
             
             var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), "CalculatorOne");
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3"));
@@ -179,10 +180,6 @@ akka.persistence{
         {
             var dep = await Init();
 
-            var reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
-
-            reportActor.Tell(ReportingActor.Start.Instance);
-
             //generate some data
 
             var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), "CalculatorOne");
@@ -197,7 +194,8 @@ akka.persistence{
             
             var projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
             Assert.Equal(3, projected.Sequence);
-            
+
+            var reportActor = Sys.GetReportingExtension().ReportingActor;
             //restart report actor to allow it to get latest projected sequence from DB
             Watch(reportActor);
             Sys.Stop(reportActor);

@@ -43,7 +43,7 @@ namespace MightyCalc.API
             builder.RegisterType<FunctionUsageContext>();
             builder.RegisterType<ReportingDependencies>().As<IReportingDependencies>().SingleInstance();
             var container = builder.Build();
-            system.InitReportingExtension(container);
+            system.InitReportingExtension(container).Start();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

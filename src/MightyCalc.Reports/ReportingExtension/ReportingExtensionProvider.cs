@@ -13,7 +13,7 @@ namespace MightyCalc.Reports.ReportingExtension {
 
         public override ReportingExtension CreateExtension(ExtendedActorSystem system)
         {
-            return new ReportingExtension(_container);
+            return new ReportingExtension(system, _container);
         }
     }
 }

@@ -50,14 +50,11 @@ namespace MightyCalc.Calculations
             {
                 switch (expr)
                 {
-                    //case InvocationExpression e: break;
-                   // case MethodCallExpression e: break;
                     case BinaryExpression e:
                     {
                         FunctionNames.Add(e.NodeType.ToString());
                         break;
                     }
-                    //case LambdaExpression e: break;
                     case UnaryExpression e:
                     {
                         FunctionNames.Add(e.NodeType.ToString());
@@ -89,11 +86,19 @@ namespace MightyCalc.Calculations
 
         public void AddFunction(string name, string description, string expression, params string[] parameterNames)
         {
-            _knownFunctions.Add(new FunctionDefinition(name,parameterNames.Count(),description, expression));
             _calculator.RegisterFunction(name, expression, parameterNames.ToArray());
             try
             {
                 Calculate(expression, parameterNames.Select(p => new Parameter(p, 0)).ToArray());
+
+                var existingFunc =
+                    _knownFunctions.FirstOrDefault(f => f.Name == name && f.Arity == parameterNames.Length);
+                if (existingFunc != null)
+                    _knownFunctions.Remove(existingFunc);
+                        
+                _knownFunctions.Add(new FunctionDefinition(name,parameterNames.Count(),description, expression));
+
+
             }
             catch (Exception ex)
             {

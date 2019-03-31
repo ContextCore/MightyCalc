@@ -60,6 +60,30 @@ namespace MightyCalc.API.Tests
             Assert.Contains(namedExpression.Expression.Representation, functionNames.Select(f => f.Expression.Representation));
             Assert.Contains(namedExpression.Description, functionNames.Select(f => f.Description));
         }
+        
+        [Fact]
+        public async Task When_replacing_function_Then_it_has_a_single_record_in_list()
+        {
+            var namedExpression = new Client.NamedExpression()
+            {
+                Expression = new Client.Expression
+                {
+                    Representation = "cuberoot(a)*b", 
+                    Parameters =
+                        new[] {new Client.Parameter {Name = "a"}, new Client.Parameter {Name = "b"}}
+                },
+                Name = "test function",
+                Description = "cuberoot description"
+            };
+            
+            await Client.CreateFunctionAsync(namedExpression);
+            await Client.ReplaceFunctionAsync(namedExpression);
+            await Client.ReplaceFunctionAsync(namedExpression);
+            await Client.ReplaceFunctionAsync(namedExpression);
+
+            var functionNames = await Client.FindFunctionsAsync();
+            Assert.Single(functionNames.Select(f => f.Name),namedExpression.Name);
+        }
        
 
  
