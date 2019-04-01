@@ -67,10 +67,18 @@ namespace MightyCalc.Calculations
                             if(_knownFunctions.Contains(customFunction))
                                 FunctionNames.Add(customFunction);
                         }
-
                         break;
+                    case MethodCallExpression e:
+                    {
+                        FunctionNames.Add(e.Method.Name);
+                        break;
+                    }
+                    default:
+                    {
+                        var a = expr;
+                        break;
+                    }
                 }
-                
                 return base.Visit(expr);
             }
         }
