@@ -51,7 +51,8 @@ namespace MightyCalc.Calculations.Tests
         [InlineData("fact(12)", "fact")]
         [InlineData("1+2-1*sqrt(sub(4,2)+6)", "AddChecked", "SubtractChecked", "MultiplyChecked", "sqrt", "sub",
             "AddChecked")]
-        [InlineData("Min(5,2)", "Min")] //factorial
+        [InlineData("Min(5,2)", "Min")]
+        [InlineData("Min(5,2) + 1", "Min","AddChecked")] //factorial
         public void
             Given_term_expression_with_build_in_functions_When_calculating_Then_used_functions_are_extracted(
                 string expression, params string[] functions)

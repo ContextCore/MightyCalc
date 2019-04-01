@@ -70,7 +70,8 @@ namespace MightyCalc.Calculations
                         break;
                     case MethodCallExpression e:
                     {
-                        FunctionNames.Add(e.Method.Name);
+                        if(e.Method.DeclaringType == typeof(System.Math))
+                                FunctionNames.Add(e.Method.Name);
                         break;
                     }
                     default:
