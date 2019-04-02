@@ -205,6 +205,14 @@ akka.persistence{
             reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
             reportActor.Tell(ReportingActor.Start.Instance);
 
+            var usage = await new FunctionsTotalUsageQuery(dep.CreateFunctionUsageContext()).Execute();
+
+            usage.Should().BeEquivalentTo(
+	            new FunctionTotalUsage {FunctionName = "AddChecked", InvocationsCount = 2},
+	            new FunctionTotalUsage {FunctionName = "SubtractChecked", InvocationsCount = 2},
+	            new FunctionTotalUsage {FunctionName = "MultiplyChecked", InvocationsCount = 1},
+	            new FunctionTotalUsage {FunctionName = "Divide", InvocationsCount = 1});
+            
             //add new events
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3*4/5"));
 
@@ -214,7 +222,7 @@ akka.persistence{
             projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
             Assert.Equal(4, projected.Sequence);
 
-            var usage = await new FunctionsTotalUsageQuery(dep.CreateFunctionUsageContext()).Execute();
+            usage = await new FunctionsTotalUsageQuery(dep.CreateFunctionUsageContext()).Execute();
 
             usage.Should().BeEquivalentTo(
                 new FunctionTotalUsage {FunctionName = "AddChecked", InvocationsCount = 3},

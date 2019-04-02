@@ -10,7 +10,7 @@ namespace MightyCalc.API.IntegrationTests
     {
         protected override IMightyCalcClient CreateClient()
         {
-            DbTools.ResetDatabases().Wait();
+            DbTools.ResetDatabases(false).Wait();
 
             var url = Environment.GetEnvironmentVariable("MightyCalc_ApiUrl") ?? "http://localhost:5000";
 

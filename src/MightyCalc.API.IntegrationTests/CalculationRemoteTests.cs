@@ -8,16 +8,23 @@ using MightyCalc.API.Tests;
 using MightyCalc.Client;
 using MightyCalc.IntegrationTests.Tools;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace MightyCalc.API.IntegrationTests
 {
     public class CalculationRemoteTests:CalculationTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public CalculationRemoteTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
         protected override IMightyCalcClient CreateClient()
         {
-            DbTools.ResetDatabases().Wait();
+            DbTools.ResetDatabases(false).Wait();
             
-            var url = Environment.GetEnvironmentVariable("MightyCalc_ApiUrl") ?? "http://localhost:5000";
+            var url = Environment.GetEnvironmentVariable("MightyCalc_ApiUrl") ?? "http://localhost:32707";
 
             //disabling https checks
             var httpClientHandler = new HttpClientHandler
@@ -52,12 +59,14 @@ namespace MightyCalc.API.IntegrationTests
                 await Client.CalculateAsync(new Client.Expression{Representation = expression});
             }
 
-            await Task.Delay(2000); // for projection
+            await Task.Delay(10000); // for projection
             
             var report = await Client.UsageStatsAsync();
-            
-            foreach(var expected in expectedUsage)
-                Assert.Equal(expected.Value,report.UsageStatistics.First(u => u.Name == expected.Key).UsageCount);
+
+            foreach (var expected in expectedUsage)
+            {
+                Assert.Equal(expected.Value, report.UsageStatistics.First(u => u.Name == expected.Key).UsageCount);
+            }
         }
 
     }
