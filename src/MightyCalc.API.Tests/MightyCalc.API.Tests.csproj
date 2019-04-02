@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.App" Version="3.0.0-preview-19075-0444" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App" Version="3.0.0-preview-19075-0444" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0-preview3-19153-02" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.3" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.0.0-preview3.19153.1" />

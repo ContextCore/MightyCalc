@@ -7,6 +7,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Akka.Configuration;
 using Akka.Persistence.Sql.Common.Journal;
+using Akka.Serialization;
 
 namespace MightyCalc.Node.IntegrationTests
 {
@@ -14,9 +15,6 @@ namespace MightyCalc.Node.IntegrationTests
     {
         public PersistentNamedCalculatorTests(ITestOutputHelper output):base(output,akkaConfig)
         {
-	        var a = typeof(ClusterShardingMessageSerializer);
-	        var b = typeof(Akka.Serialization.HyperionSerializer);
-	        var c = typeof(IClusterShardingSerializable);
         }
     
           private static Config akkaConfig = @"
@@ -25,7 +23,7 @@ namespace MightyCalc.Node.IntegrationTests
 											serialize-messages = on 
 										    serialize-creators = on
         							        serializers {
-                                                hyperion = """+typeof(DebugHyperionSerializer).AssemblyQualifiedShortName()+@"""
+                                                hyperion = """+typeof(HyperionSerializer).AssemblyQualifiedShortName()+@"""
                                             }
                                             serialization-bindings {
                                                ""System.Object"" = hyperion   

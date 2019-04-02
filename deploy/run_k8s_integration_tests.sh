@@ -1,3 +1,4 @@
+set -Eeuxo pipefail
 logFile=${1-"integration-tests.txt"}
 podname=${2-"integration-test"}
 echo test result file is $logFile
