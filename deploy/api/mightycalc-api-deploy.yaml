@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: mightycalc-api
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -16,4 +16,11 @@ spec:
         ports:
         - name: http
           containerPort: 80
+        env:
+        - name: MightyCalc_Journal
+          value: "Host=postgres-svc;Port=5432;Database=journal;User ID=postgres;"
+        - name: MightyCalc_SnapshotStore
+          value: "Host=postgres-svc;Port=5432;Database=snapshotstore;User ID=postgres;"
+        - name: MightyCalc_ReadModel
+          value: "Host=postgres-svc;Port=5432;Database=readmodel;User ID=postgres;"
       terminationGracePeriodSeconds: 600
