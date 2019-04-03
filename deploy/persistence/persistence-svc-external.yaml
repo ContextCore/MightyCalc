@@ -9,5 +9,6 @@ spec:
   ports:
   - port: 5432
     name: postgres
+    nodePort: 30020
   selector:
     app: mightycalc-persistence-statefulset

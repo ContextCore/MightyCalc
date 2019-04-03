@@ -24,7 +24,7 @@ namespace MightyCalc.API.IntegrationTests
         {
             DbTools.ResetDatabases(false).Wait();
             
-            var url = Environment.GetEnvironmentVariable("MightyCalc_ApiUrl") ?? "http://localhost:32707";
+            var url = Environment.GetEnvironmentVariable("MightyCalc_ApiUrl") ?? "http://localhost:30010";
 
             //disabling https checks
             var httpClientHandler = new HttpClientHandler

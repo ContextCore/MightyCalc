@@ -10,6 +10,7 @@ spec:
   ports:
   - port: 80
     protocol: TCP
+    nodePort: 30010
     name: mightycalc-http
   selector:
     app: mightycalc-api
