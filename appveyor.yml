@@ -3,6 +3,17 @@ branches:
   only:
   - master
 image: Ubuntu
+environment:
+  # Disable Powershell on Linux machines
+  APPVEYOR_YML_DISABLE_PS_LINUX: "true"
+  # Changes ownership of minikube config dirs to running user
+  CHANGE_MINIKUBE_NONE_USER: "true"
+  # Set kubeconfig and minikube paths
+  KUBECONFIG: "/home/appveyor/.kube/config"
+  MINIKUBE_HOME: "/home/appveyor/kubernetes"
+  # Disable prompts for CI
+  MINIKUBE_WANTUPDATENOTIFICATION: "false"
+  MINIKUBE_WANTREPORTERRORPROMPT: "false"
 services:
  - docker
 install:
@@ -25,7 +36,7 @@ install:
     curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.10.0/bin/linux/amd64/kubectl
     chmod +x kubectl
     sudo mv kubectl /usr/local/bin/.
-
+    sudo -E minikube start --vm-driver=none
 - ps: Update-AppveyorBuild -Version "$env:APP_VERSION+$env:APPVEYOR_BUILD_NUMBER"
 build_script:
 - sh: |
