@@ -18,10 +18,17 @@ install:
     echo "exported file version is $FILE_VERSION"
     echo "exported info version is $INFORMATIONAL_VERSION"
 
+    curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.27.0/minikube-linux-amd64
+    chmod +x minikube
+    sudo mv minikube /usr/local/bin/.
+
+    curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.10.0/bin/linux/amd64/kubectl
+    chmod +x kubectl
+    sudo mv kubectl /usr/local/bin/.
+
 - ps: Update-AppveyorBuild -Version "$env:APP_VERSION+$env:APPVEYOR_BUILD_NUMBER"
 build_script:
 - sh: |
-   
     cd ./src 
     docker build . --target=build-env -t aleskov/mightycalc-buildenv:latest -t aleskov/mightycalc-buildenv:$APP_VERSION
     docker build . -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
@@ -45,4 +52,3 @@ deploy_script:
     docker login -u $dockerUser -p $dockerPassword
     docker push aleskov/mightycalc-persistence
     docker push aleskov/mightycalc 
-    docker push aleskov/mightycalc-buildenv
