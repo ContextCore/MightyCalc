@@ -39,9 +39,16 @@ build_script:
 test_script:
 - sh: |
     set -euxo pipefail
+
     docker run --entrypoint dotnet aleskov/mightycalc-buildenv test ./MightyCalc.API.Tests/MightyCalc.API.Tests.csproj -c Release --no-build > api_tests.txt
     docker run --entrypoint dotnet aleskov/mightycalc-buildenv test ./MightyCalc.Node.Tests/MightyCalc.Node.Tests.csproj -c Release --no-build > node_tests.txt
     docker run --entrypoint dotnet aleskov/mightycalc-buildenv test ./MightyCalc.Reports.Tests/MightyCalc.Reports.Tests.csproj -c Release --no-build > report_tests.txt
+  
+    kubectl version
+    ./deploy/create_environment.sh
+
+    dotnet test ./MightyCalc.Reports.IntegrationTests/MightyCalc.Reports.IntegrationTests.csproj -c Release --no-build > report_tests.txt
+
 artifacts:
 - path: '**\mighty*.tar'
   name: Containers
