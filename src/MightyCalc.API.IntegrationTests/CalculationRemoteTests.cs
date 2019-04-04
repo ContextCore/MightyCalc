@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.AspNetCore.TestHost;
 using MightyCalc.API.Tests;
 using MightyCalc.Client;
@@ -12,6 +13,7 @@ using Xunit.Abstractions;
 
 namespace MightyCalc.API.IntegrationTests
 {
+
     public class CalculationRemoteTests:CalculationTests
     {
         private readonly ITestOutputHelper _output;
@@ -54,6 +56,8 @@ namespace MightyCalc.API.IntegrationTests
                 expectedUsage.Add(name,count);
             }
 
+            var beforeCalculationReport = await Client.UsageStatsAsync();
+
             foreach (var expression in expressions)
             {
                 await Client.CalculateAsync(new Client.Expression{Representation = expression});
@@ -65,7 +69,13 @@ namespace MightyCalc.API.IntegrationTests
 
             foreach (var expected in expectedUsage)
             {
-                Assert.Equal(expected.Value, report.UsageStatistics.First(u => u.Name == expected.Key).UsageCount);
+                var usageBefore = beforeCalculationReport.UsageStatistics.FirstOrDefault(u => u.Name == expected.Key)
+                                     ?.UsageCount ?? 0;
+                
+                var usageAfterCalculation = report.UsageStatistics.FirstOrDefault(u => u.Name == expected.Key)
+                                                ?.UsageCount ?? 0;
+                
+                expected.Value.Should().BeGreaterThan(usageAfterCalculation - usageBefore);
             }
         }
 

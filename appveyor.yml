@@ -8,7 +8,7 @@ services:
 install:
 - sh: |
     
-    . ./git_versioning.sh
+    . ./build/git_versioning.sh
 
     export APP_VERSION=${version}
     export FILE_VERSION=${fileVersion}
@@ -23,8 +23,8 @@ build_script:
 - sh: |
    
     cd ./src 
-    docker build . -f ./buildenv.dockerfile --target=build-env -t aleskov/mightycalc-buildenv:latest -t aleskov/mightycalc-buildenv:$APP_VERSION
-    docker build . -f ./buildenv.dockerfile  -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
+    docker build . --target=build-env -t aleskov/mightycalc-buildenv:latest -t aleskov/mightycalc-buildenv:$APP_VERSION
+    docker build . -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
     docker save aleskov/mightycalc:latest > mightycalc.tar  
     cd ..
    

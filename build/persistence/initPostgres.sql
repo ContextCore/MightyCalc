@@ -1,3 +1,3 @@
 CREATE DATABASE journal;
 CREATE DATABASE snapshotstore;
-
+CREATE DATABASE readmodel;

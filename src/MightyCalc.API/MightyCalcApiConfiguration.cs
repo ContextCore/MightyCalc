@@ -14,7 +14,7 @@ namespace MightyCalc.API
 
         public MightyCalcApiConfiguration()
         {
-            var dbPort = 31045;
+            var dbPort = 30020;
             ReadModel = Environment.GetEnvironmentVariable("MightyCalc_ReadModel")  ?? $"Host=localhost;Port={dbPort};Database=readmodel;User ID=postgres;";
             Journal =  Environment.GetEnvironmentVariable("MightyCalc_Journal") ??  $"Host=localhost;Port={dbPort};Database=journal;User ID=postgres;";
             Snapshot =  Environment.GetEnvironmentVariable("MightyCalc_SnapshotStore") ?? $"Host=localhost;Port={dbPort};Database=snapshotstore;User ID=postgres;";

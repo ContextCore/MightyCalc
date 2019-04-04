@@ -43,7 +43,7 @@ namespace MightyCalc.API
             builder.RegisterType<FunctionUsageContext>();
             builder.RegisterType<ReportingDependencies>().As<IReportingDependencies>().SingleInstance();
             var container = builder.Build();
-            system.InitReportingExtension(container).Start();
+            system.InitReportingExtension(container);//.Start();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -57,12 +57,10 @@ namespace MightyCalc.API
             Configuration.GetSection("ApiSettings").Bind(settings);
 
             //cannot inject ILogger<> due to asp.net core 3.0 bug https://github.com/aspnet/Extensions/issues/1096
-            Console.WriteLine($"Using read model connection string {settings.ReadModel}");
+            //Console.WriteLine($"Using read model connection string {settings.ReadModel}");
             
             var system = CreateActorSystem(settings);
-            var cluster = Cluster.Get(system);
-            cluster.Join(system.Provider.DefaultAddress);
-
+          
             var options = GetDbOptions(settings);
 
             services.AddSingleton<ActorSystem>(system);

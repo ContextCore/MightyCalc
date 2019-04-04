@@ -27,13 +27,11 @@ RUN dotnet build -c Release -v quiet
 RUN dotnet publish ./MightyCalc.API/MightyCalc.API.csproj -c Release --no-build -o publish -v quiet
 RUN mkdir -p /swagger
 RUN cp ./MightyCalcAPI.yaml /swagger/MightyCalcAPI.yaml #for tests
-COPY ./integration_tests.sh ./integration_tests.sh
-RUN chmod +x ./integration_tests.sh
-ENTRYPOINT [ "bash" ]
-CMD ["./integration_tests.sh"]
+ENTRYPOINT [ "dotnet" ]
 
 FROM microsoft/dotnet:3.0-aspnetcore-runtime as runtime
 COPY --from=build-env /usr/bin/MightyCalc/publish /usr/bin/MightyCalc  
 WORKDIR /usr/bin/MightyCalc
 EXPOSE 80
-ENTRYPOINT ["dotnet", "MightyCalc.API.dll"]
+ENTRYPOINT ["dotnet"]
+CMD ["MightyCalc.API.dll"]
