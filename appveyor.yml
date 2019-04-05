@@ -59,9 +59,12 @@ test_script:
     docker run --entrypoint dotnet mightycalc-test:local test ./MightyCalc.Reports.Tests/MightyCalc.Reports.Tests.csproj -c Release --no-build > report_tests.txt
    
     echo creating environment for integration tests
-    ./deploy/create_environment.sh dd
+    cd ./deploy
+    ./create_environment.sh dd
     #run integration tests in created environment
-    ./test/integration_tests.sh
+    
+    cd ../test
+    ./integration_tests.sh
 
 artifacts:
 - path: '**\mighty*.tar'
