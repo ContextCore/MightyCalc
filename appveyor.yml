@@ -49,10 +49,10 @@ build_script:
     docker build . -f ./build/persistence/persistence.dockerfile -t aleskov/mightycalc-persistence:latest -t aleskov/mightycalc-persistence:$APP_VERSION
 test_script:
 - sh: |
-    set -euxo pipefail
+   # set -euxo pipefail
 
     kubectl version
-    ./deploy/create_environment.sh
+    ./deploy/create_environment.sh dd
 
     cd ./src
 
