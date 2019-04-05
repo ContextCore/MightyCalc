@@ -2,6 +2,7 @@ using Akka.Actor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MightyCalc.Reports.DatabaseProjections;
+using MightyCalc.Reports.ReportingExtension;
 
 namespace MightyCalc.API.Tests
 {
@@ -9,11 +10,6 @@ namespace MightyCalc.API.Tests
     {
         public LocalStartup(IConfiguration configuration) : base(configuration)
         {
-        }
-
-        protected override void ConfigureExtensions(ActorSystem system, MightyCalcApiConfiguration cfg)
-        {
-              
         }
 
         private static int counter = 0;

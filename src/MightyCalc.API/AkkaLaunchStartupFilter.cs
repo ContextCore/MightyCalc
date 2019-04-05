@@ -10,8 +10,6 @@ namespace MightyCalc.API
 {
     public class AkkaLaunchStartupFilter: IStartupFilter
     {
-        // We need to inject the IServiceProvider so we can create 
-        // the scoped service, MyDbContext
         private readonly IServiceProvider _serviceProvider;
         public AkkaLaunchStartupFilter(IServiceProvider serviceProvider)
         {

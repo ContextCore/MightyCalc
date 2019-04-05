@@ -5,9 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MightyCalc.Reports.DatabaseProjections;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace MightyCalc.API
@@ -18,6 +21,14 @@ namespace MightyCalc.API
         {
             var host = CreateHostBuilder(args).Build();
                 
+            using(var scope = host.Services.CreateScope())
+            {
+                var myDbContext = scope.ServiceProvider.GetRequiredService<FunctionUsageContext>();
+
+                myDbContext.Database.Migrate();
+            }
+
+            
             host.Run();
         }
 
