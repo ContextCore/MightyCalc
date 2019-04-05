@@ -1,19 +1,18 @@
 using Akka.Actor;
-using Autofac;
 
 namespace MightyCalc.Reports.ReportingExtension {
     public class ReportingExtensionProvider : ExtensionIdProvider<ReportingExtension>
     {
-        private readonly IContainer _container;
+        private readonly IReportingDependencies _reportingDeps;
 
-        public ReportingExtensionProvider(IContainer container)
+        public ReportingExtensionProvider(IReportingDependencies reportingDeps)
         {
-            _container = container;
+            _reportingDeps = reportingDeps;
         }
 
         public override ReportingExtension CreateExtension(ExtendedActorSystem system)
         {
-            return new ReportingExtension(system, _container);
+            return new ReportingExtension(system, _reportingDeps);
         }
     }
 }

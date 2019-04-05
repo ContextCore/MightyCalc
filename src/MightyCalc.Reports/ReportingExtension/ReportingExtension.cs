@@ -3,20 +3,19 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Cluster.Tools.Singleton;
 using Akka.Persistence;
-using Autofac;
 
 namespace MightyCalc.Reports.ReportingExtension
 {
     public class ReportingExtension : IExtension
     {
-        private readonly IContainer _container;
+        private readonly IReportingDependencies _dependencies;
         private readonly ExtendedActorSystem _system;
         public IActorRef ReportingActor { get; private set; }
 
-        public ReportingExtension(ExtendedActorSystem system, IContainer container)
+        public ReportingExtension(ExtendedActorSystem system, IReportingDependencies dependencies)
         {
             _system = system;
-            _container = container;
+            _dependencies = dependencies;
         }
 
         public IActorRef Start()
@@ -40,7 +39,7 @@ namespace MightyCalc.Reports.ReportingExtension
         
         public IReportingDependencies GetDependencies()
         {
-            return _container.Resolve<IReportingDependencies>();
+            return _dependencies;
         }
     }
 }

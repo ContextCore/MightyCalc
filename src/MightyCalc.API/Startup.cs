@@ -1,9 +1,7 @@
-using System;
 using System.IO;
 using System.Reflection;
 using Akka.Actor;
 using Akka.Cluster;
-using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -38,12 +36,7 @@ namespace MightyCalc.API
 
         protected virtual void ConfigureExtensions(ActorSystem system, MightyCalcApiConfiguration cfg)
         {
-            var builder = new ContainerBuilder();
-            builder.RegisterInstance(GetDbOptions(cfg));
-            builder.RegisterType<FunctionUsageContext>();
-            builder.RegisterType<ReportingDependencies>().As<IReportingDependencies>().SingleInstance();
-            var container = builder.Build();
-            system.InitReportingExtension(container);//.Start();
+            system.InitReportingExtension(new ReportingDependencies(GetDbOptions(cfg)));
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -69,7 +62,10 @@ namespace MightyCalc.API
             services.AddSingleton(options);
             services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
             services.AddSingleton<INamedCalculatorPool, AkkaCalculatorPool>();
-
+            
+            services.AddTransient<IStartupFilter, MigratorStartupFilter>();
+            services.AddTransient<IStartupFilter, AkkaLaunchStartupFilter>();
+            
             ConfigureExtensions(system, settings);
         }
 

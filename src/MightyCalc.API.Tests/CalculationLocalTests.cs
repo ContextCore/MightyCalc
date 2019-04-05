@@ -2,7 +2,6 @@ using System.IO;
 using System.Reflection;
 using Akka.Actor;
 using Akka.Cluster;
-using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -29,6 +28,7 @@ namespace MightyCalc.API.Tests
                 .UseStartup<LocalStartup>(); 
             
             var server = new TestServer(builder);
+            
             var httpClient = server.CreateClient();
             return new MightyCalcClient("", httpClient);
         }

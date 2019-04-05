@@ -8,7 +8,6 @@ using Akka.Streams;
 using Akka.Streams.Dsl;
 using Akka.Streams.IO;
 using Akka.TestKit.Xunit2;
-using Autofac;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MightyCalc.Node;

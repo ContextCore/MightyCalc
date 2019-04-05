@@ -7,7 +7,6 @@ using Akka.Persistence.Query.Sql;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using Akka.TestKit.Xunit2;
-using Autofac;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MightyCalc.IntegrationTests.Tools;
@@ -38,9 +37,7 @@ namespace MightyCalc.Reports.IntegrationTests
                 .Options;
             await DbTools.ResetDatabases();
 
-            var container = new ContainerBuilder();
-            container.RegisterInstance<IReportingDependencies>(new ReportingDependencies(options));
-            Sys.InitReportingExtension(container.Build());
+            Sys.InitReportingExtension(new ReportingDependencies(options));
             return Sys.GetReportingExtension().GetDependencies();
         }
 		 

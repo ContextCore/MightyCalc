@@ -1,6 +1,5 @@
 using System;
 using Akka.Actor;
-using Autofac;
 
 namespace MightyCalc.Reports.ReportingExtension {
     public static class ReportingExtensions
@@ -12,7 +11,7 @@ namespace MightyCalc.Reports.ReportingExtension {
 
             
         public static ReportingExtension InitReportingExtension(this ActorSystem system,
-                                                                  IContainer container)
+                                                                IReportingDependencies container)
         {
             if(system == null)
                 throw new ArgumentNullException(nameof(system));

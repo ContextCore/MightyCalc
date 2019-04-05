@@ -9,7 +9,6 @@ using Akka.Cluster;
 using Akka.Configuration;
 using Akka.Remote;
 using Akka.TestKit.Xunit2;
-using Autofac;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MightyCalc.IntegrationTests.Tools;
@@ -133,9 +132,7 @@ akka.persistence{
 
             var cluster = Cluster.Get(Sys);
             cluster.Join(((ExtendedActorSystem)Sys).Provider.DefaultAddress);
-            var container = new ContainerBuilder();
-            container.RegisterInstance<IReportingDependencies>(new ReportingDependencies(options));
-            var ext = Sys.InitReportingExtension(container.Build());
+            var ext = Sys.InitReportingExtension(new ReportingDependencies(options));
             ext.Start();
             return Sys.GetReportingExtension().GetDependencies();
         }

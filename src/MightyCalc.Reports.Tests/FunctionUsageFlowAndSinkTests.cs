@@ -8,7 +8,6 @@ using Akka.Persistence.Query;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using Akka.TestKit.Xunit2;
-using Autofac;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MightyCalc.Node;
@@ -66,14 +65,12 @@ namespace MightyCalc.Reports.Tests
 
         private IReportingDependencies Init(string dbName)
         {
-            var container = new ContainerBuilder();
             var options = new DbContextOptionsBuilder<FunctionUsageContext>()
                 .UseInMemoryDatabase(dbName)
                 .EnableSensitiveDataLogging()
                 .Options;
 
-            container.RegisterInstance<IReportingDependencies>(new ReportingDependencies(options));
-            Sys.InitReportingExtension(container.Build());
+            Sys.InitReportingExtension(new ReportingDependencies(options));
             return Sys.GetReportingExtension().GetDependencies();
         }
     }
