@@ -37,11 +37,12 @@ install:
     chmod +x kubectl
     sudo mv kubectl /usr/local/bin/.
     sudo -E minikube start --vm-driver=none
+
 - ps: Update-AppveyorBuild -Version "$env:APP_VERSION+$env:APPVEYOR_BUILD_NUMBER"
 build_script:
 - sh: |
     cd ./src 
-    docker build . --target=build-env -t aleskov/mightycalc-buildenv:latest -t aleskov/mightycalc-buildenv:$APP_VERSION
+    docker build . --target=build-env -t mightycalc-test:local
     docker build . -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
     docker save aleskov/mightycalc:latest > mightycalc.tar  
     cd ..
@@ -49,20 +50,18 @@ build_script:
     docker build . -f ./build/persistence/persistence.dockerfile -t aleskov/mightycalc-persistence:latest -t aleskov/mightycalc-persistence:$APP_VERSION
 test_script:
 - sh: |
-   # set -euxo pipefail
+    set -e pipefail
 
-    kubectl version
-    ./deploy/create_environment.sh dd
-
-    cd ./src
-
-    dotnet test ./MightyCalc.API.Tests/MightyCalc.API.Tests.csproj -c Release --no-build /l:"/opt/appveyor/build-agent/AppVeyor.MSBuildLogger.dll" > api_tests.txt
-    dotnet test ./MightyCalc.Node.Tests/MightyCalc.Node.Tests.csproj -c Release --no-build /l:"/opt/appveyor/build-agent/AppVeyor.MSBuildLogger.dll" > node_tests.txt
-    dotnet test ./MightyCalc.Reports.Tests/MightyCalc.Reports.Tests.csproj -c Release --no-build /l:"/opt/appveyor/build-agent/AppVeyor.MSBuildLogger.dll" > report_tests.txt
-  
-    dotnet test ./MightyCalc.Reports.IntegrationTests/MightyCalc.Reports.IntegrationTests.csproj -c Release --no-build /l:"/opt/appveyor/build-agent/AppVeyor.MSBuildLogger.dll" > report_integration_tests.txt
-    dotnet test ./MightyCalc.API.IntegrationTests/MightyCalc.API.IntegrationTests.csproj -c Release --no-build /l:"/opt/appveyor/build-agent/AppVeyor.MSBuildLogger.dll" > api_integration_tests.txt
-    dotnet test ./MightyCalc.Node.IntegrationTests/MightyCalc.Node.IntegrationTests.csproj -c Release --no-build /l:"/opt/appveyor/build-agent/AppVeyor.MSBuildLogger.dll" > node_integration_tests.txt
+   echo "running unit tests"
+   #using docker instead of k8s for simplicity, we don't need any external services
+   docker run --entrypoint dotnet mightycalc-test:local test ./MightyCalc.API.Tests/MightyCalc.API.Tests.csproj -c Release --no-build > api_tests.txt
+   docker run --entrypoint dotnet mightycalc-test:local test ./MightyCalc.Node.Tests/MightyCalc.Node.Tests.csproj -c Release --no-build > node_tests.txt
+   docker run --entrypoint dotnet mightycalc-test:local test ./MightyCalc.Reports.Tests/MightyCalc.Reports.Tests.csproj -c Release --no-build > report_tests.txt
+   
+   echo "creating environment for integration tests"
+   ./deploy/create_environment.sh dd
+   #run integration tests in created environment
+   ./test/integration_tests.sh
 
 artifacts:
 - path: '**\mighty*.tar'
