@@ -44,7 +44,8 @@ function __wait-until-pods-ready() {
       return 0
     fi
 
-    echo "Waiting for pods to be ready..."
+    echo "Waiting for pods to be ready. Current state:"
+    kubectl get pod
     sleep "$interval"
   done
 
