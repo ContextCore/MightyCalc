@@ -5,12 +5,12 @@ branches:
 image: Ubuntu
 environment:
   # Disable Powershell on Linux machines
-  APPVEYOR_YML_DISABLE_PS_LINUX: "true"
+  #APPVEYOR_YML_DISABLE_PS_LINUX: "true"
   # Changes ownership of minikube config dirs to running user
   CHANGE_MINIKUBE_NONE_USER: "true"
   # Set kubeconfig and minikube paths
-  KUBECONFIG: "/home/appveyor/.kube/config"
-  MINIKUBE_HOME: "/home/appveyor/kubernetes"
+  #KUBECONFIG: "/home/appveyor/.kube/config"
+  #MINIKUBE_HOME: "/home/appveyor/kubernetes"
   # Disable prompts for CI
   MINIKUBE_WANTUPDATENOTIFICATION: "false"
   MINIKUBE_WANTREPORTERRORPROMPT: "false"
