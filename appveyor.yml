@@ -50,28 +50,23 @@ build_script:
     
 test_script:
 - sh: |
-    set -euo pipefail
-
-    echo running unit tests
+    #set -euo pipefail
     #using docker instead of k8s for simplicity, we don't need any external services
-    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+    #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
-    docker run --entrypoint dotnet mightycalc-test:local test ./MightyCalc.API.Tests/MightyCalc.API.Tests.csproj -c Release --no-build > api_tests.txt
-    docker run --entrypoint dotnet mightycalc-test:local test ./MightyCalc.Node.Tests/MightyCalc.Node.Tests.csproj -c Release --no-build > node_tests.txt
-    docker run --entrypoint dotnet mightycalc-test:local test ./MightyCalc.Reports.Tests/MightyCalc.Reports.Tests.csproj -c Release --no-build > report_tests.txt
-   
-    echo creating environment for integration tests
+    echo creating environment for tests
+
     cd ./deploy
     ./create_environment.sh mk
+
     #run integration tests in created environment
-    
     cd ../test
-    ./integration_tests.sh
+    ./run_tests.sh
 
 artifacts:
 - path: '**\mighty*.tar'
   name: Containers
-- path: '**\*_tests.txt'
+- path: '**\*logs.zip'
   name: TestLogs
 deploy_script:
 - sh: | 
