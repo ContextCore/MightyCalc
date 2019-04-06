@@ -6,5 +6,5 @@ provisioner: kubernetes.io/gce-pd
 reclaimPolicy: Retain
 parameters:
   type: pd-standard
-  zone: asia-east2-c
+  zone: asia-east2-a
   fsType: ext4

@@ -1,4 +1,4 @@
-set -e pipefail
+set -euo pipefail
 
 echo "creating test pod" 
 kubectl apply -f mightycalc-tests.yaml
