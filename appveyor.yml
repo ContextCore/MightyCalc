@@ -14,6 +14,7 @@ environment:
   # Disable prompts for CI
   MINIKUBE_WANTUPDATENOTIFICATION: "false"
   MINIKUBE_WANTREPORTERRORPROMPT: "false"
+  APPVEYOR_SSH_BLOCK: true
 services:
  - docker
 install:
@@ -48,7 +49,7 @@ build_script:
     cd ..
    
     docker build . -f ./build/persistence/persistence.dockerfile -t aleskov/mightycalc-persistence:latest -t aleskov/mightycalc-persistence:$APP_VERSION
-    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+    #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
     
 test_script:
 - sh: |
@@ -62,7 +63,7 @@ test_script:
    
     echo creating environment for integration tests
     cd ./deploy
-    ./create_environment.sh dd
+    ./create_environment.sh mk
     #run integration tests in created environment
     
     cd ../test
