@@ -4,8 +4,6 @@ branches:
   - master
 image: Ubuntu
 environment:
-  # Disable Powershell on Linux machines
-  #APPVEYOR_YML_DISABLE_PS_LINUX: "true"
   # Changes ownership of minikube config dirs to running user
   CHANGE_MINIKUBE_NONE_USER: "true"
   # Set kubeconfig and minikube paths
@@ -14,7 +12,7 @@ environment:
   # Disable prompts for CI
   MINIKUBE_WANTUPDATENOTIFICATION: "false"
   MINIKUBE_WANTREPORTERRORPROMPT: "false"
-  APPVEYOR_SSH_BLOCK: true
+  #APPVEYOR_SSH_BLOCK: true
 services:
  - docker
 install:
