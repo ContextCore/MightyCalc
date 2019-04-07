@@ -14,4 +14,10 @@
       <ProjectReference Include="..\MightyCalc.Calculations\MightyCalc.Calculations.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="fulldebug.conf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </EmbeddedResource>
+    </ItemGroup>
+
 </Project>

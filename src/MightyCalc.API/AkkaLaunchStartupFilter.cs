@@ -1,6 +1,7 @@
 using System;
 using Akka.Actor;
 using Akka.Cluster;
+using DotNetty.Common.Concurrency;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,8 +24,9 @@ namespace MightyCalc.API
                 var system = (ExtendedActorSystem) scope.ServiceProvider.GetRequiredService<ActorSystem>();
 
                 var cluster = Cluster.Get(system);
-                cluster.Join(system.Provider.DefaultAddress);
-                system.GetReportingExtension().Start();
+                var source = new TaskCompletionSource();
+                cluster.RegisterOnMemberUp(() => source.Complete());
+                source.Task.Wait();
             }
 
             return next;

@@ -19,7 +19,7 @@ namespace MightyCalc.Node
 
             _region = clusterSharding.StartAsync("calculators",
                 aggregateProps,
-                ClusterShardingSettings.Create(sys),
+                ClusterShardingSettings.Create(sys).WithRole(KnownRoles.Calculation),
                 new ShardedMessageMetadataExtractor()).Result; 
         }
 

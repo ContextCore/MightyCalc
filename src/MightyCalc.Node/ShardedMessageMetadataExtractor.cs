@@ -2,7 +2,7 @@ using Akka.Cluster.Sharding;
 
 namespace MightyCalc.Node
 {
-    internal class ShardedMessageMetadataExtractor : IMessageExtractor
+    public class ShardedMessageMetadataExtractor : IMessageExtractor
     {
         public string EntityId(object message) => (message as ShardEnvelop)?.EntityId;
 

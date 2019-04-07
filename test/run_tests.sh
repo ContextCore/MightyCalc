@@ -12,7 +12,7 @@ runTests() {
     testProject="./$testFolder/$testFolder.csproj"
     echo Running $testsName tests in $testProject
 
-    hostLogsDirName="Logs"
+    hostLogsDirName=$testsName"_Logs"
     hostLogsDir="./"$hostLogsDirName
     mkdir $hostLogsDir
 

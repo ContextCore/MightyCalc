@@ -24,7 +24,7 @@ namespace MightyCalc.Reports.ReportingExtension
             var dispatcher = _system.ActorOf(ClusterSingletonManager.Props(
                     Props.Create<ReportingActor>(),
                     PoisonPill.Instance,
-                    ClusterSingletonManagerSettings.Create(_system)
+                    ClusterSingletonManagerSettings.Create(_system).WithRole(KnownRoles.Projection)
                 ),
                 name: "reporting");
       

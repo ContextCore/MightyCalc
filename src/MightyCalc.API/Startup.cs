@@ -2,6 +2,7 @@ using System.IO;
 using System.Reflection;
 using Akka.Actor;
 using Akka.Cluster;
+using Akka.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -49,9 +50,13 @@ namespace MightyCalc.API
             var settings = new MightyCalcApiConfiguration();
             Configuration.GetSection("ApiSettings").Bind(settings);
 
-            //cannot inject ILogger<> due to asp.net core 3.0 bug https://github.com/aspnet/Extensions/issues/1096
-            //Console.WriteLine($"Using read model connection string {settings.ReadModel}");
-            
+            var hoconPath = Path.Combine(ExecutingAssemblyFolder(), "akka.hocon");
+            if (File.Exists(hoconPath))
+            {
+                Config cfg = File.ReadAllText(hoconPath);
+                if(cfg.GetBoolean("enabled"))
+                    settings.Akka = cfg;
+            }
             var system = CreateActorSystem(settings);
           
             var options = GetDbOptions(settings);
@@ -61,7 +66,7 @@ namespace MightyCalc.API
             services.AddTransient<IApiController, AkkaApi>();
             services.AddSingleton(options);
             services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
-            services.AddSingleton<INamedCalculatorPool, AkkaCalculatorPool>();
+            services.AddSingleton<INamedCalculatorPool, AkkaRemoteCalculatorPool>();
             
             services.AddTransient<IStartupFilter, AkkaLaunchStartupFilter>();
             
@@ -70,7 +75,7 @@ namespace MightyCalc.API
 
         protected virtual ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
         {
-            return (ExtendedActorSystem) ActorSystem.Create("Calc", cfg.Akka);
+            return (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,9 +92,7 @@ namespace MightyCalc.API
             }
 
             //map /swagger folder in the same folder as executing assembly
-            var location = Assembly.GetExecutingAssembly().Location;
-            var executingAssemblyFolder = Path.GetDirectoryName(location);
-            var provider = new PhysicalFileProvider(Path.Combine(executingAssemblyFolder, "swagger"));
+            var provider = new PhysicalFileProvider(Path.Combine(ExecutingAssemblyFolder(), "swagger"));
 
             app.UseDirectoryBrowser(new DirectoryBrowserOptions
             {
@@ -116,6 +119,13 @@ namespace MightyCalc.API
 
             app.UseAuthentication();
             app.UseAuthorization();
+        }
+
+        private static string ExecutingAssemblyFolder()
+        {
+            var location = Assembly.GetExecutingAssembly().Location;
+            var executingAssemblyFolder = Path.GetDirectoryName(location);
+            return executingAssemblyFolder;
         }
     }
 }

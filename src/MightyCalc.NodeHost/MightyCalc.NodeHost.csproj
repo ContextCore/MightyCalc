@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
+        <AssemblyName>MightyCalc.NodeHost</AssemblyName>
+        <RootNamespace>MightyCalc.NodeHost</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Akka.Cluster.Sharding" Version="1.3.12-beta" />
+      <PackageReference Include="Akka.Persistence.PostgreSql" Version="1.3.9" />
+      <PackageReference Include="Hocon.Extensions.Configuration" Version="1.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.0.0-preview3.19153.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.0.0-preview3.19153.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0-preview3.19153.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0-preview3.19153.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Yaml" Version="2.0.0-preview2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MightyCalc.Node\MightyCalc.Node.csproj" />
+      <ProjectReference Include="..\MightyCalc.Reports\MightyCalc.Reports.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="akka.conf">
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </EmbeddedResource>
+      <Content Include="akka.hocon">
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="appsettings.json">
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
+</Project>

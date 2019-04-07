@@ -1,12 +1,7 @@
-using Akka.Cluster.Sharding;
-using Akka.Cluster.Sharding.Serialization;
 using Akka.Configuration;
 using MightyCalc.IntegrationTests.Tools;
 using MightyCalc.Node.Tests;
-using Xunit;
 using Xunit.Abstractions;
-using Akka.Configuration;
-using Akka.Persistence.Sql.Common.Journal;
 using Akka.Serialization;
 
 namespace MightyCalc.Node.IntegrationTests
