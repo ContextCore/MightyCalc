@@ -42,8 +42,10 @@ build_script:
 - sh: |
     cd ./src 
 
-    echo changing API yaml definition version to $env:APP_VERSION
-    sed -i '' -e 's/\(.*version:.*\)/version: $env:APP_VERSION/g' MightyCalcAPI.yaml
+    echo changing API yaml definition version to $APP_VERSION
+    #MacOS version:
+    #sed -i '' -e 's/\(.*version:.*\)/version: $APP_VERSION/g' MightyCalcAPI.yaml
+    sed -i 's/\(.*version:.*\)/  version: $APP_VERSION/g' MightyCalcAPI.yaml
 
     docker build . --target=build-env -t mightycalc-test:local
     docker build . -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
