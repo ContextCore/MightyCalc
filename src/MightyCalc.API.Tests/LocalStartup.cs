@@ -23,7 +23,20 @@ namespace MightyCalc.API.Tests
         protected override ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
         {
             return (ExtendedActorSystem)ActorSystem.Create("Calc",
-                @"akka.actor.provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""");
+                @"
+akka{
+    actor.provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
+    remote {
+          dot-netty.tcp {
+              port = 0
+              hostname = localhost
+          }
+    }
+    cluster{
+        seed-nodes = [""akka.tcp://MightyCalc@localhost:30031""]
+        roles = [api]
+    }
+}");
         }
     }
 }

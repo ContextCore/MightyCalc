@@ -1,16 +1,21 @@
 enabled = false
 akka {
     actor{
-        provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
+         provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
+        
          serializers {
                        akka-sharding = "Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding"
+                       hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
                      }
-                     serialization-bindings {
+                     
+         serialization-bindings {
                        "Akka.Cluster.Sharding.IClusterShardingSerializable, Akka.Cluster.Sharding" = akka-sharding
-                     }
-                     serialization-identifiers {
-                       "Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding" = 13
-                     }
+                        ""System.Object"" = hyperion
+         }
+         
+         serialization-identifiers {
+                         "Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding" = 13
+         }
     }
     remote {
         dot-netty.tcp {

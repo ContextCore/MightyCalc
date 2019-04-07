@@ -15,24 +15,26 @@ namespace MightyCalc.Node.Tests
     {
         private readonly INamedCalculatorPool _pool;
 
-        private static readonly Config Config = @"akka.actor.provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"" 
-                               akka.actor.serialize-messages = on 
-                               akka.actor.serialize-creators = on
-                               akka.actor{
-							        serializers : {
-                                  #      akka-sharding = ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding""
-                                        hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
-
-                                    }
-                                    serialization-bindings : {
-                                 #      ""Akka.Cluster.Sharding.IClusterShardingSerializable, Akka.Cluster.Sharding"" = akka-sharding
-                                        ""System.Object"" = hyperion
-                                    }
-                                  #  serialization-identifiers : {
-                                  #   ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding"" = 13
-                                  #  }
-                               }    
-                              ";
+        private static readonly Config Config = @"
+akka {
+      actor{
+            provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"" 
+            serialize-messages = on 
+            serialize-creators = on
+       
+			serializers : {
+                hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
+            }
+            serialization-bindings : {
+                ""System.Object"" = hyperion
+            }
+       }    
+ 
+      cluster{
+			roles = [calculation]
+      }
+}    
+";
 
         protected NamedCalculatorTests(ITestOutputHelper output, Config config) : base(config,"Test",output)
         {
