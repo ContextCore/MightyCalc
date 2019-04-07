@@ -17,7 +17,7 @@ namespace MightyCalc.Node
 
             var aggregateProps = Props.Create<CalculatorActor>();
 
-            _region = clusterSharding.StartAsync("calculators",
+            _region = clusterSharding.StartAsync(KnownActorRegions.Calculator,
                 aggregateProps,
                 ClusterShardingSettings.Create(sys).WithRole(KnownRoles.Calculation),
                 new ShardedMessageMetadataExtractor()).Result; 

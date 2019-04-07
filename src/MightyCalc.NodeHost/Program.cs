@@ -8,6 +8,7 @@ using Hocon.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
+using MightyCalc.Node;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 
@@ -17,7 +18,7 @@ namespace MightCalc.NodeHost
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Starting MightyCalc node");
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -42,7 +43,7 @@ namespace MightCalc.NodeHost
             cluster.RegisterOnMemberUp(() => OnStart(system, config.ReadModel));
             
             Console.WriteLine("Press any key to exit");
-            Console.ReadKey();
+            Console.ReadLine();
         }
 
         private static void OnStart(ActorSystem system, string readModelConnectionString)
@@ -52,6 +53,9 @@ namespace MightCalc.NodeHost
                 .Options;
 
             system.InitReportingExtension(new ReportingDependencies(options)).Start();
+
+        
+            var pool = new AkkaCalculatorPool(system);
         }
 
         private static string ExecutingAssemblyFolder()

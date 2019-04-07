@@ -3,6 +3,15 @@ akka {
 
     actor {
        provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
+       serializers {
+               akka-sharding = "Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding"
+             }
+             serialization-bindings {
+               "Akka.Cluster.Sharding.IClusterShardingSerializable, Akka.Cluster.Sharding" = akka-sharding
+             }
+             serialization-identifiers {
+               "Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding" = 13
+             }
     }
     
     remote {
@@ -15,6 +24,7 @@ akka {
     cluster {
         seed-nodes = ["akka.tcp://MightyCalc@localhost:30030"]
         roles = [calculation, projection]
+        auto-down-unreachable-after = 30s #only for local test config! 
     } 
     
     persistence{

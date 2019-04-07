@@ -66,7 +66,7 @@ namespace MightyCalc.API
             services.AddTransient<IApiController, AkkaApi>();
             services.AddSingleton(options);
             services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
-            services.AddSingleton<INamedCalculatorPool, AkkaRemoteCalculatorPool>();
+            services.AddSingleton<INamedCalculatorPool, AkkaCalculatorPool>();
             
             services.AddTransient<IStartupFilter, AkkaLaunchStartupFilter>();
             
