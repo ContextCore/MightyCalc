@@ -32,7 +32,7 @@ runTests() {
     #echo Looking for a tests results. It may be the direct output and any additional logs in *.txt files produced by 
     #test runner
     zip -r ${testsName}_test_logs.zip $hostLogsDirName
-    rm -rf $hostLogsDir
+    #rm -rf $hostLogsDir
     return $TestResult
 }
 
