@@ -39,9 +39,9 @@ runTests() {
 testsPlan=( "api:MightyCalc.API.Tests"
              "node:MightyCalc.Node.Tests"
              "reports:MightyCalc.Reports.Tests"
-             "api_integration:MightyCalc.Node.IntegrationTests"
+             "node_integration:MightyCalc.Node.IntegrationTests"
              "report_integration:MightyCalc.Reports.IntegrationTests"
-             "node_integration:MightyCalc.Node.IntegrationTests")
+             "api_integration:MightyCalc.API.IntegrationTests")
 anyTestFailed=0
 
 for plan in "${testsPlan[@]}" ; do
