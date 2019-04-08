@@ -5,12 +5,12 @@ akka {
         
          serializers {
                        akka-sharding = "Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding"
-                       hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
+                       hyperion = "Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion"
                      }
                      
          serialization-bindings {
                        "Akka.Cluster.Sharding.IClusterShardingSerializable, Akka.Cluster.Sharding" = akka-sharding
-                        ""System.Object"" = hyperion
+                        "System.Object" = hyperion
          }
          
          serialization-identifiers {

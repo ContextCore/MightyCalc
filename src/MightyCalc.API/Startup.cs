@@ -1,5 +1,7 @@
+using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Cluster;
 using Akka.Configuration;
@@ -14,7 +16,6 @@ using MightyCalc.Reports;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.Extensions.Logging;
 
 namespace MightyCalc.API
 {
@@ -47,18 +48,10 @@ namespace MightyCalc.API
                     .AddMvc()
                     .AddNewtonsoftJson();
 
-            var settings = new MightyCalcApiConfiguration();
-            Configuration.GetSection("ApiSettings").Bind(settings);
-
-            var hoconPath = Path.Combine(ExecutingAssemblyFolder(), "akka.hocon");
-            if (File.Exists(hoconPath))
-            {
-                Config cfg = File.ReadAllText(hoconPath);
-                if(cfg.GetBoolean("enabled"))
-                    settings.Akka = cfg;
-            }
+            var settings = BuildConfiguration();
+            
             var system = CreateActorSystem(settings);
-          
+            
             var options = GetDbOptions(settings);
 
             services.AddSingleton<ActorSystem>(system);
@@ -68,14 +61,40 @@ namespace MightyCalc.API
             services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
             services.AddSingleton<INamedCalculatorPool, AkkaCalculatorPool>();
             
-            services.AddTransient<IStartupFilter, AkkaLaunchStartupFilter>();
-            
             ConfigureExtensions(system, settings);
+        }
+
+        protected virtual MightyCalcApiConfiguration BuildConfiguration()
+        {
+            var settings = new MightyCalcApiConfiguration();
+            Configuration.GetSection("ApiSettings")?.Bind(settings);
+
+            var hoconPath = Path.Combine(ExecutingAssemblyFolder(), "akka.hocon");
+            if (File.Exists(hoconPath))
+            {
+                Config cfg = File.ReadAllText(hoconPath);
+                if (cfg.GetBoolean("enabled"))
+                    settings.Akka = cfg;
+            }
+
+            return settings;
         }
 
         protected virtual ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
         {
-            return (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka);
+            var system = (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka);
+            var complete = new TaskCompletionSource<bool>();
+            var cluster = Cluster.Get(system);
+            cluster.RegisterOnMemberUp(() => complete.SetResult(true));
+            
+            if(!complete.Task.Wait(TimeSpan.FromSeconds(10)))
+                throw new AkkaClusterIsNotAvailableException();
+            
+            return system;
+        }
+
+        public class AkkaClusterIsNotAvailableException : Exception
+        {
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

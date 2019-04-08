@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace MightyCalc.API.Tests
 {
-    public abstract class CalculationTests:IDisposable
+    public abstract class CalculationTests
     {    
         protected IMightyCalcClient Client => _lazyClient.Value;
         private readonly Lazy<IMightyCalcClient> _lazyClient;
@@ -98,17 +98,5 @@ namespace MightyCalc.API.Tests
             Assert.Equal(500, ex.StatusCode);
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
     }
 }

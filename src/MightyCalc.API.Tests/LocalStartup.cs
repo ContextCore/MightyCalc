@@ -1,4 +1,5 @@
 using Akka.Actor;
+using Akka.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MightyCalc.Reports.DatabaseProjections;
@@ -20,23 +21,43 @@ namespace MightyCalc.API.Tests
 
         }
 
-        protected override ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
+        protected override MightyCalcApiConfiguration BuildConfiguration()
         {
-            return (ExtendedActorSystem)ActorSystem.Create("Calc",
-                @"
+            var cfg = base.BuildConfiguration();
+            cfg.ClusterName = "ApiTest";
+            cfg.Akka = (Config) @"
 akka{
-    actor.provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
+    actor{
+        provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
+        serialize-messages = on 
+        serialize-creators = on
+        serializers {
+                          akka-sharding = ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding""
+            hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
+        }
+                        
+        serialization-bindings {
+            ""Akka.Cluster.Sharding.IClusterShardingSerializable, Akka.Cluster.Sharding"" = akka-sharding
+            ""System.Object"" = hyperion
+        }
+            
+        serialization-identifiers {
+            ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding"" = 13
+        }
+    }
     remote {
           dot-netty.tcp {
-              port = 0
+              port = 30031
               hostname = localhost
           }
     }
     cluster{
-        seed-nodes = [""akka.tcp://MightyCalc@localhost:30031""]
-        roles = [api]
+        seed-nodes = [""akka.tcp://ApiTest@localhost:30031""]
+        roles = [api, calculation, projection]
     }
-}");
+}";
+            return cfg;
         }
+
     }
 }
