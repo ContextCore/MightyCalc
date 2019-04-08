@@ -18,6 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MightyCalc.Calculations\MightyCalc.Calculations.csproj" />
+      <ProjectReference Include="..\MightyCalc.Configuration\MightyCalc.Configuration.csproj" />
       <ProjectReference Include="..\MightyCalc.Node\MightyCalc.Node.csproj" />
       <ProjectReference Include="..\MightyCalc.Reports\MightyCalc.Reports.csproj" />
     </ItemGroup>

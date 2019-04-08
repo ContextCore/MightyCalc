@@ -24,14 +24,28 @@ FROM microsoft/dotnet:3.0-sdk as build-env
 COPY --from=api-gen-env /usr/bin/MightyCalc /usr/bin/MightyCalc
 WORKDIR /usr/bin/MightyCalc
 RUN dotnet build -c Release -v quiet
-RUN dotnet publish ./MightyCalc.API/MightyCalc.API.csproj -c Release --no-build -o publish -v quiet
 RUN mkdir -p /swagger
 RUN cp ./MightyCalcAPI.yaml /swagger/MightyCalcAPI.yaml #for tests
 ENTRYPOINT [ "dotnet" ]
 
-FROM microsoft/dotnet:3.0-aspnetcore-runtime as runtime
-COPY --from=build-env /usr/bin/MightyCalc/publish /usr/bin/MightyCalc  
+FROM build-env as publish-env
+RUN dotnet publish ./MightyCalc.API/MightyCalc.API.csproj -c Release --no-build -o publish/api -v quiet
+RUN dotnet publish ./MightyCalc.NodeHost/MightyCalc.NodeHost.csproj -c Release --no-build -o publish/host -v quiet
+
+FROM microsoft/dotnet:3.0-aspnetcore-runtime as api-runtime
+COPY --from=publish-env /usr/bin/MightyCalc/publish/api /usr/bin/MightyCalc  
 WORKDIR /usr/bin/MightyCalc
 EXPOSE 80
+EXPOSE 2552
+ENV MightyCalc_NodePort 2552
 ENTRYPOINT ["dotnet"]
 CMD ["MightyCalc.API.dll"]
+
+FROM microsoft/dotnet:3.0-runtime as node-runtime
+COPY --from=build-env /usr/bin/MightyCalc/publish/node /usr/bin/MightyCalc  
+WORKDIR /usr/bin/MightyCalc
+EXPOSE 80
+EXPOSE 2552
+ENV MightyCalc_NodePort 2552
+ENTRYPOINT ["dotnet"]
+CMD ["MightyCalc.NodeHost.dll"]

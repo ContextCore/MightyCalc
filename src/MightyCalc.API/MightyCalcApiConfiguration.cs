@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using Akka.Configuration;
 using MightyCalc.Node;
 
@@ -10,7 +10,6 @@ namespace MightyCalc.API
         public Config Akka { get; set; }
         public string ReadModel { get; set; }
         
-        public string[] SeedNodes { get; set; }
 
         public string ClusterName { get; set; }
 
@@ -20,15 +19,17 @@ namespace MightyCalc.API
             
             ReadModel = Environment.GetEnvironmentVariable("MightyCalc_ReadModel")?? $"Host=localhost;Port={dbPort};Database=readmodel;User ID=postgres;";
             ClusterName = Environment.GetEnvironmentVariable("MightyCalc_ClusterName") ?? "MightyCalc";
-            SeedNodes = Environment.GetEnvironmentVariable("MightyCalc_SeedNodes")?.Split(";");
+            
+            var customCfg = MightyCalc.Configuration.Configuration.GetEnvironmentConfig(new Dictionary<string, string>
+            {
+                {"MightyCalc_SeedNodes", "akka.cluster.seed-nodes"},
+                {"MightyCalc_NodePort", "akka.remote.dot-netty.tcp.port"},
+                {"MightyCalc_PublicHostName", "akka.remote.dot-netty.tcp.public-hostname"},
+                {"MightyCalc_PublicIP", "akka.remote.dot-netty.tcp.public-ip"}
+            });
+            
             var defaultConfig = GetDefaultAkkaConfig();
-            Akka = defaultConfig;
-            if (SeedNodes == null) return;
-            
-            Config seedNodesCfg =
-                $"akka.cluster.seed-nodes = [{string.Join(",", SeedNodes.Select(s => $"\"{s}\""))}";
-            
-            Akka = seedNodesCfg.WithFallback(defaultConfig);
+            Akka = customCfg.WithFallback(defaultConfig);
         }
     
         private static Config GetDefaultAkkaConfig()
