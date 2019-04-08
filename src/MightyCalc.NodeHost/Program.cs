@@ -36,7 +36,7 @@ namespace MightCalc.NodeHost
             if (File.Exists(hoconPath))
             {
                 Config cfg = File.ReadAllText(hoconPath);
-                if(cfg.GetBoolean("enabled"))
+                if (cfg.GetBoolean("enabled"))
                     config.AkkaConfig = cfg;
             }
 
@@ -53,9 +53,15 @@ namespace MightCalc.NodeHost
                 .UseNpgsql(readModelConnectionString)
                 .Options;
 
+
+            using (var myDbContext = new FunctionUsageContext(options))
+            {
+                myDbContext.Database.Migrate();
+            }
+
             system.InitReportingExtension(new ReportingDependencies(options)).Start();
 
-        
+
             var pool = new AkkaCalculatorPool(system);
         }
 
