@@ -17,7 +17,7 @@ namespace MightyCalc.Configuration
 
                 var envValue = Environment.GetEnvironmentVariable(environmentVariableName);
                 if (envValue == null) continue;
-                stringBuilder.AppendLine(configPath);
+                stringBuilder.AppendLine(configPath+"="+envValue);
             }
 
             Config customCfg = stringBuilder.ToString();

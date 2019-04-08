@@ -33,7 +33,8 @@ namespace MightCalc.NodeHost
 	            {"MightyCalc_SeedNodes", "akka.cluster.seed-nodes"},
 	            {"MightyCalc_NodePort", "akka.remote.dot-netty.tcp.port"},
 	            {"MightyCalc_PublicHostName", "akka.remote.dot-netty.tcp.public-hostname"},
-	            {"MightyCalc_PublicIP", "akka.remote.dot-netty.tcp.public-ip"}
+	            {"MightyCalc_PublicIP", "akka.remote.dot-netty.tcp.public-ip"},
+	            {"MightyCalc_HostName", "akka.remote.dot-netty.tcp.hostname"}
             });
 	       
             AkkaConfig = customCfg.WithFallback(defaultConfig).WithFallback(HoconConfigurations.FullDebug);

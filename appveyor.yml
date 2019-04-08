@@ -48,8 +48,11 @@ build_script:
     sed -i "s/\(.*version:.*\)/  version: $APP_VERSION/g" MightyCalcAPI.yaml
 
     docker build . --target=build-env -t mightycalc-test:local
-    docker build . -t aleskov/mightycalc:latest -t aleskov/mightycalc:$APP_VERSION
-    docker save aleskov/mightycalc:latest > mightycalc.tar  
+    docker build . --target=api-runtime -t aleskov/mightycalc-api:latest -t aleskov/mightycalc-api:$APP_VERSION
+    docker build . --target=node-runtime -t aleskov/mightycalc-node:latest -t aleskov/mightycalc-node:$APP_VERSION
+
+    docker save aleskov/mightycalc-api:latest > mightycalc-api.tar 
+    docker save aleskov/mightycalc-node:latest > mightycalc-node.tar  
     cd ..
    
     docker build . -f ./build/persistence/persistence.dockerfile -t aleskov/mightycalc-persistence:latest -t aleskov/mightycalc-persistence:$APP_VERSION
@@ -78,7 +81,8 @@ deploy_script:
 - sh: | 
     docker login -u $dockerUser -p $dockerPassword
     docker push aleskov/mightycalc-persistence
-    docker push aleskov/mightycalc
+    docker push aleskov/mightycalc-api
+    docker push aleskov/mightycalc-node
 on_finish:
   - sh: |
       find "$APPVEYOR_BUILD_FOLDER" -type f -name '*.trx' -print0 | xargs -0 -I '{}' curl -F 'file=@{}' "https://ci.appveyor.com/api/testresults/mstest/$APPVEYOR_JOB_ID" 

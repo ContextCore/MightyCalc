@@ -32,11 +32,11 @@ namespace MightyCalc.API
             Akka = customCfg.WithFallback(defaultConfig);
         }
     
-        private static Config GetDefaultAkkaConfig()
+        private static Config GetDefaultAkkaConfig()  
         {
             var cfg = ConfigurationFactory.FromResource<Startup>("MightyCalc.API.akka.conf");    
 	        
             return cfg.WithFallback(HoconConfigurations.FullDebug);
         }
     }
-}
+} 

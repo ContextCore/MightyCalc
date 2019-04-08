@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Cluster;
 using Akka.Configuration;
@@ -16,7 +17,7 @@ namespace MightCalc.NodeHost
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Starting MightyCalc node");
 
@@ -41,9 +42,8 @@ namespace MightCalc.NodeHost
             var system = ActorSystem.Create(config.ClusterName, config.AkkaConfig);
             var cluster = Cluster.Get(system);
             cluster.RegisterOnMemberUp(() => OnStart(system, config.ReadModel));
-            
-            Console.WriteLine("Press any key to exit");
-            Console.ReadLine();
+
+            await system.WhenTerminated;
         }
 
         private static void OnStart(ActorSystem system, string readModelConnectionString)

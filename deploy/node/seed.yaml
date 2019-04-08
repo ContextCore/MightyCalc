@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seed
+spec:
+  serviceName: seeds
+  replicas: 2 # by default is 1
+  selector:
+    matchLabels:
+      app: seed # has to match .spec.template.metadata.labels
+  template:
+    metadata:
+      labels:
+        app: seed # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mightycalc-node
+        image: aleskov/mightycalc-node:local
+        ports:
+        - name: akka
+          containerPort: 2555
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: 2555
+        env:
+        - name: MightyCalc_Journal
+          value: '"Host=postgres-svc;Port=5432;Database=journal;User ID=postgres;"'
+        - name: MightyCalc_SnapshotStore
+          value: '"Host=postgres-svc;Port=5432;Database=snapshotstore;User ID=postgres;"'
+        - name: MightyCalc_ReadModel
+          value: "Host=postgres-svc;Port=5432;Database=readmodel;User ID=postgres;"
+        - name: MightyCalc_NodePort
+          value: "2555"
+        - name: HOST_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MightyCalc_HostName
+          value: "0.0.0.0"
+        - name: MightyCalc_PublicHostName
+          value: "$(HOST_NAME).seeds"
+        - name: MightyCalc_SeedNodes
+          value: '["akka.tcp://MightyCalc@seed-0.seeds:2555", "akka.tcp://MightyCalc@seed-1.seeds:2555"]'
+       
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
