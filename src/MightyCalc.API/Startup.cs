@@ -67,7 +67,6 @@ namespace MightyCalc.API
         protected virtual MightyCalcApiConfiguration BuildConfiguration()
         {
             var settings = new MightyCalcApiConfiguration();
-            Configuration.GetSection("ApiSettings")?.Bind(settings);
 
             var hoconPath = Path.Combine(ExecutingAssemblyFolder(), "akka.hocon");
             if (File.Exists(hoconPath))

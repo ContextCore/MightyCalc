@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: mightycalc-node-container
-        image: aleskov/mightycalc-node:local
+        image: aleskov/mightycalc-node
         ports:
         - name: akka
           containerPort: 2555

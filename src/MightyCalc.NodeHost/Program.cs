@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using MightyCalc.Node;
+using MightyCalc.NodeHost;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 

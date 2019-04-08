@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using Akka.Configuration;
-using MightyCalc.Configuration;
+using MightCalc.NodeHost;
 using MightyCalc.Node;
 
-namespace MightCalc.NodeHost
+namespace MightyCalc.NodeHost
 {
     public class NodeConfiguration
     {
@@ -15,8 +13,6 @@ namespace MightCalc.NodeHost
         
         public string ClusterName { get; set; }
 
-
-      
         
         public NodeConfiguration()
         {
@@ -26,7 +22,7 @@ namespace MightCalc.NodeHost
             
             var defaultConfig = ConfigurationFactory.FromResource<Program>("MightyCalc.NodeHost.akka.conf");
 
-            var customCfg = Configuration.GetEnvironmentConfig(new Dictionary<string, string>
+            var customCfg = Configuration.Configuration.GetEnvironmentConfig(new Dictionary<string, string>
             {
 	            {"MightyCalc_Journal", "akka.persistence.journal.postgresql.connection-string"},
 	            {"MightyCalc_SnapshotStore", "akka.persistence.snapshot-store.postgresql.connection-string"},
