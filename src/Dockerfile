@@ -34,20 +34,32 @@ RUN dotnet publish ./MightyCalc.API/MightyCalc.API.csproj -c Release --no-build 
 FROM build-env as node-publish-env
 RUN dotnet publish ./MightyCalc.NodeHost/MightyCalc.NodeHost.csproj -c Release --no-build -o publish -v quiet
 
+FROM build-env as lighthouse-publish-env
+RUN dotnet publish ./MightyCalc.LightHouse/MightyCalc.LightHouse.csproj -c Release --no-build -o publish -v quiet
+
 FROM microsoft/dotnet:3.0-aspnetcore-runtime as api-runtime
 COPY --from=api-publish-env /usr/bin/MightyCalc/publish /usr/bin/MightyCalc  
 WORKDIR /usr/bin/MightyCalc
 EXPOSE 80
-EXPOSE 2552
-ENV MightyCalc_NodePort 2552
+EXPOSE 2556
+ENV MightyCalc_NodePort 2555
 ENTRYPOINT ["dotnet"]
 CMD ["MightyCalc.API.dll"]
 
 FROM microsoft/dotnet:3.0-runtime as node-runtime
 COPY --from=node-publish-env /usr/bin/MightyCalc/publish /usr/bin/MightyCalc  
 WORKDIR /usr/bin/MightyCalc
-EXPOSE 80
-EXPOSE 2552
-ENV MightyCalc_NodePort 2552
+EXPOSE 2555
+EXPOSE 2556
+ENV MightyCalc_NodePort 2555
 ENTRYPOINT ["dotnet"]
 CMD ["MightyCalc.NodeHost.dll"]
+
+FROM microsoft/dotnet:3.0-runtime as lighthouse-runtime
+COPY --from=lighthouse-publish-env /usr/bin/MightyCalc/publish /usr/bin/MightyCalc  
+WORKDIR /usr/bin/MightyCalc
+EXPOSE 2555
+EXPOSE 2556
+ENV MightyCalc_NodePort 2555
+ENTRYPOINT ["dotnet"]
+CMD ["MightyCalc.LightHouse.dll"]

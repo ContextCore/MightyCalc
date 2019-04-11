@@ -1,18 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: seeds
+  name: nodes
 spec:
-  clusterIP: None
   ports:
   - port: 2555
-    protocol: TCP
     name: akka
+    protocol: TCP
     targetPort: 2555
   - port: 2556
+    name: node-cmd
     protocol: TCP
-    name: akka-cmd
     targetPort: 2556
   selector:
-    app: seed
-  
+    type: node
+  clusterIP: None

@@ -26,8 +26,7 @@ namespace MightyCalc.Node.IntegrationTests
                                        }    
                                       
 	          
-#akka.persistence.journal.plugin = ""akka.persistence.journal.postgresql""
-
+akka.cluster.roles= [calculation,api,projection]
 akka.persistence{
 	journal {
 		plugin = ""akka.persistence.journal.postgresql""

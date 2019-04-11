@@ -2,24 +2,36 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: seed
+  labels:
+    app: seed
+    type: node
 spec:
   serviceName: seeds
-  replicas: 2 # by default is 1
+  replicas: 1 
   selector:
     matchLabels:
       app: seed # has to match .spec.template.metadata.labels
+      type: node
   template:
     metadata:
       labels:
         app: seed # has to match .spec.selector.matchLabels
+        type: node
     spec:
       terminationGracePeriodSeconds: 10
       containers:
-      - name: mightycalc-node
-        image: aleskov/mightycalc-node:local
+      - name: node
+        image: aleskov/mightycalc-lighthouse:local
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "pbm 127.0.0.1:2556 cluster leave"]
         ports:
         - name: akka
           containerPort: 2555
+          protocol: TCP
+        - name: akka-cmd
+          containerPort: 2556
           protocol: TCP
         livenessProbe:
           tcpSocket:
@@ -33,6 +45,8 @@ spec:
           value: "Host=postgres-svc;Port=5432;Database=readmodel;User ID=postgres;"
         - name: MightyCalc_NodePort
           value: "2555"
+        - name: MightyCalc_CmdPort
+          value: "2556"
         - name: HOST_NAME
           valueFrom:
             fieldRef:
@@ -42,7 +56,11 @@ spec:
         - name: MightyCalc_PublicHostName
           value: "$(HOST_NAME).seeds"
         - name: MightyCalc_SeedNodes
-          value: '["akka.tcp://MightyCalc@seed-0.seeds:2555", "akka.tcp://MightyCalc@seed-1.seeds:2555"]'
+          value: '["akka.tcp://MightyCalc@seed-0.seeds:2555"]'
+        - name: MightyCalc_NodeRoles
+          value: '[seed]'
+        - name: MightyCalc_CmdPort
+          value: "2556"
        
         resources:
           requests:

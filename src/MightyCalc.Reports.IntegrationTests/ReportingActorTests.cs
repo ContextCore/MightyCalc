@@ -32,9 +32,7 @@ namespace MightyCalc.Reports.IntegrationTests
 
         private static Config akkaConfig = @"
 akka.actor.provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
-akka.persistence.journal.plugin = ""akka.persistence.journal.postgresql""
-akka.persistence.snapshot-store.plugin = ""akka.persistence.snapshot-store.postgresql""
-
+akka.cluster.roles=[api, projection, calculation]
 akka.persistence.query.journal.sql {
 		# Implementation class of the SQL ReadJournalProvider
 			 class = ""Akka.Persistence.Query.Sql.SqlReadJournalProvider, Akka.Persistence.Query.Sql""
@@ -58,6 +56,7 @@ akka.persistence.query.journal.sql {
 
 akka.persistence{
 	journal {
+        plugin = ""akka.persistence.journal.postgresql""
 		postgresql {
 			# qualified type name of the PostgreSql persistence journal actor
 			class = ""Akka.Persistence.PostgreSql.Journal.PostgreSqlJournal, Akka.Persistence.PostgreSql""
@@ -98,6 +97,7 @@ akka.persistence{
 	}
 
 	snapshot-store {
+		plugin = ""akka.persistence.snapshot-store.postgresql""
 		postgresql {
 			# qualified type name of the PostgreSql persistence journal actor
 			class = ""Akka.Persistence.PostgreSql.Snapshot.PostgreSqlSnapshotStore, Akka.Persistence.PostgreSql""

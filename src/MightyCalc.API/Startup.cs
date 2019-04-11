@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using MightyCalc.Configuration;
 using MightyCalc.Node;
 using MightyCalc.Reports;
 using MightyCalc.Reports.DatabaseProjections;
@@ -66,22 +67,12 @@ namespace MightyCalc.API
 
         protected virtual MightyCalcApiConfiguration BuildConfiguration()
         {
-            var settings = new MightyCalcApiConfiguration();
-
-            var hoconPath = Path.Combine(ExecutingAssemblyFolder(), "akka.hocon");
-            if (File.Exists(hoconPath))
-            {
-                Config cfg = File.ReadAllText(hoconPath);
-                if (cfg.GetBoolean("enabled"))
-                    settings.Akka = cfg;
-            }
-
-            return settings;
+            return new MightyCalcApiConfiguration();
         }
 
         protected virtual ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
         {
-            var system = (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka);
+            var system = (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka).StartPbm();
             var complete = new TaskCompletionSource<bool>();
             var cluster = Cluster.Get(system);
             cluster.RegisterOnMemberUp(() => complete.SetResult(true));
