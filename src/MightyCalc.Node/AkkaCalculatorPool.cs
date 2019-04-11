@@ -15,10 +15,10 @@ namespace MightyCalc.Node
             var clusterSharding = ClusterSharding.Get(sys);
 
 
-            var aggregateProps = Props.Create<CalculatorActor>();
+            var entityProps = Props.Create<CalculatorActor>();
 
             _region = clusterSharding.StartAsync(KnownActorRegions.Calculator,
-                aggregateProps,
+                entityProps,
                 ClusterShardingSettings.Create(sys).WithRole(KnownRoles.Calculation),
                 new ShardedMessageMetadataExtractor()).Result; 
         }

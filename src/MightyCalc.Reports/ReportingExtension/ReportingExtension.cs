@@ -30,7 +30,7 @@ namespace MightyCalc.Reports.ReportingExtension
       
             ReportingActor = _system.ActorOf(ClusterSingletonProxy.Props(
                     singletonManagerPath: "/user/reporting",
-                    settings: ClusterSingletonProxySettings.Create(_system)),
+                    settings: ClusterSingletonProxySettings.Create(_system).WithRole(KnownRoles.Projection)),
                 name: "reportingProxy");
 
             ReportingActor.Tell(Reports.ReportingActor.Start.Instance);
