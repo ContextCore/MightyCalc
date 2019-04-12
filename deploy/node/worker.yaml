@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: node
-        image: aleskov/mightycalc-node:local
+        image: aleskov/mightycalc-node:stable
         lifecycle:
           preStop:
             exec:

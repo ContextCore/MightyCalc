@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: mightycalc-api-container
-        image: aleskov/mightycalc-api:local
+        image: aleskov/mightycalc-api:stable
         lifecycle:
           preStop:
             exec:

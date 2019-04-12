@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: node
-        image: aleskov/mightycalc-lighthouse:local
+        image: aleskov/mightycalc-lighthouse:stable
         lifecycle:
           preStop:
             exec:
