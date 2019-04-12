@@ -75,7 +75,7 @@ namespace MightyCalc.API.IntegrationTests
                 var usageAfterCalculation = report.UsageStatistics.FirstOrDefault(u => u.Name == expected.Key)
                                                 ?.UsageCount ?? 0;
                 
-                expected.Value.Should().BeGreaterThan(usageAfterCalculation - usageBefore);
+                expected.Value.Should().BeGreaterOrEqualTo(usageAfterCalculation - usageBefore);
             }
         }
 
