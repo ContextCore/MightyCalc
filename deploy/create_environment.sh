@@ -17,7 +17,6 @@ kubectl apply -f ./api/api-svc-external-gke.yaml
 fi
 
 #-----------##Nodes##----------
-kubectl apply -f ./node/node-svc.yaml
 kubectl apply -f ./node/seed-svc.yaml 
 kubectl apply -f ./node/seed.yaml
 kubectl apply -f ./node/worker.yaml

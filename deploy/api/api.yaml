@@ -19,28 +19,28 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command: ["/bin/sh", "-c", "pbm 127.0.0.1:2556 cluster leave"]
+              command: ["/bin/sh", "-c", "pbm 127.0.0.1:9110 cluster leave"]
         ports:
         - name: http
           containerPort: 80
         - name: akka
-          containerPort: 2555
+          containerPort: 2552
           protocol: TCP
         - name: akka-cmd
-          containerPort: 2556
+          containerPort: 9110
           protocol: TCP
         livenessProbe:
           tcpSocket:
-            port: 2555
+            port: 2552
         env:
         - name: MightyCalc_ReadModel
           value: "Host=postgres-svc;Port=5432;Database=readmodel;User ID=postgres;"
         - name: MightyCalc_NodePort
-          value: "2555"
+          value: "2552"
         - name: MightyCalc_CmdPort
-          value: "2556"
+          value: "9110"
         - name: MightyCalc_SeedNodes
-          value: '["akka.tcp://MightyCalc@seed-0.seeds:2555"]'
+          value: '["akka.tcp://MightyCalc@seed-0.seeds:2552"]'
         - name: HOST_NAME
           valueFrom:
             fieldRef:
