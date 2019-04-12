@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mightycalc-test
+  name: test
   labels:
-    app: mightycalc-test
+    app: test
 spec:
   containers:
   - name: mightycalc-container
-    image: mightycalc-test:local
+    image: aleskov/mightycalc-test:stable
     ports:
     - name: ssh
       containerPort: 22

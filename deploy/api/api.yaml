@@ -40,7 +40,7 @@ spec:
         - name: MightyCalc_CmdPort
           value: "9110"
         - name: MightyCalc_SeedNodes
-          value: '["akka.tcp://MightyCalc@seed-0.seeds:2552"]'
+          value: "akka.tcp://MightyCalc@seed-0.seeds:2552"
         - name: HOST_NAME
           valueFrom:
             fieldRef:

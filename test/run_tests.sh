@@ -1,8 +1,15 @@
 #set -euox pipefail
 #set -x
-echo "creating test pod" 
-kubectl apply -f mightycalc-tests.yaml
-./wait_pod_is_ready.sh 60 1
+mode=${1:-run} 
+if [ $mode != "clean" ]
+then
+    echo "creating test pod" 
+    kubectl apply -f mightycalc-tests.yaml
+    ./wait_pod_is_ready.sh 60 1
+else
+  echo cleaning previos test run results
+  kubectl delete pod test
+fi
 
 runTests() {
     testsName=$1
@@ -14,6 +21,7 @@ runTests() {
 
     hostLogsDirName=$testsName"_Logs"
     hostLogsDir="./"$hostLogsDirName
+    rm -rf $hostLogsDir
     mkdir $hostLogsDir
 
     kubectl exec -it $podName -- dotnet test $testProject -c Release --no-build --logger trx > $hostLogsDir/$logsOutputFile
@@ -36,6 +44,30 @@ runTests() {
     return $TestResult
 }
 
+print_red()
+{
+    printf "\e[31m$1\e[m\n"
+}
+print_green()
+{
+     printf "\e[32m$1\e[m\n"
+}
+launchTest()
+{
+    name=$1
+    project=$2
+
+     runTests $name $project test
+    
+        testExitCode=$?
+        if [ $testExitCode -ne 0 ]
+        then 
+            print_red "$name tests in $project failed, see logs for details"
+     # exit $testExitCode
+        else
+            print_green "$project tests passed" 
+        fi
+}
 testsPlan=( "api:MightyCalc.API.Tests"
              "node:MightyCalc.Node.Tests"
              "reports:MightyCalc.Reports.Tests"
@@ -48,14 +80,15 @@ for plan in "${testsPlan[@]}" ; do
     name="${plan%%:*}"
     project="${plan##*:}"
     
-    runTests $name $project mightycalc-test
-
-    testExitCode=$?
-    if [ $testExitCode -ne 0 ]
-    then 
-      echo $name tests in $project failed, see logs for details
-     # exit $testExitCode
+    if [ $mode == "clean" ]
+    then
+        rm -rf $name"_tests_output.txt" 
+        rm -rf $name"_Logs" 
+        rm -rf $name"_test_logs.zip" 
+    else 
+       launchTest $name $project
     fi
+    
 done
 
 #exit $anyTestFailed 

@@ -30,9 +30,9 @@ spec:
             port: 2552
         env:
         - name: MightyCalc_Journal
-          value: '"Host=postgres-svc;Port=5432;Database=journal;User ID=postgres;"'
+          value: "Host=postgres-svc;Port=5432;Database=journal;User ID=postgres;"
         - name: MightyCalc_SnapshotStore
-          value: '"Host=postgres-svc;Port=5432;Database=snapshotstore;User ID=postgres;"'
+          value: "Host=postgres-svc;Port=5432;Database=snapshotstore;User ID=postgres;"
         - name: MightyCalc_ReadModel
           value: "Host=postgres-svc;Port=5432;Database=readmodel;User ID=postgres;"
         - name: MightyCalc_NodePort
@@ -53,9 +53,9 @@ spec:
         - name: MightyCalc_PublicHostName
           value: "$(HOST_IP)"
         - name: MightyCalc_SeedNodes
-          value: '["akka.tcp://MightyCalc@seed-0.seeds:2552"]'
+          value: "akka.tcp://MightyCalc@seed-0.seeds:2552"
         - name: MightyCalc_NodeRoles
-          value: '[projection, calculation]'
+          value: "projection calculation"
         resources:
           requests:
             memory: "128Mi"

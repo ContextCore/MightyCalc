@@ -48,9 +48,10 @@ build_script:
     sed -i "s/\(.*version:.*\)/  version: $APP_VERSION/g" MightyCalcAPI.yaml
 
     docker build . --target=build-env -t mightycalc-test:local
+    docker build . --target=lighthouse-runtime -t aleskov/mightycalc-lighthouse:latest -t aleskov/mightycalc-lighthouse:$APP_VERSION -t aleskov/mightycalc-lighthouse:stable
     docker build . --target=api-runtime -t aleskov/mightycalc-api:latest -t aleskov/mightycalc-api:$APP_VERSION -t aleskov/mightycalc-api:stable
     docker build . --target=node-runtime -t aleskov/mightycalc-node:latest -t aleskov/mightycalc-node:$APP_VERSION -t aleskov/mightycalc-node:stable
-    docker build . --target=lighthouse-runtime -t aleskov/mightycalc-lighthouse:latest -t aleskov/mightycalc-lighthouse:$APP_VERSION -t aleskov/mightycalc-lighthouse:stable
+    docker build . --target=build-env -t aleskov/mightycalc-test:latest -t aleskov/mightycalc-test:$APP_VERSION -t aleskov/mightycalc-test:stable
 
     docker save aleskov/mightycalc-api:latest > mightycalc-api.tar 
     docker save aleskov/mightycalc-node:latest > mightycalc-node.tar  
@@ -87,6 +88,7 @@ deploy_script:
     docker push aleskov/mightycalc-api
     docker push aleskov/mightycalc-node
     docker push aleskov/mightycalc-lighthouse
+    docker push aleskov/mightycalc-test
 on_finish:
   - sh: |
       find "$APPVEYOR_BUILD_FOLDER" -type f -name '*.trx' -print0 | xargs -0 -I '{}' curl -F 'file=@{}' "https://ci.appveyor.com/api/testresults/mstest/$APPVEYOR_JOB_ID" 
