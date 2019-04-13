@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.Configuration", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.LightHouse", "MightyCalc.LightHouse\MightyCalc.LightHouse.csproj", "{C9DE33A4-4767-4177-9468-98CB178F4B82}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MightyCalc.Configuration.Tests", "MightyCalc.Configuration.Tests\MightyCalc.Configuration.Tests.csproj", "{1348CEDC-7D87-4F9B-AA68-9B7A6C9B0BFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,6 +108,10 @@ Global
 		{C9DE33A4-4767-4177-9468-98CB178F4B82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9DE33A4-4767-4177-9468-98CB178F4B82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9DE33A4-4767-4177-9468-98CB178F4B82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1348CEDC-7D87-4F9B-AA68-9B7A6C9B0BFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1348CEDC-7D87-4F9B-AA68-9B7A6C9B0BFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1348CEDC-7D87-4F9B-AA68-9B7A6C9B0BFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1348CEDC-7D87-4F9B-AA68-9B7A6C9B0BFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B35114BA-E6EE-4E07-B850-C0401B54D5D2} = {34BFC937-13EB-4787-AD50-B708999D536C}
@@ -116,5 +122,6 @@ Global
 		{849FFF76-841D-450B-8324-11AA4DBF1C2C} = {F4D970E4-BB2C-4BDC-81A7-416DC4DEA7DA}
 		{FE70D02B-870D-4232-811C-48D40BD6C7BF} = {F4D970E4-BB2C-4BDC-81A7-416DC4DEA7DA}
 		{3D83EB21-E5FE-4A41-8AF7-512CA359B472} = {34BFC937-13EB-4787-AD50-B708999D536C}
+		{1348CEDC-7D87-4F9B-AA68-9B7A6C9B0BFD} = {34BFC937-13EB-4787-AD50-B708999D536C}
 	EndGlobalSection
 EndGlobal

@@ -9,9 +9,9 @@ namespace MightyCalc.Configuration
 {
     public static class Configuration
     {
-        public class HoconConfigProvider
+        public class HoconValueProvider
         {
-            public HoconConfigProvider(string path, string environmentVariableName,
+            public HoconValueProvider(string path, string environmentVariableName,
                 Func<string, string> formatter = null)
             {
                 Path = path;
@@ -23,48 +23,54 @@ namespace MightyCalc.Configuration
             public string EnvironmentVariableName { get; }
             private readonly Func<string, string> _formatter;
 
-            public string GetHocon()
+            public string GetValue()
             {
                 var variable = Environment.GetEnvironmentVariable(EnvironmentVariableName);
                 var hoconValue = variable == null ? null : _formatter(variable);
-                return $"{Path} = {hoconValue}";
+                return hoconValue;
             }
 
-            public static HoconConfigProvider Quoted(string env, string path) =>
-                new HoconConfigProvider(path, env, s => $"\"{s}\"");
+            public string GetHocon()
+            {
+                var value = GetValue();
+                return value == null ? string.Empty : $"{Path} = {value}";
+            }
 
-            public static HoconConfigProvider Array(string env, string path) =>
-                new HoconConfigProvider(path, env, s =>
+            public static HoconValueProvider Quoted(string env, string path) =>
+                new HoconValueProvider(path, env, s => string.IsNullOrWhiteSpace(s) ? "\"\"" : $"\"{s}\"");
+
+            public static HoconValueProvider Array(string env, string path) =>
+                new HoconValueProvider(path, env, s => string.IsNullOrWhiteSpace(s) ? "[]" : 
                     $"[{string.Join(",", s.Split(' ').Select(ss => $"\"{ss}\""))}]");
         }
 
-        public static Config GetEnvironmentConfig(params HoconConfigProvider[] additionalProviders)
+        public static Config GetEnvironmentConfig(params HoconValueProvider[] additionalProviders)
         {
-            var defaultProviders = new []
+            var defaultProviders = new[]
             {
-                HoconConfigProvider.Quoted("MightyCalc_Journal",
+                HoconValueProvider.Quoted("MightyCalc_Journal",
                     "akka.persistence.journal.postgresql.connection-string"),
-                HoconConfigProvider.Quoted("MightyCalc_SnapshotStore",
+                HoconValueProvider.Quoted("MightyCalc_SnapshotStore",
                     "akka.persistence.snapshot-store.postgresql.connection-string"),
-                HoconConfigProvider.Array("MightyCalc_SeedNodes", "akka.cluster.seed-nodes"),
-                HoconConfigProvider.Array("MightyCalc_NodeRoles", "akka.cluster.roles"),
-                HoconConfigProvider.Quoted("MightyCalc_NodePort", "akka.remote.dot-netty.tcp.port"),
-                HoconConfigProvider.Quoted("MightyCalc_PublicHostName",
+                HoconValueProvider.Array("MightyCalc_SeedNodes", "akka.cluster.seed-nodes"),
+                HoconValueProvider.Array("MightyCalc_NodeRoles", "akka.cluster.roles"),
+                HoconValueProvider.Quoted("MightyCalc_NodePort", "akka.remote.dot-netty.tcp.port"),
+                HoconValueProvider.Quoted("MightyCalc_PublicHostName",
                     "akka.remote.dot-netty.tcp.public-hostname"),
-                HoconConfigProvider.Quoted("MightyCalc_PublicIP", "akka.remote.dot-netty.tcp.public-ip"),
-                HoconConfigProvider.Quoted("MightyCalc_HostName", "akka.remote.dot-netty.tcp.hostname"),
-                HoconConfigProvider.Quoted("MightyCalc_CmdPort", "petabridge.cmd.port"),
-                HoconConfigProvider.Quoted("MightyCalc_CmdHost", "petabridge.cmd.host")
+                HoconValueProvider.Quoted("MightyCalc_PublicIP", "akka.remote.dot-netty.tcp.public-ip"),
+                HoconValueProvider.Quoted("MightyCalc_HostName", "akka.remote.dot-netty.tcp.hostname"),
+                HoconValueProvider.Quoted("MightyCalc_CmdPort", "petabridge.cmd.port"),
+                HoconValueProvider.Quoted("MightyCalc_CmdHost", "petabridge.cmd.host")
             };
 
-            var providers = additionalProviders.Any() ? defaultProviders.Concat(additionalProviders) : defaultProviders; 
+            var providers = additionalProviders.Any() ? defaultProviders.Concat(additionalProviders) : defaultProviders;
             var stringBuilder = new StringBuilder();
-            
-            foreach (var envNameAndPath in providers)
-            {
-                stringBuilder.AppendLine(envNameAndPath.GetHocon());
-            }
 
+            providers.Select(p => p.GetHocon())
+                     .Where(h => h != null)
+                     .ToList()
+                     .ForEach(h => stringBuilder.AppendLine(h));
+            
             Config customCfg = stringBuilder.ToString();
 
             return customCfg;
