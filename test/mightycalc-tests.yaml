@@ -15,7 +15,7 @@ spec:
     args: [ "infinity" ]
     env:
     - name: MightyCalc_ApiUrl
-      value: "http://mightycalc-api-svc"
+      value: "http://api-svc"
     - name: MightyCalc_Journal
       value: "Host=postgres-svc;Port=5432;Database=journal;User ID=postgres;"
     - name: MightyCalc_SnapshotStore

@@ -47,7 +47,6 @@ build_script:
     #sed -i '' -e 's/\(.*version:.*\)/version: $APP_VERSION/g' MightyCalcAPI.yaml
     sed -i "s/\(.*version:.*\)/  version: $APP_VERSION/g" MightyCalcAPI.yaml
 
-    docker build . --target=build-env -t mightycalc-test:local
     docker build . --target=lighthouse-runtime -t aleskov/mightycalc-lighthouse:latest -t aleskov/mightycalc-lighthouse:$APP_VERSION -t aleskov/mightycalc-lighthouse:stable
     docker build . --target=api-runtime -t aleskov/mightycalc-api:latest -t aleskov/mightycalc-api:$APP_VERSION -t aleskov/mightycalc-api:stable
     docker build . --target=node-runtime -t aleskov/mightycalc-node:latest -t aleskov/mightycalc-node:$APP_VERSION -t aleskov/mightycalc-node:stable

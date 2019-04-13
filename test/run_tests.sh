@@ -68,7 +68,8 @@ launchTest()
             print_green "$project tests passed" 
         fi
 }
-testsPlan=( "api:MightyCalc.API.Tests"
+testsPlan=(  "cfg:MightyCalc.Configuration.Tests",
+             "api:MightyCalc.API.Tests"
              "node:MightyCalc.Node.Tests"
              "reports:MightyCalc.Reports.Tests"
              "node_integration:MightyCalc.Node.IntegrationTests"
@@ -87,7 +88,7 @@ for plan in "${testsPlan[@]}" ; do
         rm -rf $name"_test_logs.zip" 
     else 
        launchTest $name $project
-    fi
+    fi;
     
 done
 
