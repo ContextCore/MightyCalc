@@ -43,10 +43,6 @@ build_script:
 - sh: |
 
     curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
-
-
-    # sudo -E minikube start --vm-driver=none
-    
     cd ./src 
 
     echo changing API yaml definition version to $APP_VERSION
@@ -58,20 +54,23 @@ build_script:
     docker build . --target=node-runtime -t aleskov/mightycalc-node:latest -t aleskov/mightycalc-node:$APP_VERSION -t aleskov/mightycalc-node:stable --quiet
     docker build . --target=build-env -t aleskov/mightycalc-test:latest -t aleskov/mightycalc-test:$APP_VERSION -t aleskov/mightycalc-test:stable --quiet
 
-    docker save aleskov/mightycalc-api:latest > mightycalc-api.tar 
-    docker save aleskov/mightycalc-node:latest > mightycalc-node.tar  
-    docker save aleskov/mightycalc-lighthouse:latest > mightycalc-lighthouse.tar  
+    # docker save aleskov/mightycalc-api:latest > mightycalc-api.tar 
+    # docker save aleskov/mightycalc-node:latest > mightycalc-node.tar  
+    # docker save aleskov/mightycalc-lighthouse:latest > mightycalc-lighthouse.tar  
 
     cd ..
    
     docker build . -f ./build/persistence/persistence.dockerfile -t aleskov/mightycalc-persistence:latest -t aleskov/mightycalc-persistence:$APP_VERSION -t aleskov/mightycalc-persistence:stable
-    
+
 test_script:
 - sh: |
     #set -euo pipefail
     #using docker instead of k8s for simplicity, we don't need any external services
     #kubectl describe node minikube
-    
+    docker image prune
+
+    sudo -E minikube start --vm-driver=none
+
     echo creating environment for tests
     
     cd ./deploy 
