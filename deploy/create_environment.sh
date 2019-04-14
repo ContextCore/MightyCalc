@@ -5,7 +5,14 @@ k8sProvider=$1 #gke or dd (docker-desktop) or mk (minikube)
 
 #-----------##Persistence##----------
 kubectl apply -f ./persistence/storageclass-${k8sProvider}.yaml
+
+if [ $k8sProvider = "mk" ]
+then
+kubectl apply -f ./persistence/postgres-mk.yaml
+else
 kubectl apply -f ./persistence/postgres.yaml
+fi
+
 kubectl apply -f ./persistence/postgres-svc.yaml
 kubectl apply -f ./persistence/postgres-svc-external.yaml
 

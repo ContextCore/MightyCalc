@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres # has to match .spec.template.metadata.labels
+  serviceName: postgres-svc
+  replicas: 1 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: postgres # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: postgres
+        image: aleskov/mightycalc-persistence
+        ports:
+        - containerPort: 5432
+          name: postgres
+        volumeMounts:
+        - name: postgres-volumeclaim
+          mountPath: /var/lib/postgresql/
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-volumeclaim
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "mightycalc-storage"
+      resources:
+        requests:
+          storage: 1Gi
