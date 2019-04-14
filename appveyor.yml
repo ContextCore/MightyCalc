@@ -45,7 +45,7 @@ build_script:
     curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
 
-   # sudo -E minikube start --vm-driver=none
+    # sudo -E minikube start --vm-driver=none
     
     cd ./src 
 
