@@ -20,7 +20,7 @@ namespace MightyCalc.NodeHost
         public void Start()
         {
             var config = new NodeConfiguration();
-            _nodeSystem = ActorSystem.Create(config.ClusterName, config.AkkaConfig);
+            _nodeSystem = ActorSystem.Create(config.ClusterName, config.AkkaConfig).StartPbm();
             var cluster = Cluster.Get(_nodeSystem);
             cluster.RegisterOnMemberUp(() => OnStart(_nodeSystem, config.ReadModel));
             

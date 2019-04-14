@@ -77,7 +77,7 @@ test_script:
     ./create_environment.sh mk
     
     #    kubectl describe node minikube
-    
+    kubectl exec seed-0 -- pbm localhost:9110 cluster show 
     #run integration tests in created environment
     cd ../test
     ./run_tests.sh
