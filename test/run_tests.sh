@@ -90,7 +90,7 @@ for plan in "${testsPlan[@]}" ; do
         rm -rf $name"_test_logs.zip" 
     else 
        launchTest $name $project
-       kubectl exec seed-0 -- pbm localhost:9110 cluster
+       kubectl exec seed-0 -- pbm localhost:9110 cluster show
     fi;
     
 done
