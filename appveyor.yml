@@ -14,7 +14,7 @@ environment:
   # Disable prompts for CI
   MINIKUBE_WANTUPDATENOTIFICATION: "false"
   MINIKUBE_WANTREPORTERRORPROMPT: "false"
-  APPVEYOR_SSH_BLOCK: true
+  #APPVEYOR_SSH_BLOCK: true
 services:
  - docker
 install:
@@ -42,7 +42,7 @@ install:
 build_script:
 - sh: |
 
-    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+    #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
     cd ./src 
 
     echo changing API yaml definition version to $APP_VERSION
@@ -67,7 +67,7 @@ test_script:
     #set -euo pipefail
     #using docker instead of k8s for simplicity, we don't need any external services
     #kubectl describe node minikube
-    docker image prune
+    docker image prune -f
 
     sudo -E minikube start --vm-driver=none
 
