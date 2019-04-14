@@ -14,7 +14,7 @@ environment:
   # Disable prompts for CI
   MINIKUBE_WANTUPDATENOTIFICATION: "false"
   MINIKUBE_WANTREPORTERRORPROMPT: "false"
-  #APPVEYOR_SSH_BLOCK: true
+  APPVEYOR_SSH_BLOCK: true
 services:
  - docker
 install:
@@ -75,7 +75,7 @@ test_script:
     
     cd ./deploy 
     ./create_environment.sh mk
-    
+    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
     #    kubectl describe node minikube
     kubectl exec seed-0 -- pbm localhost:9110 cluster show 
     #run integration tests in created environment
