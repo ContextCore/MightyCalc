@@ -4,6 +4,8 @@ branches:
   - master
 image: Ubuntu
 environment:
+  MINIKUBE_VERSION: "1.0.0"
+  KUBECTL_VERSION: "1.14.1"
   # Changes ownership of minikube config dirs to running user
   CHANGE_MINIKUBE_NONE_USER: "true"
   # Set kubeconfig and minikube paths
@@ -29,17 +31,21 @@ install:
     echo "exported info version is $INFORMATIONAL_VERSION"
 - ps: Update-AppveyorBuild -Version "$env:APP_VERSION+$env:APPVEYOR_BUILD_NUMBER"
 - sh: |
-    curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.0.0/minikube-linux-amd64
+    curl -Lo minikube https://storage.googleapis.com/minikube/releases/v${MINIKUBE_VERSION}/minikube-linux-amd64
     chmod +x minikube
     sudo mv minikube /usr/local/bin/.
 - sh: |
-    curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl
+    curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
     chmod +x kubectl
     sudo mv kubectl /usr/local/bin/.
  
 build_script:
 - sh: |
-    sudo -E minikube start --vm-driver=none
+
+    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+
+
+   # sudo -E minikube start --vm-driver=none
     
     cd ./src 
 
@@ -65,7 +71,6 @@ test_script:
     #set -euo pipefail
     #using docker instead of k8s for simplicity, we don't need any external services
     #kubectl describe node minikube
-    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
     
     echo creating environment for tests
     
