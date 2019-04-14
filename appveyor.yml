@@ -12,7 +12,7 @@ environment:
   # Disable prompts for CI
   MINIKUBE_WANTUPDATENOTIFICATION: "false"
   MINIKUBE_WANTREPORTERRORPROMPT: "false"
-  APPVEYOR_SSH_BLOCK: true
+  #APPVEYOR_SSH_BLOCK: true
 services:
  - docker
 install:
@@ -46,7 +46,7 @@ build_script:
     #MacOS version:
     sed -i "s/\(.*version:.*\)/  version: $APP_VERSION/g" MightyCalcAPI.yaml
 
-    docker build . --target=lighthouse-runtime -t aleskov/mightycalc-lighthouse:latest -t aleskov/mightycalc-lighthouse:$APP_VERSION -t aleskov/mightycalc-lighthouse:stable --quiet
+    docker build . --target=lighthouse-runtime -t aleskov/mightycalc-lighthouse:latest -t aleskov/mightycalc-lighthouse:$APP_VERSION -t aleskov/mightycalc-lighthouse:stable
     docker build . --target=api-runtime -t aleskov/mightycalc-api:latest -t aleskov/mightycalc-api:$APP_VERSION -t aleskov/mightycalc-api:stable --quiet
     docker build . --target=node-runtime -t aleskov/mightycalc-node:latest -t aleskov/mightycalc-node:$APP_VERSION -t aleskov/mightycalc-node:stable --quiet
     docker build . --target=build-env -t aleskov/mightycalc-test:latest -t aleskov/mightycalc-test:$APP_VERSION -t aleskov/mightycalc-test:stable --quiet
@@ -63,7 +63,7 @@ test_script:
 - sh: |
     #set -euo pipefail
     #using docker instead of k8s for simplicity, we don't need any external services
-    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+   # curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
     echo creating environment for tests
 

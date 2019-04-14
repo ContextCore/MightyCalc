@@ -5,7 +5,7 @@ if [ $mode != "clean" ]
 then
     echo "creating test pod" 
     kubectl apply -f mightycalc-tests.yaml
-    ./wait_pod_is_ready.sh 60 1
+    ./wait_pod_is_ready.sh 180 3
 else
   echo cleaning previos test run results
   kubectl delete pod test
@@ -76,6 +76,8 @@ testsPlan=(  "cfg:MightyCalc.Configuration.Tests",
              "report_integration:MightyCalc.Reports.IntegrationTests"
              "api_integration:MightyCalc.API.IntegrationTests")
 anyTestFailed=0
+
+
 
 for plan in "${testsPlan[@]}" ; do
     name="${plan%%:*}"
