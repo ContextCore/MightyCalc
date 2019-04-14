@@ -64,15 +64,21 @@ test_script:
 - sh: |
     #set -euo pipefail
     #using docker instead of k8s for simplicity, we don't need any external services
+    kubectl describe node minikube
+    
     echo creating environment for tests
-
+    
     cd ./deploy 
     ./create_environment.sh mk
-    curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
-
+    #curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+    
+        kubectl describe node minikube
+    
     #run integration tests in created environment
     cd ../test
     ./run_tests.sh
+
+    kubectl describe node minikube
 
 artifacts:
 - path: '**\mighty*.tar'
