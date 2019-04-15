@@ -1,28 +1,44 @@
 #set -euox pipefail
 #set -x
 mode=${1:-run} 
+#mod - can be 'run', 'clean', or test name 
+
 if [ $mode != "clean" ]
 then
     echo "creating test pod" 
     kubectl apply -f mightycalc-tests.yaml
     ./wait_pod_is_ready.sh 180 3
-else
-  echo cleaning previos test run results
-  kubectl delete pod test
 fi
+
+print_red()
+{
+    printf "\e[31m$1\e[m\n"
+}
+print_green()
+{
+     printf "\e[32m$1\e[m\n"
+}
+
+clean_all()
+{
+    rm -rf $1"_tests_output.txt"
+    rm -rf $1"_Logs" 
+    rm -rf $1"_test_logs.zip" 
+}
 
 runTests() {
     testsName=$1
     testFolder=$2
     podName=$3
-    logsOutputFile=${testsName}_tests_output.txt 
-    testProject="./$testFolder/$testFolder.csproj"
-    echo Running $testsName tests in $testProject
-
+    logsOutputFile=$testsName"_tests_output.txt"
     hostLogsDirName=$testsName"_Logs"
     hostLogsDir="./"$hostLogsDirName
     rm -rf $hostLogsDir
     mkdir $hostLogsDir
+
+    testProject="./$testFolder/$testFolder.csproj"
+    echo Running $testsName tests in $testProject
+
 
     kubectl exec -it $podName -- dotnet test $testProject -c Release --no-build --logger trx > $hostLogsDir/$logsOutputFile
     TestResult=$?
@@ -38,20 +54,11 @@ runTests() {
     kubectl cp $podName:$podTestResultFolder $hostLogsDir
     
     #echo Looking for a tests results. It may be the direct output and any additional logs in *.txt files produced by 
-    #test runner
-    zip -r ${testsName}_test_logs.zip $hostLogsDirName
-    #rm -rf $hostLogsDir
+    zip -r $name"_test_logs.zip"  $hostLogsDirName
     return $TestResult
 }
 
-print_red()
-{
-    printf "\e[31m$1\e[m\n"
-}
-print_green()
-{
-     printf "\e[32m$1\e[m\n"
-}
+
 launchTest()
 {
     name=$1
@@ -77,22 +84,23 @@ testsPlan=(  "cfg:MightyCalc.Configuration.Tests"
              "api_integration:MightyCalc.API.IntegrationTests")
 anyTestFailed=0
 
-
-
 for plan in "${testsPlan[@]}" ; do
     name="${plan%%:*}"
     project="${plan##*:}"
-    
+    #echo processing $name
     if [ $mode == "clean" ]
     then
-        rm -rf $name"_tests_output.txt" 
-        rm -rf $name"_Logs" 
-        rm -rf $name"_test_logs.zip" 
-    else 
+        clean_all $name 
+    elif [ $mode == "run" ] || [ $mode == $name ] 
+    then
        launchTest $name $project
        kubectl exec seed-0 -- pbm localhost:9110 cluster show
     fi;
-    
 done
 
+if [ $mode == "clean" ]
+then
+  echo cleaning previos test run results
+  kubectl delete pod test --wait=false
+fi
 #exit $anyTestFailed 
