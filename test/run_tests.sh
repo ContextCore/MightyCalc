@@ -40,7 +40,7 @@ runTests() {
     echo Running $testsName tests in $testProject
 
 
-    kubectl exec -it $podName -- dotnet test $testProject -c Release --no-build --logger trx > $hostLogsDir/$logsOutputFile
+    kubectl exec $podName -- dotnet test $testProject -c Release --no-build --logger trx > $hostLogsDir/$logsOutputFile
     TestResult=$?
 
     projectFolder=/usr/bin/MightyCalc/${testFolder}
