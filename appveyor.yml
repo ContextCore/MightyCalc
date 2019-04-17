@@ -87,7 +87,7 @@ test_script:
     #run integration tests in created environment
     cd ../test
 
-    . ./test/get_pod_name.sh
+    . ./get_pod_name.sh
     apiPodName = $(get_pod api)
     workerPodName = $(get_pod worker)
 
