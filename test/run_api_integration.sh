@@ -15,8 +15,8 @@ kubectl logs -f $apiPodName  > api_pod_logs.txt &
 ./run_tests.sh api_integration
 
 zip -r "seed_cluster_events_logs.zip"  ./seed_cluster_events.txt
-zip -r "api_cluster_events_logs.zip"  ./worker_cluster_events.txt
-zip -r "worker_cluster_events_logs.zip"  ./api_cluster_events.txt
+zip -r "worker_cluster_events_logs.zip"  ./worker_cluster_events.txt
+zip -r "api_cluster_events_logs.zip"  ./api_cluster_events.txt
 zip -r "seed_pod_logs.zip"  ./seed_pod_logs.txt
-zip -r "api_pod_logs.zip"  ./worker_pod_logs.txt
-zip -r "worker_pod_logs.zip"  ./api_pod_logs.txt
+zip -r "worker_pod_logs.zip"  ./worker_pod_logs.txt
+zip -r "api_pod_logs.zip"  ./api_pod_logs.txt

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -43,6 +44,7 @@ namespace MightyCalc.NodeHost
 
             using (var myDbContext = new FunctionUsageContext(options))
             {
+                Console.WriteLine("Migrating db at " + myDbContext.Database.GetDbConnection().ConnectionString);
                 myDbContext.Database.Migrate();
             }
 

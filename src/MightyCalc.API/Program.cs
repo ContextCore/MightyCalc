@@ -24,7 +24,7 @@ namespace MightyCalc.API
             using(var scope = host.Services.CreateScope())
             {
                 var myDbContext = scope.ServiceProvider.GetRequiredService<FunctionUsageContext>();
-
+                Console.WriteLine("Migrating db at " + myDbContext.Database.GetDbConnection().ConnectionString);
                 myDbContext.Database.Migrate();
             }
 
