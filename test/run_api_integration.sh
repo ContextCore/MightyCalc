@@ -16,7 +16,7 @@ kubectl logs -f $apiPodName  > api_pod_logs.txt &
 
 #./run_tests.sh api_integration
 
-./run_tests 
+./run_tests.sh 
 
 echo describing services
 #kubectl describe service postgres-svc 
