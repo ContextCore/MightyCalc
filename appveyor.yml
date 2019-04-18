@@ -90,7 +90,8 @@ test_script:
     kubectl exec seed-0 -- pbm localhost:9110 cluster show 
     #run integration tests in created environment
     cd ../test
-    ./run_tests.sh
+    #./run_tests.sh
+    ./run_api_integration.sh
     #kubectl describe node minikube
 
 artifacts:
