@@ -32,7 +32,7 @@ akka{
         serialize-messages = on 
         serialize-creators = on
         serializers {
-                          akka-sharding = ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding""
+            akka-sharding = ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding""
             hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
         }
                         
