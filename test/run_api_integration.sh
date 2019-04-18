@@ -14,12 +14,13 @@ kubectl logs -f $workerPodName  > worker_pod_logs.txt &
 kubectl exec $apiPodName -- pbm localhost:9110 cluster tail > api_cluster_events.txt &
 kubectl logs -f $apiPodName  > api_pod_logs.txt &
 
-kubectl describe postgres-svc 
+kubectl get service
+kubectl describe service postgres-svc 
 kubectl describe pod postgres-0
 
 ./run_tests.sh api_integration
 
-kubectl describe postgres-svc 
+kubectl describe service postgres-svc 
 kubectl describe pod postgres-0
 
 zip -r "seed_cluster_events_logs.zip"  ./seed_cluster_events.txt
