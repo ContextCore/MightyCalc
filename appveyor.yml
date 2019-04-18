@@ -80,7 +80,10 @@ test_script:
     
     cd ./deploy 
     ./create_environment.sh mk
+    echo waiting for postgres to start
+    echo "Current time : $(date +"%T")"
     sleep 5 #to allow postgres to init DB state
+    echo "Current time : $(date +"%T")"
     curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
     #    kubectl describe node minikube
