@@ -80,6 +80,7 @@ test_script:
     
     cd ./deploy 
     ./create_environment.sh mk
+    sleep 5 #to allow postgres to init DB state
     curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
     #    kubectl describe node minikube
