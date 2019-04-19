@@ -50,8 +50,8 @@ namespace MightyCalc.Reports.Streams
                                 InvocationsCount = functionUsage.Count(),
                                 CalculatorName = evt.CalculatorId,
                                 Period = period,
-                                PeriodStart = Period.Begin(period, evt.Occured),
-                                PeriodEnd = Period.End(period, evt.Occured)
+                                PeriodStart = evt.Occured.ToPeriodBegin(period),
+                                PeriodEnd = evt.Occured.ToPeriodEnd(period)
                             });
                         else
                         {

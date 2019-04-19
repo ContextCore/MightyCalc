@@ -10,11 +10,13 @@ namespace MightyCalc.API
     public class AkkaApi : IApiController
     {
         private readonly INamedCalculatorPool _pool;
-        private readonly IFunctionsTotalUsageQuery _functionsTotalUsageQuery;
+        private readonly IFunctionsTotalUsageQuery _totalUsageQuery;
+        private readonly IFunctionsUsageQuery _usageQuery;
 
-        public AkkaApi(INamedCalculatorPool pool, IFunctionsTotalUsageQuery query)
+        public AkkaApi(INamedCalculatorPool pool, IFunctionsTotalUsageQuery totalUsageQuery, IFunctionsUsageQuery usageQuery)
         {
-            _functionsTotalUsageQuery = query;
+            _usageQuery = usageQuery;
+            _totalUsageQuery = totalUsageQuery;
             _pool = pool;
         }
 
@@ -69,7 +71,7 @@ namespace MightyCalc.API
 
         public async Task<Report> UsageTotalStatsAsync()
         {
-            var usage = await _functionsTotalUsageQuery.Execute();
+            var usage = await _totalUsageQuery.Execute();
             return new Report()
             {
                 UsageStatistics = usage.Select(u => new FunctionUsage {
@@ -78,9 +80,15 @@ namespace MightyCalc.API
             };
         }
 
-        public Task<Report> UserUsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
+        public async Task<Report> UserUsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
         {
-            throw new NotImplementedException();
+            var usage = await _usageQuery.Execute("anonymous",@from, to);
+            return new Report()
+            {
+                UsageStatistics = usage.Select(u => new FunctionUsage {
+                Name = u.FunctionName, 
+                UsageCount = (int) u.InvocationsCount}).ToList()
+            };
         }
     }
 }

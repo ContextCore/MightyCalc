@@ -20,37 +20,61 @@ namespace MightyCalc.Reports.Tests
 {
     public class FunctionUsageSinkTests : TestKit
     {
-        public FunctionUsageSinkTests(ITestOutputHelper output):base("",output)
+        public FunctionUsageSinkTests(ITestOutputHelper output) : base("", output)
         {
-            
         }
+
         [Fact]
         public async Task Given_sink_When_pushing_events_to_it_Then_they_should_be_projected()
         {
-            var dep = Init(nameof(Given_sink_When_pushing_events_to_it_Then_they_should_be_projected));
+            var dep = Init(nameof(FunctionUsageSinkTests) +
+                           nameof(Given_sink_When_pushing_events_to_it_Then_they_should_be_projected));
 
+            var now = DateTimeOffset.Now;
             var source = Source.From(new[]
             {
-                new SequencedFunctionTotalUsage {FunctionName = "myFunc", InvocationsCount = 5, Sequence = 13},
-                new SequencedFunctionTotalUsage {FunctionName = "myFunc", InvocationsCount = 6, Sequence = 14},
-                new SequencedFunctionTotalUsage {FunctionName = "addition", InvocationsCount = 1, Sequence = 15},
+                new Sequenced<CalculatorActor.CalculationPerformed>
+                {
+                    Message = new CalculatorActor.CalculationPerformed("CalcA", "1+1", null, new[] {"myFunc"}),
+                    Sequence = 13
+                },
+                new Sequenced<CalculatorActor.CalculationPerformed>
+                {
+                    Message = new CalculatorActor.CalculationPerformed("CalcA", "1+1", null, new[] {"myFunc"}),
+                    Sequence = 14
+                },
+                new Sequenced<CalculatorActor.CalculationPerformed>
+                {
+                    Message = new CalculatorActor.CalculationPerformed("CalcA", "1+2", null, new[] {"addition"}),
+                    Sequence = 15
+                }
             });
 
-            var sink = FunctionTotalUsageSink.Create(Sys, "testEvent");
+            var sink = FunctionUsageSink.Create(Sys, "testEvent");
 
             source.RunWith(sink, Sys.Materializer());
 
             await Task.Delay(3000);
-            
-            var projection = dep.CreateFindProjectionQuery().Execute(KnownProjectionsNames.TotalFunctionUsage,
-                nameof(FunctionsTotalUsageProjector), "testEvent");
+
+            var projection = dep.CreateFindProjectionQuery().Execute(KnownProjectionsNames.FunctionUsage,
+                nameof(FunctionsUsageProjector), "testEvent");
 
             Assert.NotNull(projection);
-            var projectedData = await new FunctionsTotalUsageQuery(dep.CreateFunctionUsageContext()).Execute("");
+            var projectedData = await new FunctionsUsageQuery(dep.CreateFunctionUsageContext()).Execute("CalcA");
 
             projectedData.Should().BeEquivalentTo(
-                new FunctionTotalUsage {FunctionName = "myFunc", InvocationsCount = 11},
-                new FunctionTotalUsage {FunctionName = "addition", InvocationsCount = 1}
+                new FunctionUsage
+                {
+                    FunctionName = "myFunc", CalculatorName = "CalcA", InvocationsCount = 2,
+                    Period = TimeSpan.FromMinutes(1), PeriodEnd = now.ToMinutePeriodEnd(),
+                    PeriodStart = now.ToMinutePeriodBegin()
+                },
+                new FunctionUsage
+                {
+                    FunctionName = "addition", CalculatorName = "CalcA", InvocationsCount = 1,
+                    Period = TimeSpan.FromMinutes(1), PeriodEnd = now.ToMinutePeriodEnd(),
+                    PeriodStart = now.ToMinutePeriodBegin()
+                }
             );
         }
 

@@ -12,7 +12,7 @@ namespace MightyCalc.Reports.Streams
 
         private static Flow<EventEnvelope, SequencedFunctionTotalUsage, NotUsed> CreateFlow()
         {
-            return (Flow<EventEnvelope, SequencedFunctionTotalUsage, NotUsed>) Flow.Create<EventEnvelope>()
+            return Flow.Create<EventEnvelope>()
                 .SelectMany(e =>
                 {
                     Console.WriteLine("");

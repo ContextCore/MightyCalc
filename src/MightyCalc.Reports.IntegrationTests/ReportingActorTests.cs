@@ -15,13 +15,14 @@ using MightyCalc.IntegrationTests.Tools;
 using MightyCalc.Node;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
+using MightyCalc.Reports.Streams;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace MightyCalc.Reports.IntegrationTests
 {
-	public class ReportingActorTests : TestKit
+    public class ReportingActorTests : TestKit
     {
         private readonly ITestOutputHelper _output;
 
@@ -62,14 +63,14 @@ akka.persistence{
 			class = ""Akka.Persistence.PostgreSql.Journal.PostgreSqlJournal, Akka.Persistence.PostgreSql""
 
 		    event-adapters {
-                 tagging = """+typeof(DomainEventAdapter).AssemblyQualifiedName+@"""
+                 tagging = """ + typeof(DomainEventAdapter).AssemblyQualifiedName + @"""
               }
 
             event-adapter-bindings {
-                """+typeof(IDomainEvent).AssemblyQualifiedName+@""" = tagging
+                """ + typeof(IDomainEvent).AssemblyQualifiedName + @""" = tagging
             }
 			# connection string used for database access
-			connection-string = """+KnownConnectionStrings.Journal+@"""
+			connection-string = """ + KnownConnectionStrings.Journal + @"""
 
 			
 			# default SQL commands timeout
@@ -103,7 +104,7 @@ akka.persistence{
 			class = ""Akka.Persistence.PostgreSql.Snapshot.PostgreSqlSnapshotStore, Akka.Persistence.PostgreSql""
 
 			# connection string used for database access
-			connection-string = """+KnownConnectionStrings.SnapshotStore+@"""
+			connection-string = """ + KnownConnectionStrings.SnapshotStore + @"""
 
 			# PostgreSql schema name to table corresponding with persistent journal
 			schema-name = public
@@ -117,6 +118,7 @@ akka.persistence{
 	}
 }
 ";
+
         public ReportingActorTests(ITestOutputHelper output) : base(GetAkkaConfig(), "Test", output)
         {
             _output = output;
@@ -131,7 +133,7 @@ akka.persistence{
             await DbTools.ResetDatabases();
 
             var cluster = Cluster.Get(Sys);
-            cluster.Join(((ExtendedActorSystem)Sys).Provider.DefaultAddress);
+            cluster.Join(((ExtendedActorSystem) Sys).Provider.DefaultAddress);
             var ext = Sys.InitReportingExtension(new ReportingDependencies(options));
             ext.Start();
             return Sys.GetReportingExtension().GetDependencies();
@@ -145,22 +147,23 @@ akka.persistence{
         }
 
         [Fact]
-        public async Task Given_ReportActor_When_sending_start_message_Then_projection_launched_producing_data()
+        public async Task
+            Given_ReportActor_When_sending_start_message_Then_total_usage_projection_launched_producing_data()
         {
             var dep = await Init();
 
             _output.WriteLine(Sys.Settings.ToString());
             //generate some data
-            
+
             var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), "CalculatorOne");
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1-2*3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1/2+3"));
-         
+
             await Task.Delay(10000);
-            
+
             var projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
-            Assert.Equal(3,projected.Sequence);
+            Assert.Equal(3, projected.Sequence);
 
             var usage = await new FunctionsTotalUsageQuery(dep.CreateFunctionUsageContext()).Execute();
 
@@ -170,10 +173,156 @@ akka.persistence{
                 new FunctionTotalUsage {FunctionName = "MultiplyChecked", InvocationsCount = 1},
                 new FunctionTotalUsage {FunctionName = "Divide", InvocationsCount = 1});
         }
-        
-     
+
+
         [Fact]
-        public async Task Given_existing_projection_When_starting_it_Then_projection_is_resumed()
+        public async Task Given_ReportActor_When_sending_start_message_Then_usage_projection_launched_producing_data()
+        {
+            var dep = await Init();
+
+            _output.WriteLine(Sys.Settings.ToString());
+            //generate some data
+            var now = DateTimeOffset.Now;
+            var periodStart = now.ToMinutePeriodBegin();
+            var periodEnd = now.ToMinutePeriodEnd();
+            var oneMinute = TimeSpan.FromMinutes(1);
+
+            var calculatorName = "CalculatorOne";
+            var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), calculatorName);
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3"));
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1-2*3"));
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1/2+3"));
+
+            await Task.Delay(10000);
+
+            var projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsUsage();
+            Assert.Equal(3, projected.Sequence);
+
+            var usage = await new FunctionsUsageQuery(dep.CreateFunctionUsageContext()).Execute(calculatorName);
+
+            usage.Should().BeEquivalentTo(
+                new FunctionUsage
+                {
+                    FunctionName = "AddChecked", InvocationsCount = 2, CalculatorName = calculatorName,
+                    Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+                },
+                new FunctionUsage
+                {
+                    FunctionName = "SubtractChecked", CalculatorName = calculatorName, InvocationsCount = 2,
+                    Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+                },
+                new FunctionUsage
+                {
+                    FunctionName = "MultiplyChecked", CalculatorName = calculatorName, InvocationsCount = 1,
+                    Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+                },
+                new FunctionUsage
+                {
+                    FunctionName = "Divide", CalculatorName = calculatorName, InvocationsCount = 1, Period = oneMinute,
+                    PeriodEnd = periodEnd, PeriodStart = periodStart
+                });
+        }
+
+          [Fact]
+        public async Task Given_existing_usage_projection_When_starting_it_Then_projection_is_resumed()
+        {
+            var dep = await Init();
+
+            //generate some data
+
+            var calculatorName = "CalculatorOne";
+            var calculationActor = Sys.ActorOf(Props.Create<CalculatorActor>(), calculatorName);
+            
+            var now = DateTimeOffset.Now;
+            var periodStart = now.ToMinutePeriodBegin();
+            var periodEnd = now.ToMinutePeriodEnd();
+            var oneMinute = TimeSpan.FromMinutes(1);
+
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3"));
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1-2*3"));
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1/2+3"));
+
+
+            await Task.Delay(5000);
+
+            //ensure it is persisted
+
+            var projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsUsage();
+            Assert.Equal(3, projected.Sequence);
+
+            var reportActor = Sys.GetReportingExtension().ReportingActor;
+            //restart report actor to allow it to get latest projected sequence from DB
+            Watch(reportActor);
+            Sys.Stop(reportActor);
+            FishForMessage<Terminated>(t => t.ActorRef == reportActor);
+            await Task.Delay(1000);
+
+            reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
+            reportActor.Tell(ReportingActor.Start.Instance);
+
+            var usage = await new FunctionsUsageQuery(dep.CreateFunctionUsageContext()).Execute(calculatorName);
+
+            usage.Should().BeEquivalentTo(
+	            new FunctionUsage
+	            {
+		            FunctionName = "AddChecked", InvocationsCount = 2, CalculatorName = calculatorName,
+		            Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+	            },
+	            new FunctionUsage
+	            {
+		            FunctionName = "SubtractChecked", CalculatorName = calculatorName, InvocationsCount = 2,
+		            Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+	            },
+	            new FunctionUsage
+	            {
+		            FunctionName = "MultiplyChecked", CalculatorName = calculatorName, InvocationsCount = 1,
+		            Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+	            },
+	            new FunctionUsage
+	            {
+		            FunctionName = "Divide", CalculatorName = calculatorName, InvocationsCount = 1, Period = oneMinute,
+		            PeriodEnd = periodEnd, PeriodStart = periodStart
+	            });
+            
+            now = DateTimeOffset.Now;
+            periodStart = now.ToMinutePeriodBegin();
+            periodEnd = now.ToMinutePeriodEnd();
+            //add new events
+            calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3*4/5"));
+
+            await Task.Delay(5000);
+
+            //check the results
+            projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
+            Assert.Equal(4, projected.Sequence);
+
+            usage = await new FunctionsUsageQuery(dep.CreateFunctionUsageContext()).Execute(calculatorName);
+
+            usage.Should().BeEquivalentTo(
+	            new FunctionUsage
+	            {
+		            FunctionName = "AddChecked", InvocationsCount = 3, CalculatorName = calculatorName,
+		            Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+	            },
+	            new FunctionUsage
+	            {
+		            FunctionName = "SubtractChecked", CalculatorName = calculatorName, InvocationsCount = 3,
+		            Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+	            },
+	            new FunctionUsage
+	            {
+		            FunctionName = "MultiplyChecked", CalculatorName = calculatorName, InvocationsCount = 2,
+		            Period = oneMinute, PeriodEnd = periodEnd, PeriodStart = periodStart
+	            },
+	            new FunctionUsage
+	            {
+		            FunctionName = "Divide", CalculatorName = calculatorName, InvocationsCount = 2, Period = oneMinute,
+		            PeriodEnd = periodEnd, PeriodStart = periodStart
+	            });
+        }
+
+        [Fact]
+        public async Task Given_existing_total_usage_projection_When_starting_it_Then_projection_is_resumed()
         {
             var dep = await Init();
 
@@ -184,11 +333,11 @@ akka.persistence{
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1-2*3"));
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1/2+3"));
 
-            
+
             await Task.Delay(5000);
 
             //ensure it is persisted
-            
+
             var projected = new FindProjectionQuery(dep.CreateFunctionUsageContext()).ExecuteForFunctionsTotalUsage();
             Assert.Equal(3, projected.Sequence);
 
@@ -198,18 +347,18 @@ akka.persistence{
             Sys.Stop(reportActor);
             FishForMessage<Terminated>(t => t.ActorRef == reportActor);
             await Task.Delay(1000);
-            
+
             reportActor = Sys.ActorOf(Props.Create<ReportingActor>(), "reportingActor");
             reportActor.Tell(ReportingActor.Start.Instance);
 
             var usage = await new FunctionsTotalUsageQuery(dep.CreateFunctionUsageContext()).Execute();
 
             usage.Should().BeEquivalentTo(
-	            new FunctionTotalUsage {FunctionName = "AddChecked", InvocationsCount = 2},
-	            new FunctionTotalUsage {FunctionName = "SubtractChecked", InvocationsCount = 2},
-	            new FunctionTotalUsage {FunctionName = "MultiplyChecked", InvocationsCount = 1},
-	            new FunctionTotalUsage {FunctionName = "Divide", InvocationsCount = 1});
-            
+                new FunctionTotalUsage {FunctionName = "AddChecked", InvocationsCount = 2},
+                new FunctionTotalUsage {FunctionName = "SubtractChecked", InvocationsCount = 2},
+                new FunctionTotalUsage {FunctionName = "MultiplyChecked", InvocationsCount = 1},
+                new FunctionTotalUsage {FunctionName = "Divide", InvocationsCount = 1});
+
             //add new events
             calculationActor.Tell(new CalculatorActorProtocol.CalculateExpression("1+2-3*4/5"));
 

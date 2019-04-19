@@ -98,7 +98,7 @@ namespace MightyCalc.Reports.Tests
             var periodSpan = TimeSpan.Parse(period);
             var eventOffset = DateTimeOffset.Parse(eventTime);
             var expectedPeriodStartOffset = DateTimeOffset.Parse(expectedPeriodStart);
-            var periodStart = Period.Begin(periodSpan, eventOffset);
+            var periodStart = eventOffset.ToPeriodBegin(periodSpan);
             Assert.Equal(expectedPeriodStartOffset, periodStart);
         }
 
@@ -113,7 +113,7 @@ namespace MightyCalc.Reports.Tests
             var periodSpan = TimeSpan.Parse(period);
             var eventOffset = DateTimeOffset.Parse(eventTime);
             var expectedPeriodStartOffset = DateTimeOffset.Parse(expectedPeriodStart);
-            var periodStart = Period.End(periodSpan, eventOffset);
+            var periodStart = eventOffset.ToPeriodEnd(periodSpan);
             Assert.Equal(expectedPeriodStartOffset, periodStart);
         }
 
@@ -162,8 +162,8 @@ namespace MightyCalc.Reports.Tests
                     FunctionName = sequenced.Message.FunctionsUsed[0],
                     Period = TimeSpan.FromMinutes(1),
                     CalculatorName = sequenced.Message.CalculatorId,
-                    PeriodStart = Period.Begin(TimeSpan.FromMinutes(1), sequenced.Message.Occured),
-                    PeriodEnd = Period.End(TimeSpan.FromMinutes(1), sequenced.Message.Occured)
+                    PeriodStart = sequenced.Message.Occured.ToMinutePeriodBegin(),
+                    PeriodEnd = sequenced.Message.Occured.ToMinutePeriodEnd()
                 },
                 new FunctionUsage
                 {
@@ -171,8 +171,8 @@ namespace MightyCalc.Reports.Tests
                     FunctionName = sequenced.Message.FunctionsUsed[1],
                     Period = TimeSpan.FromMinutes(1),
                     CalculatorName = sequenced.Message.CalculatorId,
-                    PeriodStart = Period.Begin(TimeSpan.FromMinutes(1), sequenced.Message.Occured),
-                    PeriodEnd = Period.End(TimeSpan.FromMinutes(1), sequenced.Message.Occured)
+                    PeriodStart = sequenced.Message.Occured.ToMinutePeriodBegin(),
+                    PeriodEnd = sequenced.Message.Occured.ToMinutePeriodEnd()
                 }
             });
         }

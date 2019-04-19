@@ -10,5 +10,11 @@ namespace MightyCalc.Reports
             return query.Execute(KnownProjectionsNames.TotalFunctionUsage, nameof(FunctionsTotalUsageProjector),
                 nameof(CalculatorActor.CalculationPerformed));
         }
+
+        public static Projection ExecuteForFunctionsUsage(this IFindProjectionQuery query)
+        {
+            return query.Execute(KnownProjectionsNames.FunctionUsage, nameof(FunctionsUsageProjector),
+                nameof(CalculatorActor.CalculationPerformed));
+        }
     }
 }

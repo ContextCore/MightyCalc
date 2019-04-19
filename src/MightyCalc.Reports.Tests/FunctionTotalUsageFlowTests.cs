@@ -19,9 +19,9 @@ using Xunit.Abstractions;
 
 namespace MightyCalc.Reports.Tests
 {
-    public class FunctionUsageFlowTests:TestKit
+    public class FunctionTotalUsageFlowTests:TestKit
     {
-        public FunctionUsageFlowTests(ITestOutputHelper output):base("", output)
+        public FunctionTotalUsageFlowTests(ITestOutputHelper output):base("", output)
         {
             
         }
