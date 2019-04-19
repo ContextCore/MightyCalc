@@ -10,36 +10,25 @@ namespace MightyCalc.Reports.Streams
     public static class FunctionTotalUsageFlow
     {
 
-        private static Flow<EventEnvelope, SequencedFunctionUsage, NotUsed> CreateFlow()
+        private static Flow<EventEnvelope, SequencedFunctionTotalUsage, NotUsed> CreateFlow()
         {
-            return (Flow<EventEnvelope, SequencedFunctionUsage, NotUsed>) Flow.Create<EventEnvelope>()
+            return (Flow<EventEnvelope, SequencedFunctionTotalUsage, NotUsed>) Flow.Create<EventEnvelope>()
                 .SelectMany(e =>
                 {
                     Console.WriteLine("");
                     var calculationPerformed = (e.Event as CalculatorActor.CalculationPerformed);
                     //transform each element to pair with number of words in it
                     return calculationPerformed?.FunctionsUsed.GroupBy(f => f)
-                        .Select(g => new SequencedFunctionUsage
+                        .Select(g => new SequencedFunctionTotalUsage
                         {
                             FunctionName = g.Key,
                             Sequence = (e.Offset as Sequence).Value,
                             InvocationsCount = g.Count()
                         });
                 });
-            // split the words into separate streams first
-            // .GroupBy(10000, u => u.FunctionName)
-            // add counting logic to the streams
-            //    .Sum((l, r) => new SequencedFunctionUsage
-            //    {
-            //        FunctionName = l.FunctionName, InvocationsCount = l.InvocationsCount + r.InvocationsCount,
-            //        Sequence = Math.Max(l.Sequence, r.Sequence)
-            //    })
-
-            // get a stream of word counts
-            //  .MergeSubstreams();
         }
 
-        public static Flow<EventEnvelope, SequencedFunctionUsage, NotUsed> Instance { get; } = CreateFlow();
+        public static Flow<EventEnvelope, SequencedFunctionTotalUsage, NotUsed> Instance { get; } = CreateFlow();
 
     }
 }

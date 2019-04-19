@@ -38,7 +38,7 @@ namespace MightyCalc.Reports.Tests
                     new CalculatorActor.CalculationPerformed("calcB","a-b+c",null, new[]{"sub","add"})),
             });
 
-            var sink = Sink.Seq<SequencedFunctionUsage>();
+            var sink = Sink.Seq<SequencedFunctionTotalUsage>();
 
             var runTask = source.RunWith(flow.ToMaterialized(sink, Keep.Right), Sys.Materializer());
 
@@ -46,9 +46,9 @@ namespace MightyCalc.Reports.Tests
 
             result.Should().BeEquivalentTo(
                 
-                new SequencedFunctionUsage {FunctionName = "add", InvocationsCount = 4, Sequence = 1},
-                new SequencedFunctionUsage {FunctionName = "sub", InvocationsCount = 1, Sequence = 2},
-                new SequencedFunctionUsage {FunctionName = "add", InvocationsCount = 1, Sequence = 2}
+                new SequencedFunctionTotalUsage {FunctionName = "add", InvocationsCount = 4, Sequence = 1},
+                new SequencedFunctionTotalUsage {FunctionName = "sub", InvocationsCount = 1, Sequence = 2},
+                new SequencedFunctionTotalUsage {FunctionName = "add", InvocationsCount = 1, Sequence = 2}
             );
         }
     }

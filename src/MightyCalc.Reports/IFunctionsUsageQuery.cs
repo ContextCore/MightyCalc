@@ -7,6 +7,6 @@ namespace MightyCalc.Reports
 {
     public interface IFunctionsUsageQuery
     {
-        Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string calculatorName=null,  DateTimeOffset? periodStart=null, DateTimeOffset? periodEnd = null);
+        Task<IReadOnlyCollection<FunctionUsage>> Execute(string calculatorName=null,  DateTimeOffset? periodStart=null, DateTimeOffset? periodEnd = null);
     }
 }

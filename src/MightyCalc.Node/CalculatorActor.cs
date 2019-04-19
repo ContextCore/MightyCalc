@@ -8,8 +8,9 @@ namespace MightyCalc.Node
 {
     public interface IDomainEvent
     {
-        
+        DateTimeOffset Occured { get; }
     }
+    
     public class CalculatorActor : ReceivePersistentActor
     {
         public CalculatorActor()
@@ -90,6 +91,8 @@ namespace MightyCalc.Node
                 Parameters = parameters;
                 FunctionsUsed = functionsUsed;
             }
+
+            public DateTimeOffset Occured { get; } = DateTimeOffset.Now;
         }
 
         public class FunctionAdded:IDomainEvent
@@ -102,6 +105,8 @@ namespace MightyCalc.Node
                 CalculatorId = calculatorId;
                 Definition = definition;
             }
+
+            public DateTimeOffset Occured { get; } = DateTimeOffset.Now;
         }
     }
 }

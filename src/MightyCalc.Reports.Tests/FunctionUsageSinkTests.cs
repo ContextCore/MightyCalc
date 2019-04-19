@@ -31,9 +31,9 @@ namespace MightyCalc.Reports.Tests
 
             var source = Source.From(new[]
             {
-                new SequencedFunctionUsage {FunctionName = "myFunc", InvocationsCount = 5, Sequence = 13},
-                new SequencedFunctionUsage {FunctionName = "myFunc", InvocationsCount = 6, Sequence = 14},
-                new SequencedFunctionUsage {FunctionName = "addition", InvocationsCount = 1, Sequence = 15},
+                new SequencedFunctionTotalUsage {FunctionName = "myFunc", InvocationsCount = 5, Sequence = 13},
+                new SequencedFunctionTotalUsage {FunctionName = "myFunc", InvocationsCount = 6, Sequence = 14},
+                new SequencedFunctionTotalUsage {FunctionName = "addition", InvocationsCount = 1, Sequence = 15},
             });
 
             var sink = FunctionTotalUsageSink.Create(Sys, "testEvent");

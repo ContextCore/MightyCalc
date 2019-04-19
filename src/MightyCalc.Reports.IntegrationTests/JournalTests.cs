@@ -191,7 +191,7 @@ akka.persistence{
 						            .Via(sharedKillSwitch.Flow<EventEnvelope>());
             
             var flow = FunctionTotalUsageFlow.Instance;
-            var sink = Sink.Seq<SequencedFunctionUsage>();
+            var sink = Sink.Seq<SequencedFunctionTotalUsage>();
 
             var	materializer = Sys.Materializer();
             var runTask = source.RunWith(flow.ToMaterialized(sink, Keep.Right), materializer);

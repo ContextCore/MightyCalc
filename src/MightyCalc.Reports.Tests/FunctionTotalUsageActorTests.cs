@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.TestKit.Xunit2;
@@ -13,9 +12,9 @@ using Xunit.Abstractions;
 
 namespace MightyCalc.Reports.Tests
 {
-    public class ProjectionActorTests:TestKit
+    public class FunctionTotalUsageActorTests:TestKit
     {
-        public ProjectionActorTests(ITestOutputHelper output):base("",output)
+        public FunctionTotalUsageActorTests(ITestOutputHelper output):base("",output)
         {
            
         }
@@ -43,10 +42,10 @@ namespace MightyCalc.Reports.Tests
             
             var actor = Sys.ActorOf(Props.Create<FunctionsTotalUsageProjector>(eventName));
             
-            actor.Tell(FunctionsTotalUsageProjector.Start.Instance);
-            ExpectMsg<FunctionsTotalUsageProjector.Next>();
+            actor.Tell(ProjectorActorProtocol.Start.Instance);
+            ExpectMsg<ProjectorActorProtocol.Next>();
             
-            var usage = new SequencedFunctionUsage
+            var usage = new SequencedFunctionTotalUsage
             {
                 FunctionName = "testFunction",
                 InvocationsCount = 10,
@@ -54,7 +53,7 @@ namespace MightyCalc.Reports.Tests
             };
             actor.Tell(usage);
 
-            ExpectMsg<FunctionsTotalUsageProjector.Next>();
+            ExpectMsg<ProjectorActorProtocol.Next>();
             
             var query = dependencies.CreateFindProjectionQuery();
             var projection = query.Execute(KnownProjectionsNames.TotalFunctionUsage,
@@ -89,17 +88,17 @@ namespace MightyCalc.Reports.Tests
             
             var actor = Sys.ActorOf(Props.Create<FunctionsTotalUsageProjector>(eventName));
             
-            actor.Tell(FunctionsTotalUsageProjector.Start.Instance);
-            ExpectMsg<FunctionsTotalUsageProjector.Next>();
+            actor.Tell(ProjectorActorProtocol.Start.Instance);
+            ExpectMsg<ProjectorActorProtocol.Next>();
             
-            var usage = new SequencedFunctionUsage
+            var usage = new SequencedFunctionTotalUsage
             {
                 FunctionName = "testFunction",
                 InvocationsCount = 10,
                 Sequence = 200
             };
             actor.Tell(usage);
-            ExpectMsg<FunctionsTotalUsageProjector.Next>();
+            ExpectMsg<ProjectorActorProtocol.Next>();
 
             var query = dependencies.CreateFindProjectionQuery();
             var projection = query.Execute(KnownProjectionsNames.TotalFunctionUsage,
@@ -122,9 +121,9 @@ namespace MightyCalc.Reports.Tests
         {
             Init(nameof(Given_actor_When_sending_function_usages_to_it_And_they_are_projected_Then_next_message_is_received));
             var actor = Sys.ActorOf(Props.Create<FunctionsTotalUsageProjector>("testEvent"));
-            actor.Tell(FunctionsTotalUsageProjector.Start.Instance);
-            actor.Tell(new SequencedFunctionUsage());
-            ExpectMsg<FunctionsTotalUsageProjector.Next>();
+            actor.Tell(ProjectorActorProtocol.Start.Instance);
+            actor.Tell(new SequencedFunctionTotalUsage());
+            ExpectMsg<ProjectorActorProtocol.Next>();
         }
     }
 }

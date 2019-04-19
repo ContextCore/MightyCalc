@@ -8,9 +8,7 @@ using MightyCalc.Reports.ReportingExtension;
 
 namespace MightyCalc.Reports.Streams
 {
-    /// <summary>
-    /// This projection relies on ordering on 
-    /// </summary>
+
     public class FunctionsTotalUsageProjector : ReceiveActor
     {
         public FunctionsTotalUsageProjector(string eventName = "unknown")
@@ -19,17 +17,17 @@ namespace MightyCalc.Reports.Streams
             Func<FunctionUsageContext> contextFactory = () => dependencies.CreateFunctionUsageContext();
             var log = Context.GetLogger();
             
-            Receive<Start>(s =>
+            Receive<ProjectorActorProtocol.Start>(s =>
             {
                 log.Info("Starting projection");
-                Sender.Tell(Next.Instance);
+                Sender.Tell(ProjectorActorProtocol.Next.Instance);
             });
-            Receive<ProjectionDone>(s =>
+            Receive<ProjectorActorProtocol.ProjectionDone>(s =>
             {
                 log.Info("Stopping projection");
             });
             //Event processing intentionally made slow for simplicity
-            Receive<SequencedFunctionUsage>(e =>
+            Receive<SequencedFunctionTotalUsage>(e =>
             {
                 log.Debug("Received event to project");
 
@@ -68,37 +66,11 @@ namespace MightyCalc.Reports.Streams
                     context.SaveChanges();
                 }
 
-                Sender.Tell(Next.Instance);
+                Sender.Tell(ProjectorActorProtocol.Next.Instance);
             });
             
             ReceiveAny(o => log.Warning("missing message: " + o.ToString()));
         }
 
-        public class Start
-        {
-            private Start()
-            {
-            }
-
-            public static readonly Start Instance = new Start();
-        }
-
-        public class Next
-        {
-            private Next()
-            {
-            }
-
-            public static readonly Next Instance = new Next();
-        }
-
-        public class ProjectionDone
-        {
-            private ProjectionDone()
-            {
-            }
-
-            public static readonly ProjectionDone Instance = new ProjectionDone();
-        }
     }
 }

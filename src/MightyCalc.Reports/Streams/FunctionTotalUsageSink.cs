@@ -7,15 +7,15 @@ namespace MightyCalc.Reports.Streams
 {
     public static class FunctionTotalUsageSink
     {
-        public static Sink<SequencedFunctionUsage, NotUsed> Create(IActorRefFactory system, string eventName)
+        public static Sink<SequencedFunctionTotalUsage, NotUsed> Create(IActorRefFactory system, string eventName)
         {
             var actorRef = system.ActorOf(Props.Create<FunctionsTotalUsageProjector>(eventName), nameof(FunctionsTotalUsageProjector));
 
-            return Sink.ActorRefWithAck<SequencedFunctionUsage>(
+            return Sink.ActorRefWithAck<SequencedFunctionTotalUsage>(
                 actorRef,
-                FunctionsTotalUsageProjector.Start.Instance,
-                FunctionsTotalUsageProjector.Next.Instance,
-                FunctionsTotalUsageProjector.ProjectionDone.Instance);
+                ProjectorActorProtocol.Start.Instance,
+                ProjectorActorProtocol.Next.Instance,
+                ProjectorActorProtocol.ProjectionDone.Instance);
 
         }
     }

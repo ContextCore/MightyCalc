@@ -2,7 +2,7 @@ using MightyCalc.Reports.DatabaseProjections;
 
 namespace MightyCalc.Reports.Streams
 {
-    public class SequencedFunctionUsage : FunctionTotalUsage
+    public class SequencedFunctionTotalUsage : FunctionTotalUsage
     {
         public long Sequence { get; set; }
     }
