@@ -23,6 +23,9 @@ else
 kubectl apply -f ./api/api-svc-external-gke.yaml
 fi
 
+ #to allow postgres db initialize before first request from nodes
+ ./wait_pod_is_ready.sh 60 1
+
 #-----------##Nodes##----------
 kubectl apply -f ./node/nodes-svc.yaml 
 kubectl apply -f ./node/seed.yaml

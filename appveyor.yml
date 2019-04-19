@@ -81,12 +81,7 @@ test_script:
     
     cd ./deploy 
     ./create_environment.sh mk
-    echo waiting for postgres to start
-    echo "Current time : $(date +"%T")"
-    sleep 5 #to allow postgres to init DB state
-    echo "Current time : $(date +"%T")"
-    
-    #    kubectl describe node minikube
+
     kubectl exec seed-0 -- pbm localhost:9110 cluster show 
     #run integration tests in created environment
     cd ../test

@@ -23,6 +23,18 @@ spec:
         volumeMounts:
         - name: postgres-volumeclaim
           mountPath: /var/lib/postgresql/
+        readinessProbe:
+          exec:
+            command: ["psql", "-w", "-U", "postgres", "-d", "readmodel", "-c", "SELECT 1"]
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command: ["psql", "-w", "-U", "postgres", "-d", "journal", "-c", "SELECT 1"]
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 5
         resources:
           requests:
             memory: "256Mi"

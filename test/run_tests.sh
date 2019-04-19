@@ -10,7 +10,7 @@ then
     ./wait_pod_is_ready.sh 180 3
 fi
 
- kubectl exec test -- dotnet ef database update --project ./MightyCalc.Reports/MightyCalc.Reports.csproj --startup-project ./MightyCalc.Reports.IntegrationTests/MightyCalc.Reports.IntegrationTests.csproj
+ #kubectl exec test -- dotnet ef database update --project ./MightyCalc.Reports/MightyCalc.Reports.csproj --startup-project ./MightyCalc.Reports.IntegrationTests/MightyCalc.Reports.IntegrationTests.csproj
 
 print_red()
 {
