@@ -24,12 +24,4 @@ namespace MightyCalc.Reports.DatabaseProjections
                 .ToArrayAsync();
         }
     }
-
-    public class FunctionsUsageQuery : IFunctionsUsageQuery
-    {
-        public Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionName = null, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }
