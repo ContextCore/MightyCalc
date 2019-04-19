@@ -87,6 +87,8 @@ testsPlan=(  "cfg:MightyCalc.Configuration.Tests"
              "api_integration:MightyCalc.API.IntegrationTests")
 anyTestFailed=0
 
+echo "Current time : $(date +"%T")"
+
 for plan in "${testsPlan[@]}" ; do
     name="${plan%%:*}"
     project="${plan##*:}"
@@ -97,7 +99,7 @@ for plan in "${testsPlan[@]}" ; do
     elif [ $mode == "run" ] || [ $mode == $name ] 
     then
        launchTest $name $project
-       kubectl exec seed-0 -- pbm localhost:9110 cluster show
+       echo "Current time : $(date +"%T")"
     fi;
 done
 
