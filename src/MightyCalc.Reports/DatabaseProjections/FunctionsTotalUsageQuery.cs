@@ -14,7 +14,7 @@ namespace MightyCalc.Reports.DatabaseProjections
         {
             _context = context;
         }
-        public async Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionName = null, DateTimeOffset? @from = null, DateTimeOffset? to = null)
+        public async Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionName = null)
         {
             if (String.IsNullOrEmpty(functionName))
                 return await _context.FunctionsTotalUsage.ToArrayAsync();
@@ -22,6 +22,14 @@ namespace MightyCalc.Reports.DatabaseProjections
             return await _context.FunctionsTotalUsage
                 .Where(f => f.FunctionName.Contains(functionName))
                 .ToArrayAsync();
+        }
+    }
+
+    public class FunctionsUsageQuery : IFunctionsUsageQuery
+    {
+        public Task<IReadOnlyCollection<FunctionTotalUsage>> Execute(string functionName = null, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }

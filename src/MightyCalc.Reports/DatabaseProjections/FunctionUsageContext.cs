@@ -16,7 +16,7 @@ namespace MightyCalc.Reports.DatabaseProjections
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<FunctionUsage>().HasKey(p => new {p.CalculatorName, p.FunctionName});
+            modelBuilder.Entity<FunctionUsage>().HasKey(p => new {p.CalculatorName, p.FunctionName, p.PeriodStart, p.PeriodEnd});
             modelBuilder.Entity<Projection>().HasKey(p => new {p.Name, p.Projector, p.Event});
             modelBuilder.Entity<FunctionTotalUsage>().HasKey(p => p.FunctionName);
         }

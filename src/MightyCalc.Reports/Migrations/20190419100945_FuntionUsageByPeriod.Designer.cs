@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MightyCalc.Reports.DatabaseProjections;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -9,9 +10,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MightyCalc.Reports.Migrations
 {
     [DbContext(typeof(FunctionUsageContext))]
-    partial class FunctionUsageContextModelSnapshot : ModelSnapshot
+    [Migration("20190419100945_FuntionUsageByPeriod")]
+    partial class FuntionUsageByPeriod
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
