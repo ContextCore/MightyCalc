@@ -77,8 +77,8 @@ launchTest()
             print_green "$project tests passed" 
         fi
 }
-testsPlan=(  "cfg:MightyCalc.Configuration.Tests",
-             "calc:MightyCalc.Calculations.Tests",
+testsPlan=(  "cfg:MightyCalc.Configuration.Tests"
+             "calc:MightyCalc.Calculations.Tests"
              "node:MightyCalc.Node.Tests"
              "reports:MightyCalc.Reports.Tests"
              "api:MightyCalc.API.Tests"
