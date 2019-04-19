@@ -1,31 +1,37 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: api
+  labels:
+    app: api
+    type: node
 spec:
-  replicas: 1
+  serviceName: nodes
+  replicas: 1 
   selector:
     matchLabels:
-      app: api
+      app: api # has to match .spec.template.metadata.labels
+      type: node
   template:
     metadata:
       labels:
-        app: api
+        app: api # has to match .spec.selector.matchLabels
         type: node
     spec:
+      terminationGracePeriodSeconds: 35
       containers:
-      - name: mightycalc-api-container
+      - name: node
         image: aleskov/mightycalc-api:stable
         lifecycle:
           preStop:
             exec:
               command: ["/bin/sh", "-c", "pbm 127.0.0.1:9110 cluster leave"]
         ports:
-        - name: http
-          containerPort: 80
         - name: akka
           containerPort: 2552
           protocol: TCP
+        - name: http
+          containerPort: 80
         - name: akka-cmd
           containerPort: 9110
           protocol: TCP
@@ -39,26 +45,23 @@ spec:
           value: "2552"
         - name: MightyCalc_CmdPort
           value: "9110"
-        - name: MightyCalc_SeedNodes
-          value: "akka.tcp://MightyCalc@seed-0.seeds:2552"
+        - name: MightyCalc_HostName
+          value: "0.0.0.0"
         - name: HOST_NAME
           valueFrom:
             fieldRef:
-               apiVersion: v1
-               fieldPath: metadata.name 
-        - name: HOST_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
-        - name: MightyCalc_HostName
-          value: "$(HOST_IP)"
+              fieldPath: metadata.name
         - name: MightyCalc_PublicHostName
-          value: "$(HOST_IP)"
+          value: "$(HOST_NAME).nodes"
+        - name: MightyCalc_SeedNodes
+          value: "akka.tcp://MightyCalc@seed-0.nodes:2552"
+        - name: MightyCalc_NodeRoles
+          value: "api"
+       
         resources:
           requests:
-            memory: "128Mi"
+            memory: "256Mi"
             cpu: "100m"
           limits:
             memory: "512Mi"
             cpu: "500m"
-      terminationGracePeriodSeconds: 10

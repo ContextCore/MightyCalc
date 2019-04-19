@@ -1,32 +1,28 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: worker
-  labels:
-    app: worker
-    type: node
+  name: api
 spec:
-  serviceName: nodes
-  replicas: 1 
+  replicas: 1
   selector:
     matchLabels:
-      app: worker # has to match .spec.template.metadata.labels
-      type: node
+      app: api
   template:
     metadata:
       labels:
-        app: worker # has to match .spec.selector.matchLabels
+        app: api
         type: node
     spec:
-      terminationGracePeriodSeconds: 35
       containers:
-      - name: node
-        image: aleskov/mightycalc-node:stable
+      - name: mightycalc-api-container
+        image: aleskov/mightycalc-api:stable
         lifecycle:
           preStop:
             exec:
               command: ["/bin/sh", "-c", "pbm 127.0.0.1:9110 cluster leave"]
         ports:
+        - name: http
+          containerPort: 80
         - name: akka
           containerPort: 2552
           protocol: TCP
@@ -37,33 +33,32 @@ spec:
           tcpSocket:
             port: 2552
         env:
-        - name: MightyCalc_Journal
-          value: "Host=postgres-svc;Port=5432;Database=journal;User ID=postgres;"
-        - name: MightyCalc_SnapshotStore
-          value: "Host=postgres-svc;Port=5432;Database=snapshotstore;User ID=postgres;"
         - name: MightyCalc_ReadModel
           value: "Host=postgres-svc;Port=5432;Database=readmodel;User ID=postgres;"
         - name: MightyCalc_NodePort
           value: "2552"
         - name: MightyCalc_CmdPort
           value: "9110"
+        - name: MightyCalc_SeedNodes
+          value: "akka.tcp://MightyCalc@seed-0.seeds:2552"
         - name: HOST_NAME
           valueFrom:
             fieldRef:
-              fieldPath: metadata.name
+               apiVersion: v1
+               fieldPath: metadata.name 
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         - name: MightyCalc_HostName
-          value: "0.0.0.0"
+          value: "$(HOST_IP)"
         - name: MightyCalc_PublicHostName
-          value: "$(HOST_NAME).nodes"
-        - name: MightyCalc_SeedNodes
-          value: "akka.tcp://MightyCalc@seed-0.nodes:2552"
-        - name: MightyCalc_NodeRoles
-          value: "calculation projection"
-       
+          value: "$(HOST_IP)"
         resources:
           requests:
-            memory: "256Mi"
+            memory: "128Mi"
             cpu: "100m"
           limits:
             memory: "512Mi"
             cpu: "500m"
+      terminationGracePeriodSeconds: 10

@@ -1,24 +1,18 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: worker
-  labels:
-    app: worker
-    type: node
 spec:
-  serviceName: nodes
-  replicas: 1 
+  replicas: 1
   selector:
     matchLabels:
-      app: worker # has to match .spec.template.metadata.labels
-      type: node
+      app: worker
   template:
     metadata:
       labels:
-        app: worker # has to match .spec.selector.matchLabels
+        app: worker
         type: node
     spec:
-      terminationGracePeriodSeconds: 35
       containers:
       - name: node
         image: aleskov/mightycalc-node:stable
@@ -29,10 +23,8 @@ spec:
         ports:
         - name: akka
           containerPort: 2552
-          protocol: TCP
         - name: akka-cmd
           containerPort: 9110
-          protocol: TCP
         livenessProbe:
           tcpSocket:
             port: 2552
@@ -50,16 +42,20 @@ spec:
         - name: HOST_NAME
           valueFrom:
             fieldRef:
-              fieldPath: metadata.name
+              apiVersion: v1
+              fieldPath: metadata.name 
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         - name: MightyCalc_HostName
-          value: "0.0.0.0"
+          value: "$(HOST_IP)"
         - name: MightyCalc_PublicHostName
-          value: "$(HOST_NAME).nodes"
+          value: "$(HOST_IP)"
         - name: MightyCalc_SeedNodes
-          value: "akka.tcp://MightyCalc@seed-0.nodes:2552"
+          value: "akka.tcp://MightyCalc@seed-0.seeds:2552"
         - name: MightyCalc_NodeRoles
-          value: "calculation projection"
-       
+          value: "projection calculation"
         resources:
           requests:
             memory: "256Mi"
@@ -67,3 +63,4 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+      terminationGracePeriodSeconds: 35

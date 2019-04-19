@@ -6,7 +6,7 @@ metadata:
     app: seed
     type: node
 spec:
-  serviceName: seeds
+  serviceName: nodes
   replicas: 1 
   selector:
     matchLabels:
@@ -18,7 +18,7 @@ spec:
         app: seed # has to match .spec.selector.matchLabels
         type: node
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 35
       containers:
       - name: node
         image: aleskov/mightycalc-lighthouse:stable
@@ -54,9 +54,9 @@ spec:
         - name: MightyCalc_HostName
           value: "0.0.0.0"
         - name: MightyCalc_PublicHostName
-          value: "$(HOST_NAME).seeds"
+          value: "$(HOST_NAME).nodes"
         - name: MightyCalc_SeedNodes
-          value: "akka.tcp://MightyCalc@seed-0.seeds:2552"
+          value: "akka.tcp://MightyCalc@seed-0.nodes:2552"
         - name: MightyCalc_NodeRoles
           value: "seed"
         - name: MightyCalc_CmdPort
@@ -64,7 +64,7 @@ spec:
        
         resources:
           requests:
-            memory: "128Mi"
+            memory: "256Mi"
             cpu: "100m"
           limits:
             memory: "512Mi"
