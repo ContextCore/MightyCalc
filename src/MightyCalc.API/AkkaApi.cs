@@ -67,15 +67,20 @@ namespace MightyCalc.API
                 body.Expression.Parameters.Select(p => p.Name).ToArray());
         }
 
-        public async Task<Report> UsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
+        public async Task<Report> UsageTotalStatsAsync()
         {
             var usage = await _functionsTotalUsageQuery.Execute();
             return new Report()
             {
                 UsageStatistics = usage.Select(u => new FunctionUsage {
-                     Name = u.FunctionName, 
-                     UsageCount = (int) u.InvocationsCount}).ToList()
+                    Name = u.FunctionName, 
+                    UsageCount = (int) u.InvocationsCount}).ToList()
             };
+        }
+
+        public Task<Report> UserUsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
+        {
+            throw new NotImplementedException();
         }
     }
 }

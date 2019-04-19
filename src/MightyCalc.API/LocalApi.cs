@@ -57,12 +57,18 @@ namespace MightyCalc.API
             return Task.CompletedTask;
         }
 
-
-        public Task<Report> UsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
+        public Task<Report> UsageTotalStatsAsync()
         {
             return Task.FromResult(new Report()
                 {UsageStatistics = new List<FunctionUsage>() {new FunctionUsage {Name = "Test", UsageCount = 1}}});
         }
+
+        public Task<Report> UserUsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
+        {
+            return Task.FromResult(new Report()
+                {UsageStatistics = new List<FunctionUsage>() {new FunctionUsage {Name = "Test", UsageCount = 1}}});
+        }
+       
     }
     internal class FunctionAlreadyExistsException : Exception
     {

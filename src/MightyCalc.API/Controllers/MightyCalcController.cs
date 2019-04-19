@@ -15,7 +15,7 @@ namespace MightyCalc.API
         /// <returns>Calculation succeeded</returns>
         System.Threading.Tasks.Task<double> CalculateAsync(Expression body);
     
-        /// <summary>Finds user-defined functions</summary>
+        /// <summary>Returns user-defined functions. This list can be changed by POST /func</summary>
         /// <param name="name">Function name pattern to seach for</param>
         /// <returns>successful operation</returns>
         System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<NamedExpression>> FindFunctionsAsync(string name);
@@ -28,11 +28,15 @@ namespace MightyCalc.API
         /// <returns>successful operation</returns>
         System.Threading.Tasks.Task ReplaceFunctionAsync(NamedExpression body);
     
-        /// <summary>Get usage statistics</summary>
+        /// <summary>Get total usage statistics</summary>
+        /// <returns>successful operation</returns>
+        System.Threading.Tasks.Task<Report> UsageTotalStatsAsync();
+    
+        /// <summary>Get usage statistics for logged user</summary>
         /// <param name="from">start of the report period</param>
         /// <param name="to">end of the report period</param>
         /// <returns>successful operation</returns>
-        System.Threading.Tasks.Task<Report> UsageStatsAsync(System.DateTimeOffset? from, System.DateTimeOffset? to);
+        System.Threading.Tasks.Task<Report> UserUsageStatsAsync(System.DateTimeOffset? from, System.DateTimeOffset? to);
     
     }
     
@@ -54,7 +58,7 @@ namespace MightyCalc.API
             return _implementation.CalculateAsync(body);
         }
     
-        /// <summary>Finds user-defined functions</summary>
+        /// <summary>Returns user-defined functions. This list can be changed by POST /func</summary>
         /// <param name="name">Function name pattern to seach for</param>
         /// <returns>successful operation</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("func")]
@@ -79,14 +83,22 @@ namespace MightyCalc.API
             return _implementation.ReplaceFunctionAsync(body);
         }
     
-        /// <summary>Get usage statistics</summary>
+        /// <summary>Get total usage statistics</summary>
+        /// <returns>successful operation</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("stats/total")]
+        public System.Threading.Tasks.Task<Report> UsageTotalStats()
+        {
+            return _implementation.UsageTotalStatsAsync();
+        }
+    
+        /// <summary>Get usage statistics for logged user</summary>
         /// <param name="from">start of the report period</param>
         /// <param name="to">end of the report period</param>
         /// <returns>successful operation</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("stats")]
-        public System.Threading.Tasks.Task<Report> UsageStats(System.DateTimeOffset? from, System.DateTimeOffset? to)
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("stats/user")]
+        public System.Threading.Tasks.Task<Report> UserUsageStats(System.DateTimeOffset? from, System.DateTimeOffset? to)
         {
-            return _implementation.UsageStatsAsync(from, to);
+            return _implementation.UserUsageStatsAsync(from, to);
         }
     
     }

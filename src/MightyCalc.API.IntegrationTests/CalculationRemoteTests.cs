@@ -56,7 +56,7 @@ namespace MightyCalc.API.IntegrationTests
                 expectedUsage.Add(name,count);
             }
 
-            var beforeCalculationReport = await Client.UsageStatsAsync();
+            var beforeCalculationReport = await Client.UsageTotalStatsAsync();
 
             foreach (var expression in expressions)
             {
@@ -65,7 +65,7 @@ namespace MightyCalc.API.IntegrationTests
 
             await Task.Delay(10000); // for projection
             
-            var report = await Client.UsageStatsAsync();
+            var report = await Client.UsageTotalStatsAsync();
 
             foreach (var expected in expectedUsage)
             {

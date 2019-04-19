@@ -117,13 +117,27 @@ paths:
         '422':
           description: Expression contains unknown functions 
        
-  /stats:
+  /stats/total:
     get:
       tags:
         - statistics
-      summary: Get usage statistics
+      summary: Get total usage statistics
       description: Provides information about function usage frequency
-      operationId: usageStats
+      operationId: usageTotalStats
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+  /stats/user:
+    get:
+      tags:
+        - statistics
+      summary: Get usage statistics for logged user
+      description: Provides information about function usage frequency
+      operationId: userUsageStats
       parameters:
         - name: from
           in: query
@@ -147,7 +161,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Report'
         '400':
-          description: Invalid datetime period specified
+          description: Invalid time period specified
 components:
   schemas:
     FunctionUsage:
