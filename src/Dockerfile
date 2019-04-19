@@ -24,8 +24,8 @@ RUN rm ./NSwag.zip > /dev/null
 
 COPY . .
 
-RUN ./api_controller_gen.sh "./NSwag/NetCore22/dotnet-nswag.dll" "./MightyCalc.API/MightyCalc.API/Controllers/MightyCalcController.cs"
-RUN ./api_client_gen.sh  "./NSwag/NetCore22/dotnet-nswag.dll" "./MightyCalc.API/MightyCalc.Client/Client.cs"
+RUN ./api_controller_gen.sh "./NSwag/NetCore22/dotnet-nswag.dll" "./MightyCalc/MightyCalc.API/Controllers/MightyCalcController.cs"
+RUN ./api_client_gen.sh  "./NSwag/NetCore22/dotnet-nswag.dll" "./MightyCalc/MightyCalc.Client/Client.cs"
 
 #Generating API controller
 #RUN dotnet ./NSwag/NetCore22/dotnet-nswag.dll swagger2cscontroller /input:"./MightyCalcAPI.yaml" /classname:Api /namespace:MightyCalc.API /UseLiquidTemplates:true /ControllerBaseClass:Microsoft.AspNetCore.Mvc.ControllerBase /AspNetNamespace:"Microsoft.AspNetCore.Mvc" /output:"/MightyCalc.API/MightyCalc.API/Controllers/MightyCalcController.cs" /ResponseArrayType:"System.Collections.Generic.IReadOnlyCollection"  /ArrayBaseType:"System.Collections.Generic.IReadonlyCollection" /ArrayInstanceType:"System.Collections.Generic.List"
