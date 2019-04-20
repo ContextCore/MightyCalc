@@ -171,6 +171,9 @@ components:
           type: string 
         usageCount:
           type: integer
+      example:
+        name: "Multiply"
+        usageCount: "5"
     FunctionPeriodUsage:
       type: object
       properties:
@@ -186,6 +189,13 @@ components:
           format: date-time
         period:
           type: string
+      example:
+        name: Addition
+        usageCount: 2
+        periodStart: "04/19/2019 18:06:00 +8:00"
+        periodEnd: "04/19/2019 18:07:00 +8:00"
+        period: "00:00:01.000"
+
     PeriodReport:
       type: object
       properties: 
