@@ -13,7 +13,8 @@ namespace MightyCalc.API
         private readonly IFunctionsTotalUsageQuery _totalUsageQuery;
         private readonly IFunctionsUsageQuery _usageQuery;
 
-        public AkkaApi(INamedCalculatorPool pool, IFunctionsTotalUsageQuery totalUsageQuery, IFunctionsUsageQuery usageQuery)
+        public AkkaApi(INamedCalculatorPool pool, IFunctionsTotalUsageQuery totalUsageQuery,
+            IFunctionsUsageQuery usageQuery)
         {
             _usageQuery = usageQuery;
             _totalUsageQuery = totalUsageQuery;
@@ -74,20 +75,27 @@ namespace MightyCalc.API
             var usage = await _totalUsageQuery.Execute();
             return new Report()
             {
-                UsageStatistics = usage.Select(u => new FunctionUsage {
-                    Name = u.FunctionName, 
-                    UsageCount = (int) u.InvocationsCount}).ToList()
+                UsageStatistics = usage.Select(u => new FunctionUsage
+                {
+                    Name = u.FunctionName,
+                    UsageCount = (int) u.InvocationsCount
+                }).ToList()
             };
         }
 
-        public async Task<Report> UserUsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
+        public async Task<PeriodReport> UserUsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
         {
-            var usage = await _usageQuery.Execute("anonymous",@from, to);
-            return new Report()
+            var usage = await _usageQuery.Execute("anonymous", @from, to);
+            return new PeriodReport()
             {
-                UsageStatistics = usage.Select(u => new FunctionUsage {
-                Name = u.FunctionName, 
-                UsageCount = (int) u.InvocationsCount}).ToList()
+                UsageStatistics = usage.Select(u => new FunctionPeriodUsage
+                {
+                    Name = u.FunctionName,
+                    UsageCount = u.InvocationsCount,
+                    PeriodStart = u.PeriodStart,
+                    PeriodEnd = u.PeriodEnd,
+                    Period = u.Period.ToString("g")
+                }).ToList()
             };
         }
     }

@@ -48,7 +48,7 @@ namespace MightyCalc.Client
         /// <returns>successful operation</returns>
         /// <exception cref="MightyCalcException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        System.Threading.Tasks.Task<Report> UserUsageStatsAsync(System.DateTimeOffset? from = null, System.DateTimeOffset? to = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<PeriodReport> UserUsageStatsAsync(System.DateTimeOffset? from = null, System.DateTimeOffset? to = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
     
     }
     
@@ -471,7 +471,7 @@ namespace MightyCalc.Client
         /// <returns>successful operation</returns>
         /// <exception cref="MightyCalcException">A server side error occurred.</exception>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        public async System.Threading.Tasks.Task<Report> UserUsageStatsAsync(System.DateTimeOffset? from = null, System.DateTimeOffset? to = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<PeriodReport> UserUsageStatsAsync(System.DateTimeOffset? from = null, System.DateTimeOffset? to = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/stats/user?");
@@ -514,10 +514,10 @@ namespace MightyCalc.Client
                         if (status_ == "200") 
                         {
                             var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false); 
-                            var result_ = default(Report); 
+                            var result_ = default(PeriodReport); 
                             try
                             {
-                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<Report>(responseData_, _settings.Value);
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<PeriodReport>(responseData_, _settings.Value);
                                 return result_; 
                             } 
                             catch (System.Exception exception_) 
@@ -538,7 +538,7 @@ namespace MightyCalc.Client
                             throw new MightyCalcException("The HTTP status code of the response was not expected (" + (int)response_.StatusCode + ").", (int)response_.StatusCode, responseData_, headers_, null);
                         }
             
-                        return default(Report);
+                        return default(PeriodReport);
                     }
                     finally
                     {
@@ -607,6 +607,54 @@ namespace MightyCalc.Client
         public static FunctionUsage FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<FunctionUsage>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.22.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class FunctionPeriodUsage 
+    {
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("usageCount", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int UsageCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("periodStart", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTimeOffset PeriodStart { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("periodEnd", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTimeOffset PeriodEnd { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("period", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Period { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static FunctionPeriodUsage FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<FunctionPeriodUsage>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.22.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class PeriodReport 
+    {
+        [Newtonsoft.Json.JsonProperty("UsageStatistics", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.IReadOnlyCollection<FunctionPeriodUsage> UsageStatistics { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static PeriodReport FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<PeriodReport>(data);
         }
     
     }

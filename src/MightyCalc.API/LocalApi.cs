@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using MightyCalc.Calculations;
+using MightyCalc.Reports;
 
 namespace MightyCalc.API
 {
@@ -63,10 +64,14 @@ namespace MightyCalc.API
                 {UsageStatistics = new List<FunctionUsage>() {new FunctionUsage {Name = "Test", UsageCount = 1}}});
         }
 
-        public Task<Report> UserUsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
+        public Task<PeriodReport> UserUsageStatsAsync(DateTimeOffset? @from, DateTimeOffset? to)
         {
-            return Task.FromResult(new Report()
-                {UsageStatistics = new List<FunctionUsage>() {new FunctionUsage {Name = "Test", UsageCount = 1}}});
+            return Task.FromResult(new PeriodReport()
+                {UsageStatistics = new List<FunctionPeriodUsage>() {new FunctionPeriodUsage {Name = "Test", UsageCount = 1, 
+                    PeriodStart = DateTimeOffset.Now.ToMinutePeriodBegin(),
+                    PeriodEnd = DateTimeOffset.Now.ToMinutePeriodEnd(),
+                    Period= TimeSpan.FromMinutes(1).ToString("g")
+                }}});
         }
        
     }

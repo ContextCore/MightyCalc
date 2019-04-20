@@ -159,7 +159,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report'
+                $ref: '#/components/schemas/PeriodReport'
         '400':
           description: Invalid time period specified
 components:
@@ -171,6 +171,29 @@ components:
           type: string 
         usageCount:
           type: integer
+    FunctionPeriodUsage:
+      type: object
+      properties:
+        name: 
+          type: string 
+        usageCount:
+          type: integer
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        period:
+          type: string
+    PeriodReport:
+      type: object
+      properties: 
+        UsageStatistics:   
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionPeriodUsage'
+                
     Report: 
       type: object
       properties: 

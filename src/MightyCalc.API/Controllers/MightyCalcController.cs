@@ -36,7 +36,7 @@ namespace MightyCalc.API
         /// <param name="from">start of the report period</param>
         /// <param name="to">end of the report period</param>
         /// <returns>successful operation</returns>
-        System.Threading.Tasks.Task<Report> UserUsageStatsAsync(System.DateTimeOffset? from, System.DateTimeOffset? to);
+        System.Threading.Tasks.Task<PeriodReport> UserUsageStatsAsync(System.DateTimeOffset? from, System.DateTimeOffset? to);
     
     }
     
@@ -96,7 +96,7 @@ namespace MightyCalc.API
         /// <param name="to">end of the report period</param>
         /// <returns>successful operation</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("stats/user")]
-        public System.Threading.Tasks.Task<Report> UserUsageStats(System.DateTimeOffset? from, System.DateTimeOffset? to)
+        public System.Threading.Tasks.Task<PeriodReport> UserUsageStats(System.DateTimeOffset? from, System.DateTimeOffset? to)
         {
             return _implementation.UserUsageStatsAsync(from, to);
         }
@@ -122,6 +122,54 @@ namespace MightyCalc.API
         public static FunctionUsage FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<FunctionUsage>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.22.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class FunctionPeriodUsage 
+    {
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("usageCount", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int UsageCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("periodStart", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTimeOffset PeriodStart { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("periodEnd", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTimeOffset PeriodEnd { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("period", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Period { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static FunctionPeriodUsage FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<FunctionPeriodUsage>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.13.22.0 (Newtonsoft.Json v11.0.0.0)")]
+    public partial class PeriodReport 
+    {
+        [Newtonsoft.Json.JsonProperty("UsageStatistics", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.List<FunctionPeriodUsage> UsageStatistics { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static PeriodReport FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<PeriodReport>(data);
         }
     
     }

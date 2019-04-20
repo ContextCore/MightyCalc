@@ -44,7 +44,7 @@ namespace MightyCalc.API.IntegrationTests
         [InlineData(new[]{"1+1.5"},"AddChecked",1)] //add
         [InlineData(new[]{"1+1.5+1","0+0+0+1"},"AddChecked",5)] //add
         [InlineData(new[]{"Pow(2,1) - 23","23 - 4 - 1"},"Pow",1,"SubtractChecked",3)] //add
-        public async Task Given_expressions_calculated_When_getting_stats_Then_it_should_be_presented(string[] expressions, params object[] expectedStats)
+        public async Task Given_expressions_calculated_When_getting_total_stats_Then_it_should_be_presented(string[] expressions, params object[] expectedStats)
         {
             var expectedUsage = new Dictionary<string,int>();
             var enumerator = expectedStats.GetEnumerator();
@@ -63,7 +63,7 @@ namespace MightyCalc.API.IntegrationTests
                 await Client.CalculateAsync(new Client.Expression{Representation = expression});
             }
 
-            await Task.Delay(10000); // for projection
+            await Task.Delay(5000); // for projection
             
             var report = await Client.UsageTotalStatsAsync();
 
@@ -79,5 +79,44 @@ namespace MightyCalc.API.IntegrationTests
             }
         }
 
+
+        [Theory]
+        [InlineData(new[]{"1+1.5"},"AddChecked",1)] //add
+        [InlineData(new[]{"1+1.5+1","0+0+0+1"},"AddChecked",5)] //add
+        [InlineData(new[]{"Pow(2,1) - 23","23 - 4 - 1"},"Pow",1,"SubtractChecked",3)] //add
+        public async Task Given_expressions_calculated_When_getting_stats_Then_it_should_be_presented(string[] expressions, params object[] expectedStats)
+        {
+            var expectedUsage = new Dictionary<string,int>();
+            var enumerator = expectedStats.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                var name = (string) enumerator.Current;
+                enumerator.MoveNext();
+                var count = (int) enumerator.Current;
+                expectedUsage.Add(name,count);
+            }
+
+            var beforeCalculationReport = await Client.UserUsageStatsAsync();
+
+            foreach (var expression in expressions)
+            {
+                await Client.CalculateAsync(new Client.Expression{Representation = expression});
+            }
+
+            await Task.Delay(5000); // for projection
+            
+            var report = await Client.UsageTotalStatsAsync();
+
+            foreach (var expected in expectedUsage)
+            {
+                var usageBefore = beforeCalculationReport.UsageStatistics.FirstOrDefault(u => u.Name == expected.Key)
+                                      ?.UsageCount ?? 0;
+                
+                var usageAfterCalculation = report.UsageStatistics.FirstOrDefault(u => u.Name == expected.Key)
+                                                ?.UsageCount ?? 0;
+                
+                expected.Value.Should().BeGreaterOrEqualTo(usageAfterCalculation - usageBefore);
+            }
+        }
     }
 }
