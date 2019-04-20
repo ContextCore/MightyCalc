@@ -6,9 +6,4 @@ namespace MightyCalc.Configuration
     {
         public static Config FullDebug { get; } = ConfigurationFactory.FromResource<Cfg>("MightyCalc.Configuration.fulldebug.conf");
     }
-
-    class Cfg
-    {
-        
-    }
 }

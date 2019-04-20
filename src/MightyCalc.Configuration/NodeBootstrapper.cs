@@ -1,5 +1,6 @@
 using Akka.Actor;
 using Petabridge.Cmd.Cluster;
+using Petabridge.Cmd.Cluster.Sharding;
 using Petabridge.Cmd.Host;
 
 namespace MightyCalc.Configuration
@@ -19,13 +20,9 @@ namespace MightyCalc.Configuration
         {
             var pbm = PetabridgeCmd.Get(system);
             pbm.RegisterCommandPalette(ClusterCommands.Instance); // enable cluster management commands
+            pbm.RegisterCommandPalette(ClusterShardingCommands.Instance);
             pbm.Start();
             return system;
         }
-    }
-
-    public class ManualRequestReason : CoordinatedShutdown.Reason
-    {
-        
     }
 }
