@@ -4,13 +4,14 @@ using Akka.Actor;
 using Akka.Persistence;
 using MightyCalc.Calculations;
 
-namespace MightyCalc.Node
+namespace MightyCalc.Node.Akka
 {
     public interface IDomainEvent
     {
         DateTimeOffset Occured { get; }
     }
-    
+
+
     public class CalculatorActor : ReceivePersistentActor
     {
         public CalculatorActor()
@@ -83,7 +84,7 @@ namespace MightyCalc.Node
             public Parameter[] Parameters { get; }
             public string[] FunctionsUsed { get; }
 
-            public CalculationPerformed(string calculatorId, string expression, Parameter[] parameters,
+            public CalculationPerformed(string calculatorId, string expression, Parameter[] parameters, 
                 string[] functionsUsed)
             {
                 CalculatorId = calculatorId;

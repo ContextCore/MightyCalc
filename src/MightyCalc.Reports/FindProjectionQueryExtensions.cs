@@ -1,4 +1,5 @@
 using MightyCalc.Node;
+using MightyCalc.Node.Akka;
 using MightyCalc.Reports.Streams;
 
 namespace MightyCalc.Reports

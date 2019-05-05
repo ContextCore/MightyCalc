@@ -1,4 +1,4 @@
-namespace MightyCalc.Node
+namespace MightyCalc.Node.Akka
 {
     public static class KnownActorRegions
     {

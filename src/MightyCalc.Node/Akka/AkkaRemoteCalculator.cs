@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using MightyCalc.Calculations;
 
-namespace MightyCalc.Node
+namespace MightyCalc.Node.Akka
 {
     public class AkkaRemoteCalculator : IRemoteCalculator
     {

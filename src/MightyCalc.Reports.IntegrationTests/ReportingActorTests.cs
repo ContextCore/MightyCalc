@@ -13,6 +13,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MightyCalc.IntegrationTests.Tools;
 using MightyCalc.Node;
+using MightyCalc.Node.Akka;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 using MightyCalc.Reports.Streams;

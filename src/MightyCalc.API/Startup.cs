@@ -13,6 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using MightyCalc.Configuration;
 using MightyCalc.Node;
+using MightyCalc.Node.Akka;
+using MightyCalc.Node.Domain;
 using MightyCalc.Reports;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
@@ -61,7 +63,12 @@ namespace MightyCalc.API
             services.AddSingleton(options);
             services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
             services.AddTransient<IFunctionsUsageQuery, FunctionsUsageQuery>();
-            services.AddSingleton<INamedCalculatorPool, AkkaCalculatorPool>();
+            services.AddSingleton<INamedCalculatorPool>(p =>
+            {
+                var pool = new DomainCalculatorPool(p.GetRequiredService<ActorSystem>());
+                pool.Start().Wait();
+                return pool;
+            });
             
             ConfigureExtensions(system, settings);
         }

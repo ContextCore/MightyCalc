@@ -8,13 +8,23 @@
 
     <ItemGroup>
         <PackageReference Include="FluentAssertions" Version="5.6.0" />
+        <PackageReference Include="GridDomain.Scenarios" Version="2.7.0-preview2" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.0-preview-20181205-02" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.4" />
+        <PackageReference Include="Serilog.Sinks.XunitTestOutput" Version="1.0.14" />
+        <PackageReference Include="Shouldly" Version="3.0.2" />
         <PackageReference Include="xunit" Version="2.4.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\MightyCalc.Calculations\MightyCalc.Calculations.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+        <HintPath>..\..\..\..\.nuget\packages\serilog\2.7.1\lib\netstandard1.3\Serilog.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

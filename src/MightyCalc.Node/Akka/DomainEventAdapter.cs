@@ -1,7 +1,6 @@
-using System;
 using Akka.Persistence.Journal;
 
-namespace MightyCalc.Node
+namespace MightyCalc.Node.Akka
 {
     public class DomainEventAdapter : IEventAdapter
     {

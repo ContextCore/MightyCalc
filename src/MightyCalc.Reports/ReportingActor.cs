@@ -5,6 +5,7 @@ using Akka.Persistence.Query.Sql;
 using Akka.Streams;
 using Akka.Streams.Implementation.Fusing;
 using MightyCalc.Node;
+using MightyCalc.Node.Akka;
 using MightyCalc.Reports.ReportingExtension;
 using MightyCalc.Reports.Streams;
 

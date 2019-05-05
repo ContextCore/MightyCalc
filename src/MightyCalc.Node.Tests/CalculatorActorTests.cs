@@ -1,6 +1,7 @@
 using Akka.Actor;
 using Akka.TestKit.Xunit2;
 using MightyCalc.Calculations;
+using MightyCalc.Node.Akka;
 using Xunit;
 using Xunit.Abstractions;
 

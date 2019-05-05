@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using MightyCalc.Calculations;
 
-namespace MightyCalc.Node
+namespace MightyCalc.Node.Akka
 {
     public static class CalculatorActorProtocol
     {

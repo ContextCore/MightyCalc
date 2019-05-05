@@ -11,6 +11,7 @@ using Akka.TestKit.Xunit2;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MightyCalc.Node;
+using MightyCalc.Node.Akka;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 using MightyCalc.Reports.Streams;

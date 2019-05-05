@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Sprache;
 using Sprache.Calc;
 
 namespace MightyCalc.Calculations
@@ -93,9 +94,16 @@ namespace MightyCalc.Calculations
             return visitor.FunctionNames;
         }
 
+        public bool CanAddFunction(string expression, params string[] parameterNames)
+        {
+            _calculator.ParseExpression(expression, parameterNames.ToDictionary(p => p, p => 0d));
+            return true;
+        }
+        
         public void AddFunction(string name, string description, string expression, params string[] parameterNames)
         {
             _calculator.RegisterFunction(name, expression, parameterNames.ToArray());
+            
             try
             {
                 Calculate(expression, parameterNames.Select(p => new Parameter(p, 0)).ToArray());
@@ -115,6 +123,7 @@ namespace MightyCalc.Calculations
             }
         }
 
+        
         public class AddFunctionException : Exception
         {
             public AddFunctionException(Exception exception):base("Error during add a new function",exception)
@@ -133,7 +142,6 @@ namespace MightyCalc.Calculations
             _knownFunctions.Add(new FunctionDefinition(name,2,description,""));
             _calculator.RegisterFunction(name, expression);
         }
-
 
         public IReadOnlyList<FunctionDefinition> GetKnownFunctions()
         {

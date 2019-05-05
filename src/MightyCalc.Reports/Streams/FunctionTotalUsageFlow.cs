@@ -4,6 +4,7 @@ using Akka;
 using Akka.Persistence.Query;
 using Akka.Streams.Dsl;
 using MightyCalc.Node;
+using MightyCalc.Node.Akka;
 
 namespace MightyCalc.Reports.Streams
 {

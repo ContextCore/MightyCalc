@@ -2,7 +2,7 @@ using System;
 using Akka.Actor;
 using Akka.Cluster.Sharding;
 
-namespace MightyCalc.Node
+namespace MightyCalc.Node.Akka
 {
     public class AkkaCalculatorPool : INamedCalculatorPool
     {

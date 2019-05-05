@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace MightyCalc.Node
+namespace MightyCalc.Node.Akka
 {
     public class ShardIdGenerator
     {
