@@ -16,7 +16,6 @@ namespace MightyCalc.Reports.Streams
             return Flow.Create<EventEnvelope>()
                 .SelectMany(e =>
                 {
-                    Console.WriteLine("");
                     var calculationPerformed = (e.Event as CalculatorActor.CalculationPerformed);
                     //transform each element to pair with number of words in it
                     return calculationPerformed?.FunctionsUsed.GroupBy(f => f)

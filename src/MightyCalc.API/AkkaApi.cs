@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MightyCalc.Calculations.Aggregate.Commands;
 using MightyCalc.Node;
+using MightyCalc.Node.Domain;
 using MightyCalc.Reports;
 
 namespace MightyCalc.API
@@ -12,10 +14,14 @@ namespace MightyCalc.API
         private readonly INamedCalculatorPool _pool;
         private readonly IFunctionsTotalUsageQuery _totalUsageQuery;
         private readonly IFunctionsUsageQuery _usageQuery;
+        private readonly IKnownFunctionsQuery _knownFunctionsQuery;
 
-        public AkkaApi(INamedCalculatorPool pool, IFunctionsTotalUsageQuery totalUsageQuery,
-            IFunctionsUsageQuery usageQuery)
+        public AkkaApi(INamedCalculatorPool pool, 
+                       IFunctionsTotalUsageQuery totalUsageQuery,
+                       IFunctionsUsageQuery usageQuery,
+                       IKnownFunctionsQuery knownFunctionsQuery)
         {
+            _knownFunctionsQuery = knownFunctionsQuery;
             _usageQuery = usageQuery;
             _totalUsageQuery = totalUsageQuery;
             _pool = pool;
@@ -29,7 +35,7 @@ namespace MightyCalc.API
 
         public async Task<IReadOnlyCollection<NamedExpression>> FindFunctionsAsync(string name)
         {
-            var definitions = await _pool.For("anonymous").GetKnownFunction(name);
+            var definitions = await _knownFunctionsQuery.Execute("anonymous",name);
             return definitions.Select(d => new NamedExpression()
             {
                 Description = d.Description,
@@ -48,7 +54,7 @@ namespace MightyCalc.API
         public async Task CreateFunctionAsync(NamedExpression body)
         {
             //API-specific restriction, not coming from business logic! 
-            var functionDefinitions = await _pool.For("anonymous").GetKnownFunction(body.Name);
+            var functionDefinitions = await _knownFunctionsQuery.Execute("anonymous", body.Name);
             if (functionDefinitions.Any(f => f.Name == body.Name))
                 throw new FunctionAlreadyExistsException();
 

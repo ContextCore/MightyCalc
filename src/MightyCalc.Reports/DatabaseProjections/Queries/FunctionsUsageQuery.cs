@@ -14,17 +14,18 @@ namespace MightyCalc.Reports.DatabaseProjections
         {
             _context = context;
         }
-        
-        public async Task<IReadOnlyCollection<FunctionUsage>> Execute(string calculatorName = null, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null)
+
+        public async Task<IReadOnlyCollection<FunctionUsage>> Execute(string calculatorName = null,
+            DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null)
         {
             IQueryable<FunctionUsage> functions = _context.FunctionsUsage;
 
             if (!String.IsNullOrEmpty(calculatorName))
                 functions = functions.Where(f => f.CalculatorName == calculatorName);
-            
+
             if (periodStart != null)
                 functions = functions.Where(f => f.PeriodStart >= periodStart);
-            
+
             if (periodEnd != null)
                 functions = functions.Where(f => f.PeriodEnd <= periodEnd);
 

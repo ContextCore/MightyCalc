@@ -2,12 +2,11 @@ using System;
 using System.Linq;
 using Akka.Actor;
 using Akka.Event;
-using MightyCalc.Node;
 using MightyCalc.Node.Akka;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 
-namespace MightyCalc.Reports.Streams
+namespace MightyCalc.Reports.Streams.Projectors
 {
     public class FunctionsUsageProjector : ReceiveActor
     {

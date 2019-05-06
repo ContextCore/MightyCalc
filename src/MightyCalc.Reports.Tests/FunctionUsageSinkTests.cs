@@ -14,6 +14,7 @@ using MightyCalc.Node.Akka;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 using MightyCalc.Reports.Streams;
+using MightyCalc.Reports.Streams.Projectors;
 using Xunit;
 using Xunit.Abstractions;
 

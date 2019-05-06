@@ -2,13 +2,11 @@ using System;
 using System.Linq;
 using Akka.Actor;
 using Akka.Event;
-using Akka.Streams.Implementation.Fusing;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 
-namespace MightyCalc.Reports.Streams
+namespace MightyCalc.Reports.Streams.Projectors
 {
-
     public class FunctionsTotalUsageProjector : ReceiveActor
     {
         public FunctionsTotalUsageProjector(string eventName = "unknown")
@@ -16,16 +14,13 @@ namespace MightyCalc.Reports.Streams
             var dependencies = Context.System.GetReportingExtension().GetDependencies();
             Func<FunctionUsageContext> contextFactory = () => dependencies.CreateFunctionUsageContext();
             var log = Context.GetLogger();
-            
+
             Receive<ProjectorActorProtocol.Start>(s =>
             {
                 log.Info("Starting projection");
                 Sender.Tell(ProjectorActorProtocol.Next.Instance);
             });
-            Receive<ProjectorActorProtocol.ProjectionDone>(s =>
-            {
-                log.Info("Stopping projection");
-            });
+            Receive<ProjectorActorProtocol.ProjectionDone>(s => { log.Info("Stopping projection"); });
             //Event processing intentionally made slow for simplicity
             Receive<SequencedFunctionTotalUsage>(e =>
             {
@@ -50,7 +45,7 @@ namespace MightyCalc.Reports.Streams
                         .Execute(KnownProjectionsNames.TotalFunctionUsage,
                             nameof(FunctionsTotalUsageProjector),
                             eventName);
-                    
+
                     if (projection == null)
                         context.Projections.Add(new Projection
                         {
@@ -68,9 +63,8 @@ namespace MightyCalc.Reports.Streams
 
                 Sender.Tell(ProjectorActorProtocol.Next.Instance);
             });
-            
+
             ReceiveAny(o => log.Warning("missing message: " + o.ToString()));
         }
-
     }
 }

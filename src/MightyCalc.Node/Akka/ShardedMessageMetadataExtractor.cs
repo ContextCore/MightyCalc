@@ -1,6 +1,6 @@
 using Akka.Cluster.Sharding;
 
-namespace MightyCalc.Node
+namespace MightyCalc.Node.Akka
 {
     public class ShardedMessageMetadataExtractor : IMessageExtractor
     {

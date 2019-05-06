@@ -1,6 +1,7 @@
 using MightyCalc.Node;
 using MightyCalc.Node.Akka;
 using MightyCalc.Reports.Streams;
+using MightyCalc.Reports.Streams.Projectors;
 
 namespace MightyCalc.Reports
 {

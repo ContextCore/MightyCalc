@@ -9,7 +9,5 @@ namespace MightyCalc.Node
 
         Task AddFunction(string functionName, string description, string expression,
             params string[] parameterNames);
-        
-        Task<FunctionDefinition[]> GetKnownFunction(string functionName);
     }
 }

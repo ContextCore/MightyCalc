@@ -2,6 +2,7 @@ using System;
 using Akka;
 using Akka.Actor;
 using Akka.Streams.Dsl;
+using MightyCalc.Reports.Streams.Projectors;
 
 namespace MightyCalc.Reports.Streams
 {

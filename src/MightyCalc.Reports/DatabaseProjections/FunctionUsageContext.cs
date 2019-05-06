@@ -7,9 +7,10 @@ namespace MightyCalc.Reports.DatabaseProjections
         public DbSet<FunctionUsage> FunctionsUsage { get; set; }
         public DbSet<FunctionTotalUsage> FunctionsTotalUsage { get; set; }
         public DbSet<Projection> Projections { get; set; }
+        
+        public DbSet<KnownFunction> KnownFunctions { get; set; }
 
-        public FunctionUsageContext(DbContextOptions<FunctionUsageContext> options)
-            : base(options)
+        public FunctionUsageContext(DbContextOptions<FunctionUsageContext> options): base(options)
         {
             
         }
@@ -19,6 +20,7 @@ namespace MightyCalc.Reports.DatabaseProjections
             modelBuilder.Entity<FunctionUsage>().HasKey(p => new {p.CalculatorName, p.FunctionName, p.PeriodStart, p.PeriodEnd});
             modelBuilder.Entity<Projection>().HasKey(p => new {p.Name, p.Projector, p.Event});
             modelBuilder.Entity<FunctionTotalUsage>().HasKey(p => p.FunctionName);
+            modelBuilder.Entity<KnownFunction>().HasKey(p => new {p.CalculatorId, p.Name});
         }
     }
 }

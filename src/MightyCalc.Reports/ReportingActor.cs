@@ -4,10 +4,12 @@ using Akka.Persistence.Query;
 using Akka.Persistence.Query.Sql;
 using Akka.Streams;
 using Akka.Streams.Implementation.Fusing;
+using MightyCalc.Calculations.Aggregate.Events;
 using MightyCalc.Node;
 using MightyCalc.Node.Akka;
 using MightyCalc.Reports.ReportingExtension;
 using MightyCalc.Reports.Streams;
+using MightyCalc.Reports.Streams.Projectors;
 
 namespace MightyCalc.Reports
 {
@@ -39,6 +41,8 @@ namespace MightyCalc.Reports
                 StartTotalUsageProjection();
 
                 StartFunctionUsageProjection();
+                
+                StartKnownFunctionsProjection();
 
                 Behavior.Become(Working, nameof(Working));
             });
@@ -95,6 +99,20 @@ namespace MightyCalc.Reports
             var source = _readJournal.EventsByTag(eventName, offset);
             var groupingFlow = FunctionTotalUsageFlow.Instance;
             var projectionSink = FunctionTotalUsageSink.Create(Context, eventName);
+            var projectionGraph = source.Via(groupingFlow).To(projectionSink);
+            _materializer = Context.System.Materializer();
+            projectionGraph.Run(_materializer);
+        }
+        
+        private void StartKnownFunctionsProjection()
+        {
+            var eventName = nameof(FunctionAdded);
+
+            var offset = GetProjectionOffset(eventName, KnownProjectionsNames.KnownFunctions, nameof(KnownFunctionsProjector));
+
+            var source = _readJournal.EventsByTag(eventName, offset);
+            var groupingFlow = KnownFunctionsFlow.Instance;
+            var projectionSink = KnownFunctionsSink.Create(Context, eventName);
             var projectionGraph = source.Via(groupingFlow).To(projectionSink);
             _materializer = Context.System.Materializer();
             projectionGraph.Run(_materializer);
