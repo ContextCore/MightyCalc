@@ -10,6 +10,15 @@ namespace MightyCalc.Calculations
             Expression = expression;
             Parameters = parameters;
         }
+        
+        public FunctionDefinition(string name,  string description, string expression, params string [] parameters)
+        {
+            Name = name;
+            Arity = parameters.Length;
+            Description = description;
+            Expression = expression;
+            Parameters = parameters;
+        }
 
         public string Name { get; }
         public string Description { get; }

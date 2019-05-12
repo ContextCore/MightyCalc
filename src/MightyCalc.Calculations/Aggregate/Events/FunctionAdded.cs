@@ -7,7 +7,7 @@ namespace MightyCalc.Calculations.Aggregate.Events
         public string CalculatorId { get; }
         public FunctionDefinition Definition { get; }
 
-        public FunctionAdded(string calculatorId, FunctionDefinition definition) : base(calculatorId)
+        public FunctionAdded(string calculatorId, FunctionDefinition definition, long version) : base(calculatorId, version)
         {
             CalculatorId = calculatorId;
             Definition = definition;

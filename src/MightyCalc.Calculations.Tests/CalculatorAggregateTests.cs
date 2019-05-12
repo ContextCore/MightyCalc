@@ -39,7 +39,7 @@ namespace MightyCalc.Calculations.Tests
         {
             await AggregateScenario.New<Calculator>()
                 .When(new CalculateExpression("myCalc", expression, new Parameter[] { }))
-                .Then(new CalculationPerformed("myCalc", expression, new Parameter[] { }, answer, functionUsed))
+                .Then(new CalculationPerformed("myCalc", 1,expression, new Parameter[] { }, answer, functionUsed))
                 .Run
                 .Local(_log)
                 .Check();
@@ -61,6 +61,7 @@ namespace MightyCalc.Calculations.Tests
                 .ShouldThrow<Exception>();
         }
 
+     
         [Fact]
         public async Task When_add_custom_function_Then_can_use_it()
         {
@@ -69,11 +70,35 @@ namespace MightyCalc.Calculations.Tests
                 "Test function",
                 "sub(add(a,b),c)",
                 "a", "b", "c");
-            var parameters = functionDefinition.Parameters.Select(p => new Parameter(p)).ToArray();
             await AggregateScenario.New<Calculator>()
-                .Given(new CalculatorCreated("myCalc"))
+                .Given(new CalculatorCreated("myCalc",0))
                 .When(new AddFunction("myCalc", functionDefinition))
-                .Then(new FunctionAdded("myCalc", functionDefinition))
+                .Then(new FunctionAdded("myCalc", functionDefinition,1))
+                .Run
+                .Local(_log)
+                .Check();
+        }
+        
+        
+        [Fact]
+        public async Task When_add_custom_function_twice_Then_the_last_version_is_used()
+        {
+            var functionDefinition = new FunctionDefinition("test",
+                "Test function",
+                "sub(add(a,b),c)",
+                "a", "b", "c");
+            
+            var oldFunctionDefinition = new FunctionDefinition("test",
+                "Test function",
+                "a+b+c",
+                "a", "b", "c");
+            
+            await AggregateScenario.New<Calculator>()
+                .Given(new CalculatorCreated("myCalc",0))
+                .When(new AddFunction("myCalc", oldFunctionDefinition),
+                      new AddFunction("myCalc", functionDefinition))
+                .Then(new FunctionAdded("myCalc", oldFunctionDefinition, 1),
+                      new FunctionReplaced("myCalc", functionDefinition, 2))
                 .Run
                 .Local(_log)
                 .Check();

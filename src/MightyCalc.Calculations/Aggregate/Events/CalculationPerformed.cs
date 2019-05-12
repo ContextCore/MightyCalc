@@ -10,8 +10,8 @@ namespace MightyCalc.Calculations.Aggregate.Events
         public Parameter[] Parameters { get; }
         public string[] FunctionsUsed { get; }
 
-        public CalculationPerformed(string calculatorId, string expression, Parameter[] parameters, double value,
-            string[] functionsUsed) : base(calculatorId)
+        public CalculationPerformed(string calculatorId, long version, string expression, Parameter[] parameters, double value,
+            string[] functionsUsed) : base(calculatorId, version)
         {
             Expression = expression;
             Parameters = parameters;

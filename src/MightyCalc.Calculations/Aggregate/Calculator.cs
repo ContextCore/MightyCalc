@@ -29,7 +29,11 @@ namespace MightyCalc.Calculations.Aggregate
                     Id = c.Source.Id;
                     break;
                 case FunctionAdded a: 
-                   AddFunction(_calculatorEngine, a.Definition); break;
+                   AddFunction(_calculatorEngine, a.Definition);
+                break;
+                case FunctionReplaced r: 
+                   AddFunction(_calculatorEngine, r.NewDefinition);
+                break;
             }
             Version++;
         }
@@ -44,17 +48,23 @@ namespace MightyCalc.Calculations.Aggregate
                 case CreateCalculator c:
                     if (Id != null)
                         throw new CalculatorAlreadyCreatedException();
-                    return new CalculatorCreated(c.Recipient.Id).AsCommandResult();
+                    return new CalculatorCreated(c.Recipient.Id, Version).AsCommandResult();
                                     
                 case CalculateExpression c: 
                     var result = _calculatorEngine.Calculate(c.Representation, c.Parameters);
-                    return new CalculationPerformed(Id, c.Representation,
+                    return new CalculationPerformed(Id, Version, c.Representation,
                         c.Parameters, result.Value, result.FunctionUsages.ToArray()).AsCommandResult();
                 
                 case AddFunction a:
-                    if (_calculatorEngine.CanAddFunction(a.Definition.Expression, a.Definition.Parameters))
-                        return new FunctionAdded(Id, a.Definition).AsCommandResult();
-                    else throw new CannotAddFunctionException();
+                {
+                    if (!_calculatorEngine.CanAddFunction(a.Definition.Expression, a.Definition.Parameters))
+                      throw new CannotAddFunctionException();
+                    
+                    if(_calculatorEngine.GetKnownFunctions().Any(f => f.Name == a.Definition.Name && f.Arity == a.Definition.Arity))
+                        return new FunctionReplaced(Id, a.Definition, Version).AsCommandResult();
+                    
+                    return new FunctionAdded(Id, a.Definition, Version).AsCommandResult();
+                }
                 
                 default: throw new UnknownCommandException();
             }
