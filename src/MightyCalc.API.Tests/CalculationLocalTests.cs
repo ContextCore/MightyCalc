@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using Akka.Actor;
@@ -14,6 +15,8 @@ using MightyCalc.Node;
 using MightyCalc.Reports;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
+using Serilog;
+using Serilog.Events;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace MightyCalc.API.Tests
@@ -23,9 +26,19 @@ namespace MightyCalc.API.Tests
     {
         protected override IMightyCalcClient CreateClient()
         {
+            
+            var logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.File($"api_{DateTime.Now:yyyy-MMM-dd-hh-mm-ss}.log")
+                .CreateLogger();
+            
             var builder = new WebHostBuilder()
                 .UseEnvironment("Development")
-                .UseStartup<LocalStartup>(); 
+                .UseStartup<LocalStartup>()
+                .UseSerilog(logger); 
             
             var server = new TestServer(builder);
             

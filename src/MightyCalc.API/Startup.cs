@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Cluster;
 using Akka.Configuration;
+using GridDomain.Node.Akka.GridDomainNodeExtension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -24,12 +25,10 @@ namespace MightyCalc.API
 {
     public class Startup
     {
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
         public IConfiguration Configuration { get; }
 
         protected virtual DbContextOptions<FunctionUsageContext> GetDbOptions(MightyCalcApiConfiguration cfg)
@@ -63,12 +62,15 @@ namespace MightyCalc.API
             services.AddSingleton(options);
             services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
             services.AddTransient<IFunctionsUsageQuery, FunctionsUsageQuery>();
-            services.AddSingleton<INamedCalculatorPool>(p =>
-            {
-                var pool = new DomainCalculatorPool(p.GetRequiredService<ActorSystem>());
-                pool.Start().Wait();
-                return pool;
-            });
+            services.AddTransient<IKnownFunctionsQuery, KnownFunctionsQuery>();
+            
+            var node = system.InitGridDomainExtension(new CalculatorDomainConfiguration());
+            var domain = node.Start().Result;
+
+            var pool = new DomainCalculatorPool(domain);
+
+            Task.Delay(2000).Wait();
+            services.AddSingleton<INamedCalculatorPool>(pool);
             
             ConfigureExtensions(system, settings);
         }
@@ -96,7 +98,7 @@ namespace MightyCalc.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {

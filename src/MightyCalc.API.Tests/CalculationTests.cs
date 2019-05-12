@@ -11,13 +11,12 @@ namespace MightyCalc.API.Tests
 {
     public abstract class CalculationTests
     {    
-        protected IMightyCalcClient Client => _lazyClient.Value;
-        private readonly Lazy<IMightyCalcClient> _lazyClient;
+        protected IMightyCalcClient Client { get; }
         protected abstract IMightyCalcClient CreateClient();
 
         protected CalculationTests()
         {
-            _lazyClient = new Lazy<IMightyCalcClient>(CreateClient);
+            Client = CreateClient();
         }
         
         [Theory]

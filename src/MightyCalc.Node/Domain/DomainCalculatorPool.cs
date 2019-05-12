@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.Cluster.Sharding;
 using GridDomain.Domains;
 using GridDomain.Node;
 using GridDomain.Node.Akka.GridDomainNodeExtension;
@@ -8,22 +9,16 @@ namespace MightyCalc.Node.Domain
 {
     public class DomainCalculatorPool : INamedCalculatorPool
     {
-        private readonly GridDomainNode _node;
-        private IDomain domain;
+        private IDomain _domain;
 
-        public DomainCalculatorPool(ActorSystem sys)
+        public DomainCalculatorPool(IDomain domain)
         {
-            _node = sys.InitGridDomainExtension(new CalculatorDomainConfiguration());
-        }
-
-        public async Task Start()
-        {
-            domain = await _node.Start();
+            _domain = domain;
         }
 
         public IRemoteCalculator For(string name)
         {
-            return new DomainCalculator(name, domain.CommandHandler<CalculatorCommandsHandler>());
+            return new DomainCalculator(name, _domain.CommandHandler<CalculatorCommandsHandler>());
         }
     }
 }

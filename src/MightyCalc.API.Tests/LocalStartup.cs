@@ -1,9 +1,17 @@
+using System;
+using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.Cluster;
 using Akka.Configuration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using MightyCalc.Configuration;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
+using Serilog;
+using Serilog.Events;
 
 namespace MightyCalc.API.Tests
 {
@@ -14,6 +22,22 @@ namespace MightyCalc.API.Tests
         }
 
         private static int counter = 0;
+        private ExtendedActorSystem _actorSystem;
+
+        protected override ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
+        {
+            _actorSystem = (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka);
+            
+            var complete = new TaskCompletionSource<bool>();
+            var cluster = Cluster.Get(_actorSystem);
+            cluster.RegisterOnMemberUp(() => complete.SetResult(true));
+            
+            if(!complete.Task.Wait(TimeSpan.FromSeconds(10)))
+                throw new AkkaClusterIsNotAvailableException();
+            
+            return _actorSystem;
+        }
+
         protected override DbContextOptions<FunctionUsageContext> GetDbOptions(MightyCalcApiConfiguration cfg)
         {
             return new DbContextOptionsBuilder<FunctionUsageContext>()
@@ -24,9 +48,17 @@ namespace MightyCalc.API.Tests
         protected override MightyCalcApiConfiguration BuildConfiguration()
         {
             var cfg = base.BuildConfiguration();
+
+            var logger = new LoggerConfiguration().MinimumLevel.Debug()
+                .WriteTo
+                .File($"actor_system_{DateTime.Now:yyyy-MMM-dd-hh-mm-ss}.log").CreateLogger();
+
+            Log.Logger = logger;
+            
             cfg.ClusterName = "ApiTest";
-            cfg.Akka = (Config) @"
+            cfg.Akka = ((Config)@"
 akka{
+    loggers=[""Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog""]
     actor{
         provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""
         serialize-messages = on 
@@ -55,7 +87,7 @@ akka{
         seed-nodes = [""akka.tcp://ApiTest@localhost:30031""]
         roles = [api, calculation, projection]
     }
-}";
+}").WithFallback(HoconConfigurations.FullDebug);
             return cfg;
         }
 

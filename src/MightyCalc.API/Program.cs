@@ -11,29 +11,51 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MightyCalc.Reports.DatabaseProjections;
+using Serilog;
+using Serilog.Events;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace MightyCalc.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
-                
-            using(var scope = host.Services.CreateScope())
+            
+            try
             {
-                var myDbContext = scope.ServiceProvider.GetRequiredService<FunctionUsageContext>();
-                Console.WriteLine("Migrating db at " + myDbContext.Database.GetDbConnection().ConnectionString);
-                myDbContext.Database.Migrate();
-            }
+                var host = CreateHostBuilder(args).Build();
+                
+                using(var scope = host.Services.CreateScope())
+                {
+                    var myDbContext = scope.ServiceProvider.GetRequiredService<FunctionUsageContext>();
+                    Console.WriteLine("Migrating db at " + myDbContext.Database.GetDbConnection().ConnectionString);
+                    myDbContext.Database.Migrate();
+                }
 
             
-            host.Run();
+                host.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+                return 1;
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+
+            return 0;
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>()
+                              .UseSerilog();
+                });
     }
 }

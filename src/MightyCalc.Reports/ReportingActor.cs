@@ -26,8 +26,7 @@ namespace MightyCalc.Reports
         {
             Behavior = new BehaviorQueue(Become);
             // obtain read journal by plugin id
-            _readJournal = PersistenceQuery.Get(Context.System)
-                .ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
+            _readJournal = PersistenceQuery.Get(Context.System).ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
             Behavior.Become(Initializing, nameof(Initializing));
             _dependencies = Context.System.GetReportingExtension().GetDependencies();
             _log = Context.GetLogger();
