@@ -44,6 +44,7 @@ RUN dotnet tool install --global pbm
 COPY --from=api-gen-env /usr/bin/MightyCalc /usr/bin/MightyCalc
 WORKDIR /usr/bin/MightyCalc
 #RUN dotnet --list-runtimes
+RUN dotnet restore -s "https://www.myget.org/F/griddomain-dev/api/v3/index.json"
 RUN dotnet build -c Release -v quiet
 RUN mkdir -p /swagger
 RUN cp ./MightyCalcAPI.yaml /swagger/MightyCalcAPI.yaml #for tests
