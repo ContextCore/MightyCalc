@@ -9,6 +9,10 @@ using Xunit;
 
 namespace MightyCalc.API.IntegrationTests
 {
+    
+    
+    //inmemory journal do not support read queries 8(
+
     public class UserFunctionTests
     {
         private IMightyCalcClient Client { get; }

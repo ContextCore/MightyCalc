@@ -3,11 +3,14 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Cluster;
 using Akka.Configuration;
+using Akka.Serialization;
+using GridDomain.Node.Akka.Configuration.Hocon;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MightyCalc.Configuration;
+using MightyCalc.Node;
 using MightyCalc.Reports.DatabaseProjections;
 using MightyCalc.Reports.ReportingExtension;
 using Serilog;
@@ -15,6 +18,48 @@ using Serilog.Events;
 
 namespace MightyCalc.API.Tests
 {
+
+    class DebugHyperionSerializer : HyperionSerializer
+    {
+        public DebugHyperionSerializer(ExtendedActorSystem system) : base(system)
+        {
+        }
+
+        public DebugHyperionSerializer(ExtendedActorSystem system, Config config) : base(system, config)
+        {
+        }
+
+        public DebugHyperionSerializer(ExtendedActorSystem system, HyperionSerializerSettings settings) : base(system, settings)
+        {
+        }
+
+        public override byte[] ToBinary(object obj)
+        {
+            try
+            {
+                return base.ToBinary(obj);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public override object FromBinary(byte[] bytes, Type type)
+        {
+            try
+            {
+                return base.FromBinary(bytes, type);
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+    }
+    
+    
     class LocalStartup : Startup
     {
         public LocalStartup(IConfiguration configuration) : base(configuration)
@@ -22,26 +67,22 @@ namespace MightyCalc.API.Tests
         }
 
         private static int counter = 0;
-        private ExtendedActorSystem _actorSystem;
+
+        protected override void ConfigureExtensions(ActorSystem system, MightyCalcApiConfiguration cfg)
+        {
+            base.ConfigureExtensions(system, cfg);
+             system.InitReportingExtension(new ReportingDependencies(GetDbOptions(cfg))).Start();
+        }
 
         protected override ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
         {
-            _actorSystem = (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka);
-            
-            var complete = new TaskCompletionSource<bool>();
-            var cluster = Cluster.Get(_actorSystem);
-            cluster.RegisterOnMemberUp(() => complete.SetResult(true));
-            
-            if(!complete.Task.Wait(TimeSpan.FromSeconds(10)))
-                throw new AkkaClusterIsNotAvailableException();
-            
-            return _actorSystem;
+            return (ExtendedActorSystem)ActorSystem.Create(cfg.ClusterName, cfg.Akka);
         }
 
         protected override DbContextOptions<FunctionUsageContext> GetDbOptions(MightyCalcApiConfiguration cfg)
         {
             return new DbContextOptionsBuilder<FunctionUsageContext>()
-                .UseInMemoryDatabase( nameof(UserFunctionLocalTests)+ ++counter).Options;
+                .UseInMemoryDatabase( nameof(UserFunctionTests)+ ++counter).Options;
 
         }
 
@@ -51,12 +92,14 @@ namespace MightyCalc.API.Tests
 
             var logger = new LoggerConfiguration().MinimumLevel.Debug()
                 .WriteTo
-                .File($"actor_system_{DateTime.Now:yyyy-MMM-dd-hh-mm-ss}.log").CreateLogger();
+                .File($"actor_system_{DateTime.Now:yyyy-MMM-dd-HH-mm-ss}.log").CreateLogger();
 
             Log.Logger = logger;
-            
+
+            var a = typeof(DebugHyperionSerializer);
+            //  #Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
             cfg.ClusterName = "ApiTest";
-            cfg.Akka = ((Config)@"
+            var configString = @"
 akka{
     loggers=[""Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog""]
     actor{
@@ -65,7 +108,7 @@ akka{
         serialize-creators = on
         serializers {
             akka-sharding = ""Akka.Cluster.Sharding.Serialization.ClusterShardingMessageSerializer, Akka.Cluster.Sharding""
-            hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
+            hyperion = """ + typeof(DebugHyperionSerializer).AssemblyQualifiedShortName() + @""" 
         }
                         
         serialization-bindings {
@@ -87,7 +130,8 @@ akka{
         seed-nodes = [""akka.tcp://ApiTest@localhost:30031""]
         roles = [api, calculation, projection]
     }
-}").WithFallback(HoconConfigurations.FullDebug);
+}";
+            cfg.Akka = ((Config)configString).WithFallback(HoconConfigurations.FullDebug);
             return cfg;
         }
 

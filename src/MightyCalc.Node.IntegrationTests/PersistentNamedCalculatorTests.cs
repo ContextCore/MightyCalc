@@ -3,6 +3,7 @@ using MightyCalc.IntegrationTests.Tools;
 using MightyCalc.Node.Tests;
 using Xunit.Abstractions;
 using Akka.Serialization;
+using GridDomain.Node.Akka.Configuration.Hocon;
 
 namespace MightyCalc.Node.IntegrationTests
 {

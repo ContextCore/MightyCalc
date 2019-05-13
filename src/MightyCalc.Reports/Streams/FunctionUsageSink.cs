@@ -27,7 +27,7 @@ namespace MightyCalc.Reports.Streams
     {
         public static Sink<FunctionAdded, NotUsed> Create(IActorRefFactory system, string eventName)
         {
-            var actorRef = system.ActorOf(Props.Create<KnownFunctionsProjector>(eventName, null), nameof(KnownFunctionsProjector));
+            var actorRef = system.ActorOf(Props.Create<KnownFunctionsProjector>(eventName), nameof(KnownFunctionsProjector));
 
             return Sink.ActorRefWithAck<FunctionAdded>(
                 actorRef,

@@ -23,6 +23,8 @@ else
 kubectl apply -f ./api/api-svc-external-gke.yaml
 fi
 
+kubectl apply -f ./persistence/storageclass-$k8sProvider.yaml
+
  #to allow postgres db initialize before first request from nodes
  ./wait_pod_is_ready.sh 60 1
 

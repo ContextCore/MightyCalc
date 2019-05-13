@@ -9,7 +9,7 @@ namespace MightyCalc.Node.Domain
     {
         public async Task Register(IDomainBuilder builder)
         {
-            await builder.RegisterAggregate(new AggregateConfiguration<Calculator>());
+            await builder.RegisterAggregate(new AggregateConfiguration<Calculator>(null, new AggregateSettings(hostRole:"calculation")));
             builder.RegisterCommandsResultAdapter<Calculator>(new CalculatorCommandResultAdapter());
             builder.RegisterCommandHandler(handler => new CalculatorCommandsHandler(handler));
         }

@@ -1,8 +1,10 @@
+using Akka;
 using Akka.Actor;
 using Akka.Event;
 using Akka.Persistence.Query;
 using Akka.Persistence.Query.Sql;
 using Akka.Streams;
+using Akka.Streams.Dsl;
 using Akka.Streams.Implementation.Fusing;
 using MightyCalc.Calculations.Aggregate.Events;
 using MightyCalc.Node;
@@ -36,7 +38,8 @@ namespace MightyCalc.Reports
         {
             Receive<Start>(s =>
             {
-
+                _log.Info("Starting projections");
+                
                 StartTotalUsageProjection();
 
                 StartFunctionUsageProjection();
@@ -47,20 +50,7 @@ namespace MightyCalc.Reports
             });
         }
 
-        private void StartFunctionUsageProjection()
-        {
-            var eventName = nameof(CalculatorActor.CalculationPerformed);
-            var offset = GetProjectionOffset(eventName, KnownProjectionsNames.FunctionUsage, nameof(FunctionsUsageProjector));
 
-
-            var source = _readJournal.EventsByTag(eventName, offset);
-            var flow = FunctionUsageFlow.Instance;
-            var sink = FunctionUsageSink.Create(Context, eventName);
-
-            var projectionGraph = source.Via(flow).To(sink);
-            _materializer = Context.System.Materializer();
-            projectionGraph.Run(_materializer);
-        }
 
         private Offset GetProjectionOffset(string eventName, string projectionName, string projectorName)
         {
@@ -89,16 +79,37 @@ namespace MightyCalc.Reports
             return offset;
         }
 
+        private void StartFunctionUsageProjection()
+        {
+            var eventName = nameof(CalculatorActor.CalculationPerformed);
+            StartProjection(eventName,
+                KnownProjectionsNames.FunctionUsage,
+                nameof(FunctionsUsageProjector),
+                FunctionUsageFlow.Instance,
+                FunctionUsageSink.Create(Context, eventName));
+        }
+        
         private void StartTotalUsageProjection()
         {
             var eventName = nameof(CalculatorActor.CalculationPerformed);
+            StartProjection(eventName,
+                KnownProjectionsNames.TotalFunctionUsage,
+                nameof(FunctionsTotalUsageProjector),
+                FunctionTotalUsageFlow.Instance,
+                FunctionTotalUsageSink.Create(Context, eventName));
 
-            var offset = GetProjectionOffset(eventName, KnownProjectionsNames.TotalFunctionUsage, nameof(FunctionsTotalUsageProjector));
-
+        }
+        
+        private void StartProjection<TEvent>(string eventName, 
+                                             string projectionName, 
+                                             string projectorName,
+                                             Flow<EventEnvelope,TEvent,NotUsed> flow,
+                                             Sink<TEvent,NotUsed> sink
+                                             )
+        {
+            var offset = GetProjectionOffset(eventName, projectionName, projectorName);
             var source = _readJournal.EventsByTag(eventName, offset);
-            var groupingFlow = FunctionTotalUsageFlow.Instance;
-            var projectionSink = FunctionTotalUsageSink.Create(Context, eventName);
-            var projectionGraph = source.Via(groupingFlow).To(projectionSink);
+            var projectionGraph = source.Via(flow).To(sink);
             _materializer = Context.System.Materializer();
             projectionGraph.Run(_materializer);
         }
@@ -106,15 +117,11 @@ namespace MightyCalc.Reports
         private void StartKnownFunctionsProjection()
         {
             var eventName = nameof(FunctionAdded);
-
-            var offset = GetProjectionOffset(eventName, KnownProjectionsNames.KnownFunctions, nameof(KnownFunctionsProjector));
-
-            var source = _readJournal.EventsByTag(eventName, offset);
-            var groupingFlow = KnownFunctionsFlow.Instance;
-            var projectionSink = KnownFunctionsSink.Create(Context, eventName);
-            var projectionGraph = source.Via(groupingFlow).To(projectionSink);
-            _materializer = Context.System.Materializer();
-            projectionGraph.Run(_materializer);
+            StartProjection(eventName,
+                KnownProjectionsNames.KnownFunctions,
+                nameof(KnownFunctionsProjector),
+                KnownFunctionsFlow.Instance,
+                KnownFunctionsSink.Create(Context, eventName));
         }
 
         public void Working()

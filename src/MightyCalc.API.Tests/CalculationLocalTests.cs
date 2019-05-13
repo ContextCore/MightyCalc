@@ -32,7 +32,7 @@ namespace MightyCalc.API.Tests
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .WriteTo.File($"api_{DateTime.Now:yyyy-MMM-dd-hh-mm-ss}.log")
+                .WriteTo.File($"api_{DateTime.Now:yyyy-MMM-dd-HH-mm-ss}.log")
                 .CreateLogger();
             
             var builder = new WebHostBuilder()

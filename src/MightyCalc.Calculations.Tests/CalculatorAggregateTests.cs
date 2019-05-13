@@ -39,7 +39,7 @@ namespace MightyCalc.Calculations.Tests
         {
             await AggregateScenario.New<Calculator>()
                 .When(new CalculateExpression("myCalc", expression, new Parameter[] { }))
-                .Then(new CalculationPerformed("myCalc", 1,expression, new Parameter[] { }, answer, functionUsed))
+                .Then(new CalculationPerformed("myCalc", 0,expression, new Parameter[] { }, answer, functionUsed))
                 .Run
                 .Local(_log)
                 .Check();

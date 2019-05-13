@@ -24,10 +24,5 @@ namespace MightyCalc.Node.Domain
         {
             await _commandHandler.Execute(new AddFunction(_calculatorId, new FunctionDefinition(functionName,parameterNames.Length,description,expression,parameterNames)));
         }
-
-        public Task<FunctionDefinition[]> GetKnownFunction(string functionName)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

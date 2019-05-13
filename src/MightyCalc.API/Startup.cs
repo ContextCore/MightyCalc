@@ -40,7 +40,9 @@ namespace MightyCalc.API
 
         protected virtual void ConfigureExtensions(ActorSystem system, MightyCalcApiConfiguration cfg)
         {
-            system.InitReportingExtension(new ReportingDependencies(GetDbOptions(cfg)));
+           // system.InitReportingExtension(new ReportingDependencies(GetDbOptions(cfg)));
+           // system.InitReportingExtension(new ReportingDependencies(GetDbOptions(cfg)));
+            system.InitGridDomainExtension(new CalculatorDomainConfiguration());
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -53,6 +55,7 @@ namespace MightyCalc.API
             var settings = BuildConfiguration();
             
             var system = CreateActorSystem(settings);
+            WaitClusterStart(system);
             
             var options = GetDbOptions(settings);
 
@@ -63,16 +66,15 @@ namespace MightyCalc.API
             services.AddTransient<IFunctionsTotalUsageQuery, FunctionsTotalUsageQuery>();
             services.AddTransient<IFunctionsUsageQuery, FunctionsUsageQuery>();
             services.AddTransient<IKnownFunctionsQuery, KnownFunctionsQuery>();
-            
-            var node = system.InitGridDomainExtension(new CalculatorDomainConfiguration());
-            var domain = node.Start().Result;
 
+            ConfigureExtensions(system, settings);
+                
+            var node = system.GetGridDomainExtension();
+            var domain = node.Start().Result;
             var pool = new DomainCalculatorPool(domain);
 
-            Task.Delay(2000).Wait();
             services.AddSingleton<INamedCalculatorPool>(pool);
             
-            ConfigureExtensions(system, settings);
         }
 
         protected virtual MightyCalcApiConfiguration BuildConfiguration()
@@ -82,14 +84,18 @@ namespace MightyCalc.API
 
         protected virtual ExtendedActorSystem CreateActorSystem(MightyCalcApiConfiguration cfg)
         {
-            var system = (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka).StartPbm();
+            return (ExtendedActorSystem) ActorSystem.Create(cfg.ClusterName, cfg.Akka).StartPbm();
+        }
+
+        private static ExtendedActorSystem WaitClusterStart(ExtendedActorSystem system)
+        {
             var complete = new TaskCompletionSource<bool>();
             var cluster = Cluster.Get(system);
             cluster.RegisterOnMemberUp(() => complete.SetResult(true));
-            
-            if(!complete.Task.Wait(TimeSpan.FromSeconds(10)))
+
+            if (!complete.Task.Wait(TimeSpan.FromSeconds(10)))
                 throw new AkkaClusterIsNotAvailableException();
-            
+
             return system;
         }
 
